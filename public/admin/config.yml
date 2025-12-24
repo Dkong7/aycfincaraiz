@@ -1,0 +1,27 @@
+﻿backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+site_url: "https://aycfincaraiz.netlify.app"
+display_url: "https://aycfincaraiz.netlify.app"
+logo_url: "https://aycfincaraiz.netlify.app/ayclogo.svg"
+
+locale: "es"
+
+collections:
+  - name: "propiedades"
+    label: "Propiedades"
+    folder: "src/content/properties"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - {label: "Título", name: "title", widget: "string"}
+      - {label: "Imagen Principal", name: "thumbnail", widget: "image"}
+      - {label: "Precio (COP)", name: "price", widget: "number"}
+      - {label: "Ubicación", name: "location", widget: "string"}
+      - {label: "Habitaciones", name: "rooms", widget: "number"}
+      - {label: "Baños", name: "baths", widget: "number"}
+      - {label: "Descripción", name: "body", widget: "markdown"}
