@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes, faChevronDown, faGlobe, faGavel, faCamera, faChartLine, faPhone, faHome, faBuilding, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faTimes, faChevronDown, faGlobe, faGavel, faCamera, faChartLine, faPhone, faHome, faBuilding, faSignOutAlt, faUserSecret } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faInstagram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useApp } from "../context/AppContext";
-import { useAuth } from "../context/AuthContext"; // Usamos el contexto de Auth
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const { t, lang, toggleLang } = useApp();
-  const { session, signOut } = useAuth(); // Obtenemos sesión
+  const { session, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -20,9 +21,37 @@ const Navbar = () => {
   const handleLogout = async () => {
     await signOut();
     navigate("/");
-    setIsOpen(false);
   };
 
+  // --- MODO ADMIN (DARK MODE & SIMPLIFICADO) ---
+  if (location.pathname.startsWith("/admin")) {
+    return (
+      <header className="bg-slate-900 text-white shadow-lg relative z-50">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+           {/* Logo Izquierda */}
+           <div className="flex items-center gap-4">
+              <img className="h-12 w-auto object-contain brightness-0 invert" src="/ayclogo.svg" alt="A&C Admin" />
+              <span className="text-xs font-mono text-yellow-500 tracking-widest border border-yellow-500 px-2 py-1 rounded">MASTER CONTROL</span>
+           </div>
+
+           {/* Menú Central (Solo Servicios Admin) */}
+           <nav className="hidden md:flex gap-6 text-sm font-bold text-slate-400">
+              <Link to="/admin" className="hover:text-white transition">DASHBOARD</Link>
+              <Link to="/admin/inmuebles" className="hover:text-white transition">INMUEBLES</Link>
+              <Link to="/admin/blog" className="hover:text-white transition">BLOG</Link>
+              <Link to="/admin/asesores" className="hover:text-white transition">MAESTROS</Link>
+           </nav>
+
+           {/* Salir Derecha */}
+           <button onClick={handleLogout} className="flex items-center gap-2 text-red-500 hover:text-red-400 font-bold text-sm transition bg-slate-800 px-4 py-2 rounded-full border border-slate-700">
+              <FontAwesomeIcon icon={faSignOutAlt} /> SALIR
+           </button>
+        </div>
+      </header>
+    );
+  }
+
+  // --- MODO PÚBLICO (NORMAL) ---
   const PHONE_NUMBER = "+57 313 466 3832";
 
   return (
@@ -43,19 +72,9 @@ const Navbar = () => {
                   <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faFacebookF} /></a>
                   <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faInstagram} /></a>
                   <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faWhatsapp} /></a>
-                  
-                  {/* SWITCH IDIOMA */}
                   <button onClick={toggleLang} className="ml-2 text-xs font-bold border-2 border-slate-200 px-3 py-1 rounded-full hover:bg-slate-100 flex gap-2 items-center">
                      <FontAwesomeIcon icon={faGlobe} /> {lang}
                   </button>
-
-                  {/* SOLO MOSTRAR SI HAY SESIÓN ACTIVA (ADMIN) */}
-                  {session && (
-                    <div className="flex items-center gap-2 ml-4 border-l pl-4 border-gray-200">
-                        <Link to="/admin" className="text-xs font-black bg-blue-900 text-white px-2 py-1 rounded uppercase tracking-wider hover:bg-blue-800">ADMIN</Link>
-                        <button onClick={handleLogout} className="text-red-500 hover:text-red-700 text-sm" title="Salir"><FontAwesomeIcon icon={faSignOutAlt} /></button>
-                    </div>
-                  )}
                </div>
             </div>
 
@@ -66,7 +85,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* NAV DESKTOP */}
       <div className="hidden lg:flex absolute top-full left-0 w-full z-20 justify-center -mt-1 pointer-events-none">
          <div className="relative w-[1000px] h-[70px] pointer-events-auto filter drop-shadow-xl">
              <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 1000 70" preserveAspectRatio="none"><path d="M0,0 H1000 C900,0 800,70 500,70 C200,70 100,0 0,0 Z" fill="#1e293b"></path></svg>
@@ -88,7 +106,6 @@ const Navbar = () => {
          </div>
       </div>
 
-      {/* NAV MOBILE */}
       <div className={`fixed inset-0 bg-slate-900/95 z-40 backdrop-blur-sm transition-all duration-300 lg:hidden flex flex-col items-center justify-center ${isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}>
          <div className="flex flex-col gap-6 text-center w-full px-8 max-h-screen overflow-y-auto">
             <button onClick={() => handleNavigation("/")} className="text-xl font-bold text-white uppercase hover:text-yellow-400 flex items-center justify-center gap-2"><FontAwesomeIcon icon={faHome} className="text-yellow-500"/> {t("nav_home")}</button>
@@ -103,11 +120,6 @@ const Navbar = () => {
             </div>
             <button onClick={() => handleNavigation("/blog")} className="text-xl font-bold text-white uppercase hover:text-yellow-400">{t("nav_blog")}</button>
             <button onClick={() => handleNavigation("/contacto")} className="bg-yellow-500 text-slate-900 px-8 py-3 rounded-full font-bold uppercase shadow-lg active:scale-95 transition-transform">{t("nav_contact")}</button>
-            
-            {/* ADMIN MOBILE ONLY IF LOGGED IN */}
-            {session && (
-               <button onClick={() => handleNavigation("/admin")} className="text-sm font-black bg-blue-600 text-white px-6 py-2 rounded uppercase tracking-wider mt-4">IR AL PANEL ADMIN</button>
-            )}
          </div>
       </div>
     </header>

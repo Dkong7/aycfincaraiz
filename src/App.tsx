@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
-import { AuthProvider } from "./context/AuthContext"; // Importante: AuthProvider debe envolver todo
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -17,6 +17,8 @@ import About from "./pages/About";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import Contact from "./pages/Contact";
+// IMPORTAR GESTOR DE BLOG (Crearé el componente vacío para que compile si no existe, o lo creas después)
+import BlogManager from "./pages/admin/BlogManager"; 
 
 function App() {
   return (
@@ -27,7 +29,7 @@ function App() {
             <Navbar />
             <main className="flex-grow">
               <Routes>
-                {/* RUTAS PÚBLICAS */}
+                {/* PÚBLICAS */}
                 <Route path="/" element={<Home />} />
                 <Route path="/inmuebles" element={<Properties />} />
                 <Route path="/inmuebles/:id" element={<PropertyDetail />} />
@@ -37,20 +39,21 @@ function App() {
                 <Route path="/contacto" element={<Contact />} />
                 <Route path="/servicios/:type" element={<ServicePage />} />
 
-                {/* RUTAS SECRETAS DE ACCESO (Login) */}
+                {/* SECRETAS */}
                 <Route path="/claclacla" element={<Login />} />
                 <Route path="/alfalfalf" element={<Login />} />
-                {/* Redirigir /login estándar al home para ocultarlo, o simplemente no definirlo */}
                 <Route path="/login" element={<Navigate to="/" replace />} />
 
-                {/* RUTAS PROTEGIDAS (DASHBOARD) */}
+                {/* ADMIN PROTEGIDAS */}
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                 <Route path="/admin/crear" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
                 <Route path="/admin/inmuebles" element={<ProtectedRoute><PropertiesList /></ProtectedRoute>} />
                 <Route path="/admin/asesores" element={<ProtectedRoute><ManageAdvisors /></ProtectedRoute>} />
+                <Route path="/admin/blog" element={<ProtectedRoute><BlogManager /></ProtectedRoute>} />
               </Routes>
             </main>
-            <Footer />
+            {/* FOOTER NO SE MUESTRA EN ADMIN */}
+            {!window.location.pathname.startsWith("/admin") && <Footer />}
           </div>
         </Router>
       </AuthProvider>
