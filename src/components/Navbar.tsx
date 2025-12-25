@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const { t, lang, toggleLang } = useApp();
-  const { session, signOut } = useAuth();
+  const { session, signOut, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,7 +23,10 @@ const Navbar = () => {
     navigate("/");
   };
 
-  // --- LÓGICA DE RUTAS ADMIN / LOGIN (MODO OSCURO + LOGO ROJO) ---
+  // DATOS DEL USUARIO
+  const meta = user?.user_metadata;
+  const adminTitle = meta?.custom_title || "ADMIN";
+
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isLoginRoute = location.pathname === "/claclacla" || location.pathname === "/alfalfalf";
 
@@ -31,26 +34,17 @@ const Navbar = () => {
     return (
       <header className="bg-slate-950 text-white shadow-2xl relative z-50 border-b border-red-900/30">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-           
-           {/* LOGO MUTANTE (Verde -> Rojo) */}
            <div className="flex items-center gap-4">
               <Link to={isAdminRoute ? "/admin" : "/"}>
-                <img 
-                    className="h-12 w-auto object-contain" 
-                    src="/ayclogo.svg" 
-                    alt="A&C Admin" 
-                    // FILTRO MAGICO: Rota el matiz (Hue) para convertir Verde en Rojo y aumenta contraste
-                    style={{ filter: "hue-rotate(-120deg) saturate(300%) brightness(0.9)" }}
-                />
+                <img className="h-12 w-auto object-contain" src="/ayclogo.svg" alt="A&C Admin" style={{ filter: "hue-rotate(-120deg) saturate(300%) brightness(0.9)" }} />
               </Link>
               {isAdminRoute && (
-                  <span className="text-[10px] font-mono text-red-500 tracking-[0.2em] border border-red-900 px-2 py-1 rounded bg-red-900/10">
-                    SISTEMA ACTIVO
+                  <span className="text-[10px] font-mono text-red-500 tracking-[0.2em] border border-red-900 px-2 py-1 rounded bg-red-900/10 uppercase">
+                    {adminTitle} ACTIVO
                   </span>
               )}
            </div>
 
-           {/* MENÚ ADMIN (Solo si ya entró, NO en el login) */}
            {isAdminRoute && (
                <>
                 <nav className="hidden md:flex gap-8 text-xs font-bold text-slate-500 tracking-widest">
@@ -59,30 +53,22 @@ const Navbar = () => {
                     <Link to="/admin/blog" className="hover:text-red-500 transition hover:scale-105">BLOG</Link>
                     <Link to="/admin/asesores" className="hover:text-red-500 transition hover:scale-105">MAESTROS</Link>
                 </nav>
-
                 <button onClick={handleLogout} className="flex items-center gap-2 text-red-600 hover:text-white font-bold text-xs transition bg-slate-900 hover:bg-red-900 px-4 py-2 rounded border border-red-900/50">
                     <FontAwesomeIcon icon={faSignOutAlt} /> SALIR
                 </button>
                </>
            )}
-           
-           {/* SI ES LOGIN, NO MOSTRAR NADA A LA DERECHA */}
         </div>
       </header>
     );
   }
 
-  // --- MODO PÚBLICO (NORMAL) ---
   const PHONE_NUMBER = "+57 313 466 3832";
-
   return (
     <header className="relative z-50 font-sans w-full">
       <div className="bg-white shadow-md relative z-30 px-4 py-2 w-full">
         <div className="max-w-7xl mx-auto flex justify-between items-center h-16 md:h-20">
-            <Link to="/" className="flex-shrink-0 z-50">
-               <img className="h-10 md:h-20 w-auto object-contain" src="/ayclogo.svg" alt="A&C Finca Raíz" />
-            </Link>
-
+            <Link to="/" className="flex-shrink-0 z-50"><img className="h-10 md:h-20 w-auto object-contain" src="/ayclogo.svg" alt="A&C" /></Link>
             <div className="hidden lg:flex items-center gap-6 text-slate-800">
                <div className="flex items-center gap-3 text-sm font-bold border-r border-gray-200 pr-6">
                   <span className="flex items-center gap-2"><FontAwesomeIcon icon={faPhone} className="text-yellow-500" /> {PHONE_NUMBER}</span>
@@ -93,19 +79,15 @@ const Navbar = () => {
                   <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faFacebookF} /></a>
                   <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faInstagram} /></a>
                   <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faWhatsapp} /></a>
-                  <button onClick={toggleLang} className="ml-2 text-xs font-bold border-2 border-slate-200 px-3 py-1 rounded-full hover:bg-slate-100 flex gap-2 items-center">
-                     <FontAwesomeIcon icon={faGlobe} /> {lang}
-                  </button>
+                  <button onClick={toggleLang} className="ml-2 text-xs font-bold border-2 border-slate-200 px-3 py-1 rounded-full hover:bg-slate-100 flex gap-2 items-center"><FontAwesomeIcon icon={faGlobe} /> {lang}</button>
                </div>
             </div>
-
             <div className="lg:hidden flex items-center gap-3">
                <button onClick={toggleLang} className="text-xs font-bold border border-slate-200 px-2 py-1 rounded-full text-slate-600">{lang}</button>
                <button onClick={() => setIsOpen(!isOpen)} className="text-slate-800 text-2xl focus:outline-none p-1"><FontAwesomeIcon icon={isOpen ? faTimes : faBars} /></button>
             </div>
         </div>
       </div>
-
       <div className="hidden lg:flex absolute top-full left-0 w-full z-20 justify-center -mt-1 pointer-events-none">
          <div className="relative w-[1000px] h-[70px] pointer-events-auto filter drop-shadow-xl">
              <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 1000 70" preserveAspectRatio="none"><path d="M0,0 H1000 C900,0 800,70 500,70 C200,70 100,0 0,0 Z" fill="#1e293b"></path></svg>
@@ -126,7 +108,6 @@ const Navbar = () => {
              </nav>
          </div>
       </div>
-
       <div className={`fixed inset-0 bg-slate-900/95 z-40 backdrop-blur-sm transition-all duration-300 lg:hidden flex flex-col items-center justify-center ${isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}>
          <div className="flex flex-col gap-6 text-center w-full px-8 max-h-screen overflow-y-auto">
             <button onClick={() => handleNavigation("/")} className="text-xl font-bold text-white uppercase hover:text-yellow-400 flex items-center justify-center gap-2"><FontAwesomeIcon icon={faHome} className="text-yellow-500"/> {t("nav_home")}</button>
