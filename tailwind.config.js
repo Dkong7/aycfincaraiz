@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+﻿/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -7,13 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#00437c",   // Azul Corporativo
-        secondary: "#00aa56", // Verde Corporativo
-        "gray-light": "#F5F5F5",
-        "text-dark": "#333333"
+        primary: "rgb(42 91 133)", // Nuevo Azul Acero
+        secondary: "#82C91E",      // Verde (Se mantiene igual)
+        "text-dark": "#1F2937",
       },
       fontFamily: {
-        sans: ['Montserrat', 'system-ui', 'sans-serif'], // Fuente profesional recomendada
+        sans: ['Inter', 'sans-serif'],
       }
     },
   },

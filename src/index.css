@@ -1,18 +1,34 @@
-﻿@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* BLINDAJE TOTAL RESPONSIVO */
 html, body {
-  height: 100%;
+  overflow-x: hidden; /* Evita scroll horizontal fantasma */
+  width: 100%;
   margin: 0;
-  font-family: "Montserrat", sans-serif;
-  scroll-behavior: smooth;
+  padding: 0;
+  position: relative;
 }
 
 #root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
 }

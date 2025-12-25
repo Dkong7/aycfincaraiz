@@ -3,6 +3,16 @@
     "home": "Home",
     "us": "About Us",
     "properties": "Properties",
-    "contact": "Contact"
-  }
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "submenu": {
+      "search": "Search Property",
+      "apts": "Apartments",
+      "houses": "Houses",
+      "commercial": "Warehouses & Retail"
+    }
+  },
+  "footer": { "desc": "Real Estate Excellence.", "menu_title": "Menu", "services_title": "Services", "services": { "sales": "Sales", "rentals": "Rentals", "appraisals": "Appraisals", "legal": "Legal" }, "contact_title": "Contact", "address": "Bogota, Colombia", "rights": "All rights reserved." },
+  "login": { "title": "Admin Access", "email": "Email", "password": "Password", "btn_login": "Sign In", "btn_register": "Sign Up", "loading": "Loading...", "success": "Welcome!", "error": "Error" }
 }

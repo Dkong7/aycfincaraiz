@@ -3,6 +3,38 @@
     "home": "Inicio",
     "us": "Nosotros",
     "properties": "Inmuebles",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "login": "Ingresar",
+    "logout": "Cerrar Sesión",
+    "submenu": {
+      "search": "Buscar Inmueble",
+      "apts": "Apartamentos",
+      "houses": "Casas",
+      "commercial": "Bodegas & Locales"
+    }
+  },
+  "footer": {
+    "desc": "Transformamos la experiencia inmobiliaria con transparencia, tecnología y un servicio de excelencia.",
+    "menu_title": "Menú",
+    "services_title": "Servicios",
+    "services": {
+      "sales": "Venta de Propiedades",
+      "rentals": "Arrendamientos",
+      "appraisals": "Avalúos Certificados",
+      "legal": "Asesoría Jurídica"
+    },
+    "contact_title": "Contacto",
+    "address": "Bogotá D.C., Colombia",
+    "rights": "Todos los derechos reservados."
+  },
+  "login": {
+    "title": "Acceso Administrativo",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "btn_login": "Iniciar Sesión",
+    "btn_register": "Registrarse",
+    "loading": "Procesando...",
+    "success": "¡Bienvenido!",
+    "error": "Error de autenticación"
   }
 }
