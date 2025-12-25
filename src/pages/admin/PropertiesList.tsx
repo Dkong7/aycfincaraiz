@@ -43,17 +43,24 @@ const PropertiesList = () => {
                </thead>
                <tbody>
                   {props.map(p => (
-                     <tr key={p.id} className="border-b hover:bg-slate-50">
+                     <tr key={p.id} className="border-b hover:bg-slate-50 transition">
                         <td className="p-4 font-mono font-bold text-blue-900">{p.listing_id}</td>
                         <td className="p-4"><span className="bg-slate-200 px-2 py-1 rounded text-xs font-bold">{p.property_type}</span></td>
-                        <td className="p-4 font-bold">{p.title}</td>
+                        
+                        {/* TÍTULO CLICKEABLE */}
+                        <td className="p-4">
+                           <Link to={`/admin/editar/${p.id}`} className="font-bold text-slate-800 hover:text-blue-600 hover:underline">
+                              {p.title}
+                           </Link>
+                        </td>
+                        
                         <td className="p-4">$ {new Intl.NumberFormat("es-CO").format(p.price)}</td>
                         <td className="p-4 flex justify-center gap-4 text-lg">
-                           {/* BOTÓN EDITAR CONVERTIDO EN LINK */}
-                           <Link to={`/admin/editar/${p.id}`} className="text-blue-600 hover:text-blue-800" title="Editar">
+                           {/* PLUMITA ENLACE */}
+                           <Link to={`/admin/editar/${p.id}`} className="text-blue-600 hover:text-blue-800 transition" title="Editar">
                               <FontAwesomeIcon icon={faEdit} />
                            </Link>
-                           <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700" title="Eliminar"><FontAwesomeIcon icon={faTrash} /></button>
+                           <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700 transition" title="Eliminar"><FontAwesomeIcon icon={faTrash} /></button>
                         </td>
                      </tr>
                   ))}

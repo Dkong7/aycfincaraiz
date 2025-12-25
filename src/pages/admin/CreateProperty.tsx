@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faSave, faBuilding, faWarehouse, faHome, faTree, faLock, faMagic, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faSave, faHome, faLock, faMagic, faEdit } from "@fortawesome/free-solid-svg-icons";
+import SuccessModal from "../../components/SuccessModal"; // IMPORTAR MODAL
 
 const CreateProperty = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // SI HAY ID, ESTAMOS EN MODO EDICIÓN
+  const { id } = useParams();
   const isEditing = !!id;
 
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false); // ESTADO DEL MODAL
+  const [modalMsg, setModalMsg] = useState("");
+  
   const [type, setType] = useState("Casa"); 
 
   const [formData, setFormData] = useState({
@@ -23,53 +27,34 @@ const CreateProperty = () => {
 
   const [privateData, setPrivateData] = useState({
     owner_name: "", owner_phone: "", 
-    exact_address: "", apt_number: "", complex_name: "", 
-    matricula: ""
+    exact_address: "", apt_number: "", complex_name: "", matricula: ""
   });
 
   const [images, setImages] = useState<string[]>([]);
   const [features, setFeatures] = useState("");
   const [listingId, setListingId] = useState<number | null>(null);
 
-  // --- EFECTO: CARGAR DATOS SI ES EDICIÓN ---
   useEffect(() => {
-    if (isEditing) {
-      loadProperty();
-    }
+    if (isEditing) loadProperty();
   }, [id]);
 
   const loadProperty = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("properties").select("*").eq("id", id).single();
-    if (error) {
-       alert("Error cargando inmueble");
-       navigate("/admin/inmuebles");
-       return;
-    }
-    
+    const { data } = await supabase.from("properties").select("*").eq("id", id).single();
     if (data) {
-       // Mapear datos de la DB al formulario
        setType(data.property_type || "Casa");
        setListingId(data.listing_id);
        setFormData({
-          title: data.title,
-          description: data.description, // Nota: Si concatenaste info extra, aquí aparecerá junta
-          price: data.price.toString(),
-          city: data.city,
-          neighborhood: data.neighborhood,
-          rooms: data.rooms.toString(),
-          bathrooms: data.bathrooms.toString(),
-          parking: data.parking.toString(),
-          area_built: data.area_built.toString(),
-          stratum: data.stratum.toString(),
-          admin_price: data.admin_price.toString(),
-          // Campos específicos (no existen columnas reales, se resetean o se dejan genéricos)
+          title: data.title, description: data.description, price: data.price.toString(),
+          city: data.city, neighborhood: data.neighborhood,
+          rooms: data.rooms.toString(), bathrooms: data.bathrooms.toString(),
+          parking: data.parking.toString(), area_built: data.area_built.toString(),
+          stratum: data.stratum.toString(), admin_price: data.admin_price.toString(),
           floor_number: "", total_floors: "", has_elevator: false,
           complex_amenities: "", warehouse_height: "", loading_dock: false, lot_area: ""
        });
        setImages(data.images || []);
        setFeatures(data.features ? data.features.join(", ") : "");
-       // Nota: Private Data no se está guardando en DB real en este demo, así que no se puede recuperar.
     }
     setLoading(false);
   };
@@ -86,49 +71,43 @@ const CreateProperty = () => {
     setLoading(true);
 
     let finalDesc = formData.description;
-    // Concatenar info específica solo si es nuevo (para no duplicar en edición) o limpiar antes
-    // Para simplificar: guardamos todo.
     if(type === "Apartamento") finalDesc += `\n\n[Detalles Apt: Piso ${formData.floor_number}, Ascensor: ${formData.has_elevator ? "Sí" : "No"}]`;
     if(type === "Bodega") finalDesc += `\n\n[Altura: ${formData.warehouse_height}m, Muelle: ${formData.loading_dock ? "Sí" : "No"}]`;
     if(type === "Casa Campestre") finalDesc += `\n\n[Lote: ${formData.lot_area}m²]`;
 
     const payload = {
-      title: formData.title,
-      description: finalDesc,
-      price: Number(formData.price),
-      city: formData.city,
-      neighborhood: formData.neighborhood,
-      property_type: type,
-      rooms: Number(formData.rooms) || 0,
-      bathrooms: Number(formData.bathrooms) || 0,
-      parking: Number(formData.parking) || 0,
-      area_built: Number(formData.area_built) || 0,
-      stratum: Number(formData.stratum) || 0,
-      admin_price: Number(formData.admin_price) || 0,
-      images: images,
-      features: features.split(",").map(f => f.trim()),
+      title: formData.title, description: finalDesc, price: Number(formData.price),
+      city: formData.city, neighborhood: formData.neighborhood, property_type: type,
+      rooms: Number(formData.rooms) || 0, bathrooms: Number(formData.bathrooms) || 0,
+      parking: Number(formData.parking) || 0, area_built: Number(formData.area_built) || 0,
+      stratum: Number(formData.stratum) || 0, admin_price: Number(formData.admin_price) || 0,
+      images: images, features: features.split(",").map(f => f.trim()),
     };
 
     let error;
-
     if (isEditing) {
-       // UPDATE
        const res = await supabase.from("properties").update(payload).eq("id", id);
        error = res.error;
     } else {
-       // INSERT
        const autoCode = generateCode();
        const res = await supabase.from("properties").insert([{ ...payload, listing_id: autoCode }]);
        error = res.error;
     }
 
+    setLoading(false);
+
     if (error) {
       alert("Error: " + error.message);
     } else {
-      alert(isEditing ? "Cambios guardados correctamente." : "Inmueble creado con éxito.");
-      navigate("/admin/inmuebles");
+      // MOSTRAR MODAL CUSTOM A&C
+      setModalMsg(isEditing ? "Los cambios se han guardado correctamente en la base de datos." : "El nuevo inmueble ha sido publicado y generado.");
+      setShowModal(true);
     }
-    setLoading(false);
+  };
+
+  const handleModalClose = () => {
+     setShowModal(false);
+     navigate("/admin/inmuebles");
   };
 
   const renderSpecificFields = () => {
@@ -162,6 +141,8 @@ const CreateProperty = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen p-8">
+      <SuccessModal isOpen={showModal} onClose={handleModalClose} message={modalMsg} />
+      
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
            <button onClick={() => navigate("/admin/inmuebles")} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-bold transition">
@@ -197,12 +178,6 @@ const CreateProperty = () => {
                  <div className="grid grid-cols-2 gap-4 mt-4">
                     <div><label className="text-xs font-bold text-slate-500">Barrio</label><input required className="w-full p-2 bg-slate-50 border rounded" value={formData.neighborhood} onChange={e=>setFormData({...formData, neighborhood:e.target.value})} /></div>
                     <div><label className="text-xs font-bold text-slate-500">Ciudad</label><input required className="w-full p-2 bg-slate-50 border rounded" value={formData.city} onChange={e=>setFormData({...formData, city:e.target.value})} /></div>
-                 </div>
-                 <div className="grid grid-cols-4 gap-2 mt-4">
-                    <div><label className="text-[10px] font-bold text-slate-500">Habs</label><input type="number" className="w-full p-2 bg-slate-50 border rounded" value={formData.rooms} onChange={e=>setFormData({...formData, rooms:e.target.value})} /></div>
-                    <div><label className="text-[10px] font-bold text-slate-500">Baños</label><input type="number" className="w-full p-2 bg-slate-50 border rounded" value={formData.bathrooms} onChange={e=>setFormData({...formData, bathrooms:e.target.value})} /></div>
-                    <div><label className="text-[10px] font-bold text-slate-500">Área (m²)</label><input type="number" className="w-full p-2 bg-slate-50 border rounded" value={formData.area_built} onChange={e=>setFormData({...formData, area_built:e.target.value})} /></div>
-                    <div><label className="text-[10px] font-bold text-slate-500">Estrato</label><input type="number" className="w-full p-2 bg-slate-50 border rounded" value={formData.stratum} onChange={e=>setFormData({...formData, stratum:e.target.value})} /></div>
                  </div>
                  <div className="mt-4">
                     <label className="text-xs font-bold text-slate-500">Descripción Pública</label>

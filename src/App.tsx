@@ -18,6 +18,7 @@ import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import Contact from "./pages/Contact";
 import BlogManager from "./pages/admin/BlogManager"; 
+import CreateBlog from "./pages/admin/CreateBlog"; // IMPORTAR EDITOR
 
 function App() {
   return (
@@ -45,13 +46,18 @@ function App() {
 
                 {/* ADMIN PROTEGIDAS */}
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                <Route path="/admin/crear" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
-                {/* RUTA DE EDICIÓN REUTILIZANDO EL COMPONENTE */}
-                <Route path="/admin/editar/:id" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
                 
+                {/* INMUEBLES */}
+                <Route path="/admin/crear" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
+                <Route path="/admin/editar/:id" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
                 <Route path="/admin/inmuebles" element={<ProtectedRoute><PropertiesList /></ProtectedRoute>} />
-                <Route path="/admin/asesores" element={<ProtectedRoute><ManageAdvisors /></ProtectedRoute>} />
+                
+                {/* BLOG (Rutas Nuevas) */}
                 <Route path="/admin/blog" element={<ProtectedRoute><BlogManager /></ProtectedRoute>} />
+                <Route path="/admin/blog/crear" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
+                <Route path="/admin/blog/editar/:id" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
+
+                <Route path="/admin/asesores" element={<ProtectedRoute><ManageAdvisors /></ProtectedRoute>} />
               </Routes>
             </main>
             {!window.location.pathname.startsWith("/admin") && <Footer />}
