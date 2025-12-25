@@ -17,7 +17,6 @@ import About from "./pages/About";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import Contact from "./pages/Contact";
-// IMPORTAR GESTOR DE BLOG (Crearé el componente vacío para que compile si no existe, o lo creas después)
 import BlogManager from "./pages/admin/BlogManager"; 
 
 function App() {
@@ -47,12 +46,14 @@ function App() {
                 {/* ADMIN PROTEGIDAS */}
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                 <Route path="/admin/crear" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
+                {/* RUTA DE EDICIÓN REUTILIZANDO EL COMPONENTE */}
+                <Route path="/admin/editar/:id" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
+                
                 <Route path="/admin/inmuebles" element={<ProtectedRoute><PropertiesList /></ProtectedRoute>} />
                 <Route path="/admin/asesores" element={<ProtectedRoute><ManageAdvisors /></ProtectedRoute>} />
                 <Route path="/admin/blog" element={<ProtectedRoute><BlogManager /></ProtectedRoute>} />
               </Routes>
             </main>
-            {/* FOOTER NO SE MUESTRA EN ADMIN */}
             {!window.location.pathname.startsWith("/admin") && <Footer />}
           </div>
         </Router>

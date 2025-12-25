@@ -34,7 +34,7 @@ const PropertiesList = () => {
             <table className="w-full text-left text-sm">
                <thead className="bg-slate-900 text-white">
                   <tr>
-                     <th className="p-4">CÓDIGO</th> {/* TILDE ARREGLADA */}
+                     <th className="p-4">CÓDIGO</th>
                      <th className="p-4">Tipo</th>
                      <th className="p-4">Título</th>
                      <th className="p-4">Precio</th>
@@ -49,7 +49,10 @@ const PropertiesList = () => {
                         <td className="p-4 font-bold">{p.title}</td>
                         <td className="p-4">$ {new Intl.NumberFormat("es-CO").format(p.price)}</td>
                         <td className="p-4 flex justify-center gap-4 text-lg">
-                           <button className="text-blue-600 hover:text-blue-800" title="Editar"><FontAwesomeIcon icon={faEdit} /></button>
+                           {/* BOTÓN EDITAR CONVERTIDO EN LINK */}
+                           <Link to={`/admin/editar/${p.id}`} className="text-blue-600 hover:text-blue-800" title="Editar">
+                              <FontAwesomeIcon icon={faEdit} />
+                           </Link>
                            <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700" title="Eliminar"><FontAwesomeIcon icon={faTrash} /></button>
                         </td>
                      </tr>
