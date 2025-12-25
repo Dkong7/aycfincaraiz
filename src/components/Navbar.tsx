@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes, faChevronDown, faGlobe, faGavel, faCamera, faChartLine, faPhone, faHome, faBuilding, faSignOutAlt, faUserSecret } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faTimes, faChevronDown, faGlobe, faGavel, faCamera, faChartLine, faPhone, faHome, faBuilding, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faInstagram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
@@ -23,29 +23,50 @@ const Navbar = () => {
     navigate("/");
   };
 
-  // --- MODO ADMIN (DARK MODE & SIMPLIFICADO) ---
-  if (location.pathname.startsWith("/admin")) {
+  // --- LÓGICA DE RUTAS ADMIN / LOGIN (MODO OSCURO + LOGO ROJO) ---
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isLoginRoute = location.pathname === "/claclacla" || location.pathname === "/alfalfalf";
+
+  if (isAdminRoute || isLoginRoute) {
     return (
-      <header className="bg-slate-900 text-white shadow-lg relative z-50">
+      <header className="bg-slate-950 text-white shadow-2xl relative z-50 border-b border-red-900/30">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-           {/* Logo Izquierda */}
+           
+           {/* LOGO MUTANTE (Verde -> Rojo) */}
            <div className="flex items-center gap-4">
-              <img className="h-12 w-auto object-contain brightness-0 invert" src="/ayclogo.svg" alt="A&C Admin" />
-              <span className="text-xs font-mono text-yellow-500 tracking-widest border border-yellow-500 px-2 py-1 rounded">MASTER CONTROL</span>
+              <Link to={isAdminRoute ? "/admin" : "/"}>
+                <img 
+                    className="h-12 w-auto object-contain" 
+                    src="/ayclogo.svg" 
+                    alt="A&C Admin" 
+                    // FILTRO MAGICO: Rota el matiz (Hue) para convertir Verde en Rojo y aumenta contraste
+                    style={{ filter: "hue-rotate(-120deg) saturate(300%) brightness(0.9)" }}
+                />
+              </Link>
+              {isAdminRoute && (
+                  <span className="text-[10px] font-mono text-red-500 tracking-[0.2em] border border-red-900 px-2 py-1 rounded bg-red-900/10">
+                    SISTEMA ACTIVO
+                  </span>
+              )}
            </div>
 
-           {/* Menú Central (Solo Servicios Admin) */}
-           <nav className="hidden md:flex gap-6 text-sm font-bold text-slate-400">
-              <Link to="/admin" className="hover:text-white transition">DASHBOARD</Link>
-              <Link to="/admin/inmuebles" className="hover:text-white transition">INMUEBLES</Link>
-              <Link to="/admin/blog" className="hover:text-white transition">BLOG</Link>
-              <Link to="/admin/asesores" className="hover:text-white transition">MAESTROS</Link>
-           </nav>
+           {/* MENÚ ADMIN (Solo si ya entró, NO en el login) */}
+           {isAdminRoute && (
+               <>
+                <nav className="hidden md:flex gap-8 text-xs font-bold text-slate-500 tracking-widest">
+                    <Link to="/admin" className="hover:text-red-500 transition hover:scale-105">PANEL</Link>
+                    <Link to="/admin/inmuebles" className="hover:text-red-500 transition hover:scale-105">INMUEBLES</Link>
+                    <Link to="/admin/blog" className="hover:text-red-500 transition hover:scale-105">BLOG</Link>
+                    <Link to="/admin/asesores" className="hover:text-red-500 transition hover:scale-105">MAESTROS</Link>
+                </nav>
 
-           {/* Salir Derecha */}
-           <button onClick={handleLogout} className="flex items-center gap-2 text-red-500 hover:text-red-400 font-bold text-sm transition bg-slate-800 px-4 py-2 rounded-full border border-slate-700">
-              <FontAwesomeIcon icon={faSignOutAlt} /> SALIR
-           </button>
+                <button onClick={handleLogout} className="flex items-center gap-2 text-red-600 hover:text-white font-bold text-xs transition bg-slate-900 hover:bg-red-900 px-4 py-2 rounded border border-red-900/50">
+                    <FontAwesomeIcon icon={faSignOutAlt} /> SALIR
+                </button>
+               </>
+           )}
+           
+           {/* SI ES LOGIN, NO MOSTRAR NADA A LA DERECHA */}
         </div>
       </header>
     );
