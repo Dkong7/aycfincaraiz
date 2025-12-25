@@ -4,7 +4,7 @@
 
 /* BLINDAJE TOTAL RESPONSIVO */
 html, body {
-  overflow-x: hidden; /* Evita scroll horizontal fantasma */
+  overflow-x: hidden;
   width: 100%;
   margin: 0;
   padding: 0;

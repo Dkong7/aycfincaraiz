@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 type Currency = "COP" | "USD";
 type Lang = "ES" | "EN";
@@ -34,7 +34,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const dictionary: Record<string, any> = {
     "ES": {
-      // MENU
       nav_home: "INICIO",
       nav_services: "SERVICIOS",
       nav_blog: "BLOG",
@@ -42,24 +41,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nav_contact: "CONTACTO",
       nav_properties: "INMUEBLES",
       
-      // DROPDOWN Y KEYS FALTANTES
+      // ESTOS SON LOS KEYS QUE HACIAN FALTA
       srv_appraisals: "Avalúos Comerciales",
       srv_legal: "Asesoría Jurídica",
       srv_audio: "Producción Audiovisual",
       
-      // BLOG
-      blog_title: "Noticias del Sector",
-      blog_empty: "No hay entradas publicadas aún.",
-      read_more: "Leer Artículo",
-      blog_home_title: "Actualidad Inmobiliaria",
-
-      // HERO
       search_title: "BÚSQUEDA RÁPIDA",
       search_code: "Código A&C",
       search_btn: "BUSCAR",
       hero_btn: "VER DETALLES",
       
-      // HOME GENERAL
       home_serv_title: "Soluciones Integrales 360°",
       serv_aval_title: "Avalúos Certificados",
       serv_aval_desc: "Valoraciones precisas bajo normativa NIIF y RAA.",
@@ -73,11 +64,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       home_b2b_title: "Alianzas para Constructores",
       home_b2b_desc: "Potenciamos proyectos nuevos con estrategias comerciales dedicadas.",
       btn_more: "Ver Más",
+      
+      blog_home_title: "Actualidad Inmobiliaria",
+      blog_title: "Noticias del Sector",
+      blog_empty: "No hay entradas publicadas aún.",
+      read_more: "Leer Artículo",
 
-      // FOOTER & DETALLES
       footer_desc: "Expertos en finca raíz en Bogotá y Cundinamarca.",
       footer_links: "Enlaces Rápidos",
       footer_contact: "Contacto",
+      
       filter_title: "Filtrar Búsqueda",
       filter_type: "Tipo",
       filter_code: "Buscar por Código",
@@ -105,11 +101,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       srv_legal: "Legal Advice",
       srv_audio: "Audiovisual",
       
-      blog_title: "Industry News",
-      blog_empty: "No posts available yet.",
-      read_more: "Read Article",
-      blog_home_title: "Market News",
-
       search_title: "QUICK SEARCH",
       search_code: "A&C Code",
       search_btn: "SEARCH",
@@ -129,9 +120,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       home_b2b_desc: "We boost new projects with dedicated strategies.",
       btn_more: "Learn More",
       
+      blog_home_title: "Market News",
+      blog_title: "Industry News",
+      blog_empty: "No posts available yet.",
+      read_more: "Read Article",
+      
       footer_desc: "Real estate experts in Bogota.",
       footer_links: "Quick Links",
       footer_contact: "Contact",
+      
       filter_title: "Filter Search",
       filter_type: "Type",
       filter_code: "Search by Code",

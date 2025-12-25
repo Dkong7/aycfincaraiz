@@ -1,4 +1,4 @@
-﻿import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faChartLine, faGavel, faVideo, faCheckCircle, faFileContract, 
@@ -11,7 +11,7 @@ const ServicePage = () => {
   const { type } = useParams();
   const { t } = useApp();
 
-  // CTA COMPONENT REUTILIZABLE
+  // CTA COMPONENT
   const ServiceCTA = () => (
     <div className="mt-16 bg-slate-50 p-8 rounded-2xl border border-slate-200 text-center">
        <h3 className="text-2xl font-bold text-slate-800 mb-2">¿Listo para empezar?</h3>
@@ -137,5 +137,4 @@ const ServicePage = () => {
 
   return <div className="bg-white min-h-screen pb-12">{renderContent()}</div>;
 };
-
 export default ServicePage;
