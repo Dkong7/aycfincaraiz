@@ -3,7 +3,8 @@ import { supabase } from "../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faChevronLeft, faChevronRight, faSearch, faHashtag, faTimes,
-  faChartLine, faGavel, faVideo, faArrowRight, faStar, faGem, faShieldAlt, faPercent, faMapMarkedAlt, faPaperPlane, faCity 
+  faChartLine, faGavel, faVideo, faArrowRight, faStar, faGem, faShieldAlt, faPercent, 
+  faMapMarkedAlt, faPaperPlane, faCity, faCheckCircle, faTrophy 
 } from "@fortawesome/free-solid-svg-icons";
 import { useApp } from "../context/AppContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -23,8 +24,9 @@ const Home = () => {
   const [searchingZone, setSearchingZone] = useState(false);
 
   useEffect(() => {
+    // TRAER 4 PREMIUM (Antes eran 2)
     const fetchFeatured = async () => {
-      const { data } = await supabase.from("properties").select("*").limit(5);
+      const { data } = await supabase.from("properties").select("*").limit(4);
       if (data) setFeatured(data);
     };
     const fetchBlog = async () => {
@@ -40,39 +42,22 @@ const Home = () => {
   const handleQuickSearch = () => { if(quickCode) navigate(`/inmuebles?code=${quickCode}`); else navigate("/inmuebles"); };
   const getLoc = (es: any, en: any) => (lang === "EN" && en) ? en : es;
 
-  // LÓGICA DE MAPEO DE ZONAS
   const handleZoneSearch = async () => {
      if(!zoneInput.trim()) return;
      setSearchingZone(true);
      
-     // 1. Mapeo Inteligente (Barrio -> Localidad/Zona)
      const zoneMap: Record<string, string> = {
-        "marsella": "Kennedy",
-        "mandalay": "Kennedy",
-        "castilla": "Kennedy",
-        "cedritos": "Usaquén",
-        "santa barbara": "Usaquén",
-        "colina": "Suba",
-        "niza": "Suba",
-        "salitre": "Fontibón",
-        "modelia": "Fontibón",
-        "centro": "La Candelaria"
+        "marsella": "Kennedy", "mandalay": "Kennedy", "castilla": "Kennedy",
+        "cedritos": "Usaquén", "santa barbara": "Usaquén", "colina": "Suba",
+        "niza": "Suba", "salitre": "Fontibón", "modelia": "Fontibón", "centro": "La Candelaria"
      };
 
      const query = zoneInput.toLowerCase();
      let searchTerm = query;
-     let mapMessage = "";
-
-     // Buscar si el término tiene una zona padre
      for (const [barrio, localidad] of Object.entries(zoneMap)) {
-        if (query.includes(barrio)) {
-           searchTerm = localidad.toLowerCase();
-           mapMessage = `Buscando en ${localidad} (Zona de ${barrio})`;
-           break;
-        }
+        if (query.includes(barrio)) { searchTerm = localidad.toLowerCase(); break; }
      }
 
-     // 2. Consulta a Supabase (ilike busca coincidencias en city o neighborhood)
      const { data } = await supabase
         .from("properties")
         .select("*")
@@ -86,49 +71,49 @@ const Home = () => {
 
   const current = featured[currentIdx] || {};
 
+  // SIMULADOR DE RAZONES PREMIUM (Ya que no vienen de BD aun)
+  const getPremiumReasons = (index: number) => {
+     const reasons = [
+        ["Alta Valorización (+12% Anual)", "Ubicación Estratégica"],
+        ["Acabados Importados", "Diseño de Autor"],
+        ["Zona de Alta Seguridad", "Tecnología Domótica"],
+        ["Oportunidad de Inversión", "Entrega Inmediata"]
+     ];
+     return reasons[index % reasons.length];
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen w-full overflow-hidden">
       
-      {/* MODAL DE RESULTADOS ZONALES */}
+      {/* MODAL ZONAS */}
       {showZoneModal && (
          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-white w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
                <button onClick={() => setShowZoneModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 z-10"><FontAwesomeIcon icon={faTimes} size="2x" /></button>
-               
                <div className="p-8 bg-slate-900 text-white">
                   <h3 className="text-2xl font-bold flex items-center gap-3"><FontAwesomeIcon icon={faCity} className="text-yellow-500"/> Resultados para "{zoneInput}"</h3>
-                  <p className="text-slate-400 text-sm mt-2">{zoneResults.length > 0 ? `Encontramos ${zoneResults.length} oportunidades de inversión.` : "Aún no tenemos propiedades publicadas exactamente ahí, pero mira estas opciones."}</p>
+                  <p className="text-slate-400 text-sm mt-2">{zoneResults.length > 0 ? `Encontramos ${zoneResults.length} oportunidades.` : "No hay coincidencias exactas."}</p>
                </div>
-
                <div className="p-8 overflow-y-auto bg-gray-50 flex-grow">
                   {zoneResults.length > 0 ? (
-                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {zoneResults.map(prop => (
-                           <Link to={`/inmuebles/${prop.id}`} key={prop.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition group">
+                           <Link to={`/inmuebles/${prop.id}`} key={prop.id} className="bg-white rounded-xl shadow hover:shadow-xl transition group">
                               <div className="h-40 bg-gray-200 relative">
                                  {prop.images && prop.images[0] && <img src={prop.images[0]} className="w-full h-full object-cover" />}
                                  <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">{prop.property_type}</span>
                               </div>
-                              <div className="p-4">
-                                 <h4 className="font-bold text-slate-800 text-sm truncate">{prop.title}</h4>
-                                 <p className="text-green-600 font-bold text-lg mt-1">{formatPrice(prop.price)}</p>
-                                 <p className="text-xs text-gray-500 flex items-center gap-1 mt-2"><FontAwesomeIcon icon={faMapMarkedAlt}/> {prop.neighborhood}, {prop.city}</p>
-                              </div>
+                              <div className="p-4"><h4 className="font-bold text-slate-800 text-sm truncate">{prop.title}</h4><p className="text-green-600 font-bold text-lg mt-1">{formatPrice(prop.price)}</p></div>
                            </Link>
                         ))}
                      </div>
-                  ) : (
-                     <div className="text-center py-12">
-                        <p className="text-slate-500 mb-4">No hay coincidencias exactas en este momento.</p>
-                        <Link to="/inmuebles" className="inline-block bg-yellow-500 text-slate-900 font-bold px-6 py-3 rounded-full hover:bg-yellow-400">Ver Inventario Completo</Link>
-                     </div>
-                  )}
+                  ) : <div className="text-center py-12"><p className="text-slate-500 mb-4">Sin resultados.</p><Link to="/inmuebles" className="bg-yellow-500 text-slate-900 font-bold px-6 py-3 rounded-full">Ver Todo</Link></div>}
                </div>
             </div>
          </div>
       )}
 
-      {/* HERO SECTION */}
+      {/* HERO SLIDER */}
       {featured.length > 0 && (
       <div className="relative bg-white pb-12">
          <div className="max-w-7xl mx-auto md:p-6 p-0">
@@ -137,14 +122,10 @@ const Home = () => {
                   <div className="absolute inset-0 bg-slate-900/30 z-10"></div>
                   <img src={current.images[0]} alt={current.title} className="w-full h-full object-cover transition-all duration-700 hover:scale-105" />
                   <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center text-white p-4">
-                     <span className="bg-yellow-500 text-slate-900 text-xs font-bold px-3 py-1 rounded uppercase mb-4 tracking-widest shadow-sm">
-                        {getLoc(current.property_type, current.property_type_en)}
-                     </span>
+                     <span className="bg-yellow-500 text-slate-900 text-xs font-bold px-3 py-1 rounded uppercase mb-4 tracking-widest shadow-sm">{getLoc(current.property_type, current.property_type_en)}</span>
                      <h2 className="text-3xl md:text-5xl font-bold drop-shadow-lg mb-2 leading-tight px-2">{getLoc(current.title, current.title_en)}</h2>
                      <p className="text-lg md:text-2xl font-light mb-6 opacity-90">{getLoc(current.city, current.city_en)} | {formatPrice(current.price)}</p>
-                     <button onClick={() => navigate(`/inmuebles/${current.id}`)} className="px-8 py-3 bg-white text-slate-800 font-bold rounded-full hover:bg-yellow-400 hover:text-slate-900 transition shadow-lg uppercase text-sm tracking-widest">
-                        {t("hero_btn")}
-                     </button>
+                     <button onClick={() => navigate(`/inmuebles/${current.id}`)} className="px-8 py-3 bg-white text-slate-800 font-bold rounded-full hover:bg-yellow-400 hover:text-slate-900 transition shadow-lg uppercase text-sm tracking-widest">{t("hero_btn")}</button>
                   </div>
                   <button onClick={prevProp} className="absolute top-1/2 left-2 md:left-4 z-30 w-10 h-10 md:w-12 md:h-12 border-2 border-white text-white rounded-full flex items-center justify-center hover:bg-white hover:text-slate-800 transition"><FontAwesomeIcon icon={faChevronLeft} /></button>
                   <button onClick={nextProp} className="absolute top-1/2 right-2 md:right-4 z-30 w-10 h-10 md:w-12 md:h-12 border-2 border-white text-white rounded-full flex items-center justify-center hover:bg-white hover:text-slate-800 transition"><FontAwesomeIcon icon={faChevronRight} /></button>
@@ -152,63 +133,41 @@ const Home = () => {
                <div className="lg:w-[30%] bg-gray-100 p-6 md:p-8 flex flex-col justify-center border-l border-gray-200">
                   <h3 className="text-slate-800 font-bold text-center text-lg mb-6 uppercase tracking-widest border-b-2 border-slate-800 pb-2 inline-block mx-auto">{t("search_title")}</h3>
                   <div className="space-y-6 flex-1">
-                     <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase block mb-2">{t("search_code")}</label>
-                        <div className="relative">
-                           <input className="w-full p-4 pl-10 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-slate-800 outline-none" placeholder="Ej: 2501" value={quickCode} onChange={(e) => setQuickCode(e.target.value)} />
-                           <FontAwesomeIcon icon={faHashtag} className="absolute left-3.5 top-4 text-gray-400" />
-                        </div>
-                     </div>
-                     <div className="p-4 bg-slate-200 rounded-lg text-xs text-slate-600 leading-relaxed border border-slate-300">
-                        <p>{lang === "EN" ? "Search by Property ID." : "Ingrese el código del inmueble para ir directo."}</p>
-                     </div>
+                     <div><label className="text-xs font-bold text-gray-500 uppercase block mb-2">{t("search_code")}</label><div className="relative"><input className="w-full p-4 pl-10 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-slate-800 outline-none" placeholder="Ej: 2501" value={quickCode} onChange={(e) => setQuickCode(e.target.value)} /><FontAwesomeIcon icon={faHashtag} className="absolute left-3.5 top-4 text-gray-400" /></div></div>
+                     <div className="p-4 bg-slate-200 rounded-lg text-xs text-slate-600 leading-relaxed border border-slate-300"><p>{lang === "EN" ? "Search by Property ID." : "Ingrese el código del inmueble para ir directo."}</p></div>
                   </div>
-                  <button onClick={handleQuickSearch} className="w-full bg-slate-800 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-slate-700 transition mt-6 flex items-center justify-center gap-2 uppercase tracking-wide border border-slate-900">
-                     <FontAwesomeIcon icon={faSearch} /> {t("search_btn")}
-                  </button>
+                  <button onClick={handleQuickSearch} className="w-full bg-slate-800 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-slate-700 transition mt-6 flex items-center justify-center gap-2 uppercase tracking-wide border border-slate-900"><FontAwesomeIcon icon={faSearch} /> {t("search_btn")}</button>
                </div>
             </div>
          </div>
       </div>
       )}
 
-      {/* --- MÓDULO INTELIGENTE CAMACOL (NUEVO) --- */}
+      {/* MÓDULO CAMACOL */}
       <div className="bg-slate-900 py-20 px-4 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
             <div className="lg:w-1/2 text-white">
                 <span className="text-yellow-400 font-bold tracking-widest text-xs uppercase mb-2 block"><FontAwesomeIcon icon={faMapMarkedAlt} /> Inteligencia de Mercado</span>
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">¿Dónde proyectas <br/>tu próxima inversión?</h2>
-                <p className="text-slate-300 text-lg mb-8 leading-relaxed font-light">
-                   Ya sea un hogar, un local comercial o una bodega, la ubicación es clave. Analizamos datos de <strong>CAMACOL</strong> para identificar zonas de alta valorización. Dinos dónde buscas y te mostramos lo mejor.
-                </p>
+                <p className="text-slate-300 text-lg mb-8 leading-relaxed font-light">Analizamos datos de <strong>CAMACOL</strong> para identificar zonas de alta valorización. Dinos dónde buscas.</p>
                 <div className="bg-white/10 backdrop-blur-md p-2 rounded-full flex items-center max-w-md border border-white/20">
-                   <input 
-                      type="text" 
-                      placeholder="Ej: Cedritos, Marsella, La Colina..." 
-                      className="bg-transparent border-none outline-none text-white placeholder-slate-400 flex-grow px-6 py-2"
-                      value={zoneInput}
-                      onChange={(e) => setZoneInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleZoneSearch()}
-                   />
-                   <button onClick={handleZoneSearch} className="bg-yellow-500 hover:bg-yellow-400 text-slate-900 w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg">
-                      {searchingZone ? <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div> : <FontAwesomeIcon icon={faPaperPlane} />}
-                   </button>
+                   <input type="text" placeholder="Ej: Cedritos, Marsella..." className="bg-transparent border-none outline-none text-white placeholder-slate-400 flex-grow px-6 py-2" value={zoneInput} onChange={(e) => setZoneInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleZoneSearch()} />
+                   <button onClick={handleZoneSearch} className="bg-yellow-500 hover:bg-yellow-400 text-slate-900 w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg">{searchingZone ? <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div> : <FontAwesomeIcon icon={faPaperPlane} />}</button>
                 </div>
-                <p className="text-xs text-slate-500 mt-4 ml-4">Prueba escribiendo un barrio (Ej: Marsella, Cedritos).</p>
             </div>
             <div className="lg:w-1/2 w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
                <h3 className="text-white font-bold mb-8 flex justify-between items-end"><span>Demanda Actual</span><span className="text-xs text-slate-400 font-normal">Fuente: Camacol Proyecciones</span></h3>
                <div className="space-y-6">
-                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Sabana Norte (Chía/Cajicá)</span> <span>85%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 w-[85%] rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div></div></div>
-                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Bogotá Norte (Cedritos/Colina)</span> <span>72%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 w-[72%] rounded-full"></div></div></div>
-                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Sabana Occidente (Madrid/Mosquera)</span> <span>64%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-green-600 to-green-400 w-[64%] rounded-full"></div></div></div>
+                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Sabana Norte</span> <span>85%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 w-[85%] rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div></div></div>
+                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Bogotá Norte</span> <span>72%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 w-[72%] rounded-full"></div></div></div>
+                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Sabana Occidente</span> <span>64%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-green-600 to-green-400 w-[64%] rounded-full"></div></div></div>
                </div>
             </div>
          </div>
       </div>
 
-      {/* PREMIUM SELECTION */}
+      {/* --- SELECCIÓN PREMIUM (EXPANDIDA A 4) --- */}
       <div className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
          <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-200 pb-4">
             <div className="max-w-2xl">
@@ -218,20 +177,69 @@ const Home = () => {
             </div>
             <Link to="/inmuebles?type=premium" className="text-blue-900 font-bold hover:underline mt-4 md:mt-0 block">Ver todo el portafolio</Link>
          </div>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {featured.slice(0, 2).map(prop => (
-               <Link to={`/inmuebles/${prop.id}`} key={prop.id} className="relative h-80 rounded-2xl overflow-hidden group shadow-2xl">
+
+         {/* GRID 2x2 para mostrar 4 elementos con relevancia */}
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10 mb-12">
+            {featured.slice(0, 4).map((prop, index) => (
+               <Link to={`/inmuebles/${prop.id}`} key={prop.id} className="relative h-[450px] rounded-3xl overflow-hidden group shadow-2xl border-4 border-white hover:border-yellow-500 transition-all duration-500">
                   <img src={prop.images[0]} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-90"></div>
-                  <div className="absolute bottom-0 left-0 p-8 text-white">
-                     <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded text-xs uppercase font-bold mb-3 inline-block border border-white/30">Colección Premium</span>
-                     <h3 className="text-2xl font-bold mb-2">{getLoc(prop.title, prop.title_en)}</h3>
-                     <p className="text-yellow-400 font-bold text-xl">{formatPrice(prop.price)}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                  
+                  {/* CONTENIDO DE LA TARJETA */}
+                  <div className="absolute bottom-0 left-0 p-8 w-full text-white">
+                     <div className="flex justify-between items-end mb-4">
+                        <span className="bg-yellow-500 text-slate-900 text-[10px] font-black px-3 py-1 rounded uppercase tracking-widest shadow-lg">Premium</span>
+                        <div className="text-right">
+                           <p className="text-2xl font-bold text-yellow-400">{formatPrice(prop.price)}</p>
+                        </div>
+                     </div>
+                     
+                     <h3 className="text-3xl font-black mb-4 leading-tight">{getLoc(prop.title, prop.title_en)}</h3>
+                     
+                     {/* FACTOR PREMIUM (EL POR QUÉ) */}
+                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl">
+                        <p className="text-yellow-400 text-xs font-bold uppercase mb-2 flex items-center gap-2"><FontAwesomeIcon icon={faTrophy} /> Factor Premium</p>
+                        <ul className="space-y-1">
+                           {getPremiumReasons(index).map((reason, i) => (
+                              <li key={i} className="text-sm font-medium flex items-center gap-2">
+                                 <FontAwesomeIcon icon={faCheckCircle} className="text-green-400 text-xs" /> {reason}
+                              </li>
+                           ))}
+                        </ul>
+                     </div>
                   </div>
                </Link>
             ))}
          </div>
       </div>
+
+      {/* BLOG - ÚLTIMOS POSTS */}
+      <div className="bg-white py-20 px-4 border-t border-gray-100">
+         <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+               <h2 className="text-3xl font-bold text-slate-800">{t("blog_home_title")}</h2>
+               <div className="w-16 h-1 bg-blue-900 mx-auto mt-4"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               {blogPosts.map(post => (
+                  <Link to={`/blog/${post.id}`} key={post.id} className="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition group border border-gray-200">
+                     <div className="h-56 overflow-hidden relative">
+                        <img src={post.image_url} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
+                     </div>
+                     <div className="p-6">
+                        <div className="text-xs text-blue-600 mb-3 uppercase font-bold tracking-widest">{new Date(post.created_at).toLocaleDateString()}</div>
+                        <h3 className="font-bold text-slate-900 text-xl mb-3 line-clamp-2 group-hover:text-blue-700 transition leading-tight">{post.title}</h3>
+                        <span className="text-slate-500 font-bold text-xs uppercase tracking-wider flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                           {t("read_more")} <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" />
+                        </span>
+                     </div>
+                  </Link>
+               ))}
+            </div>
+         </div>
+      </div>
+
     </div>
   );
 };
