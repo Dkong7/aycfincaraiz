@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faTimes, faChevronDown, faGlobe, faGavel, faCamera, faChartLine, faPhone, faHome, faBuilding, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
@@ -56,7 +56,7 @@ const Navbar = () => {
     );
   }
 
-  // --- MODO PÃšBLICO (CURVA RESTAURADA) ---
+  // --- MODO PÃƒÅ¡BLICO (CURVA RESTAURADA) ---
   const PHONE_NUMBER = "+57 313 466 3832";
   
   return (
@@ -65,13 +65,13 @@ const Navbar = () => {
       {/* BARRA BLANCA SUPERIOR */}
       <div className="bg-white shadow-md relative z-50 px-4 py-2 w-full lg:rounded-none rounded-b-[30px] transition-all duration-300">
         <div className="max-w-7xl mx-auto flex justify-between items-center h-16 md:h-20">
-            <Link to="/" className="flex-shrink-0 z-50"><img className="h-10 md:h-20 w-auto object-contain" src="/ayclogo.svg" alt="A&C Finca RaÃ­z" /></Link>
+            <Link to="/" className="flex-shrink-0 z-50"><img className="h-10 md:h-20 w-auto object-contain" src="/ayclogo.svg" alt="A&C Finca RaÃƒÂ­z" /></Link>
 
             <div className="hidden lg:flex items-center gap-6 text-slate-800">
                <div className="flex items-center gap-3 text-sm font-bold border-r border-gray-200 pr-6">
                   <span className="flex items-center gap-2"><FontAwesomeIcon icon={faPhone} className="text-green-600" /> {PHONE_NUMBER}</span>
                   <span className="text-gray-300">|</span>
-                  <span className="text-gray-500 font-normal">BogotÃ¡ & Cundinamarca</span>
+                  <span className="text-gray-500 font-normal">BogotÃƒÂ¡ & Cundinamarca</span>
                </div>
                <div className="flex items-center gap-4">
                   <a href="#" className="hover:text-green-600 transition text-xl"><FontAwesomeIcon icon={faFacebookF} /></a>
@@ -114,7 +114,7 @@ const Navbar = () => {
          </div>
       </div>
 
-      {/* MENÃš MÃ“VIL */}
+      {/* MENÃƒÅ¡ MÃƒâ€œVIL */}
       <div className={`fixed inset-0 bg-slate-900/95 z-[1000] backdrop-blur-sm transition-all duration-300 lg:hidden flex flex-col items-center justify-center ${isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}>
          <div className="flex flex-col gap-6 text-center w-full px-8 max-h-screen overflow-y-auto">
             <button onClick={() => handleNavigation("/")} className="text-xl font-bold text-white uppercase hover:text-green-500 flex items-center justify-center gap-2"><FontAwesomeIcon icon={faHome} className="text-green-600"/> {t("nav_home")}</button>
