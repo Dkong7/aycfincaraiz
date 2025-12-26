@@ -1,186 +1,197 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { DollarSign, Home, Layout, ShieldCheck, ArrowLeft, Sun, Building, Map, Truck } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { DollarSign, Home, Layout, ShieldCheck, ArrowLeft, Save } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabaseClient';
 
 const CreateProperty = () => {
-  const { register, watch, handleSubmit } = useForm();
-  const type = watch('property_type', 'Casa'); 
+  const { register, watch, handleSubmit, setValue } = useForm();
+  const type = watch('property_type', 'Casa');
+  const priceCOP = watch('price_cop');
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  // TEMAS SEGÚN USUARIO
-  const getTheme = () => {
-    if (user?.role === 'claudia') return { bg: 'bg-pink-50', card: 'bg-white border-pink-100', text: 'text-pink-900', accent: 'text-pink-600', btn: 'bg-pink-500 hover:bg-pink-600' };
-    if (user?.role === 'alfonso') return { bg: 'bg-[#050b14]', card: 'bg-[#0f172a] border-gray-800', text: 'text-white', accent: 'text-blue-400', btn: 'bg-blue-600 hover:bg-blue-700' };
-    return { bg: 'bg-gray-100', card: 'bg-white border-gray-200', text: 'text-gray-800', accent: 'text-[#009B4D]', btn: 'bg-[#009B4D] hover:bg-green-700' };
-  };
-  const theme = getTheme();
+  // CONVERSIÓN AUTOMÁTICA USD (Tasa Fija aprox para el ejemplo, idealmente API)
+  const USD_RATE = 4200; 
 
-  // COLORES POR TIPO DE INMUEBLE (Hover Icons)
-  const getTypeColor = (t) => {
-     switch(t) {
-        case 'Apartamento': return 'text-blue-500';
-        case 'Casa': return 'text-green-500';
-        case 'Bodega': return 'text-yellow-500';
-        case 'CasaCampo': return 'text-purple-500';
-        case 'Lote': return 'text-gray-500';
-        default: return 'text-gray-400';
-     }
-  };
+  useEffect(() => {
+    if (priceCOP) {
+      const usd = (parseFloat(priceCOP) / USD_RATE).toFixed(0);
+      setValue('price_usd', usd);
+    }
+  }, [priceCOP, setValue]);
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setLoading(true);
-    console.log("Saving...", data);
-    setTimeout(() => setLoading(false), 2000);
+    try {
+      // Estructuramos el JSON 'specs' con los campos específicos
+      const specsData = {
+         levels: data.levels,
+         locals_detail: data.locals_detail,
+         apts_detail: data.apts_detail,
+         area_lot: data.area_lot,
+         area_built: data.area_built,
+         area_private: data.area_private,
+         front: data.front,
+         depth: data.depth,
+         amenities: data.amenities, // Array de checkboxes
+         zoning: data.zoning, // Para lotes/bodegas
+         industrial_specs: data.industrial_specs, // Bodegas
+         rural_specs: data.rural_specs // Casas Campo
+      };
+
+      const { error } = await supabase.from('properties').insert([{
+         listing_type: 'Venta', // Default o agregar selector
+         property_type: data.property_type,
+         price_cop: data.price_cop,
+         price_usd: data.price_usd,
+         admin_price: data.admin_price,
+         appraisal_price: data.appraisal_price,
+         mortgage: data.mortgage,
+         family_patrimony: data.patrimony,
+         owner_name: data.owner_name,
+         owner_phone: data.owner_phone,
+         owner_email: data.owner_email,
+         real_address: data.real_address,
+         address_visible: data.address_visible, // Barrio visible
+         comments: data.comments,
+         specs: specsData,
+         // Imagen default para que no quede vacía
+         main_media_url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=1000' 
+      }]);
+
+      if (error) throw error;
+      alert('Propiedad creada con Código AYC Automático');
+      navigate('/dashboard');
+
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className={`min-h-screen ${theme.bg} ${theme.text} p-8 font-sans transition-colors duration-500`}>
+    <div className="min-h-screen bg-[#050b14] text-white p-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        
-        {/* HEADER */}
-        <div className="flex items-center justify-between mb-8 border-b border-gray-700/20 pb-6">
-           <Link to="/dashboard" className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
-              <ArrowLeft /> Volver al Panel
-           </Link>
+        <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+           <Link to="/dashboard" className="flex items-center gap-2 text-gray-400 hover:text-white"><ArrowLeft/> Cancelar</Link>
            <h1 className="text-3xl font-black uppercase">Nuevo Inmueble</h1>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
            
-           <div className="lg:col-span-2 space-y-8">
-              
-              {/* 1. SELECCIÓN DE TIPO */}
-              <div className={`${theme.card} p-6 rounded-2xl border shadow-sm`}>
-                 <h3 className={`${theme.accent} font-bold uppercase mb-6 flex items-center gap-2`}><Home size={18}/> Tipo de Inmueble</h3>
+           <div className="lg:col-span-2 space-y-6">
+              {/* TIPO */}
+              <div className="bg-[#0f172a] p-6 rounded-2xl border border-gray-800">
+                 <label className="text-xs font-bold text-gray-400 uppercase block mb-3">Formato de Inmueble</label>
                  <div className="grid grid-cols-5 gap-2">
                     {['Casa', 'Apartamento', 'Bodega', 'CasaCampo', 'Lote'].map(t => (
-                       <label key={t} className={`cursor-pointer flex flex-col items-center justify-center p-4 rounded-xl border transition-all hover:scale-105 group ${type === t ? 'bg-black/5 border-black/20 font-bold' : 'border-transparent hover:bg-black/5'}`}>
-                          <input type="radio" value={t} {...register('property_type')} className="hidden" />
-                          <div className={`mb-2 transition-colors ${type === t ? getTypeColor(t) : 'text-gray-400 group-hover:' + getTypeColor(t)}`}>
-                             {t === 'Casa' && <Home size={24}/>}
-                             {t === 'Apartamento' && <Building size={24}/>}
-                             {t === 'Bodega' && <Truck size={24}/>}
-                             {t === 'CasaCampo' && <Sun size={24}/>}
-                             {t === 'Lote' && <Map size={24}/>}
-                          </div>
-                          <span className="text-xs uppercase">{t}</span>
+                       <label key={t} className={`p-3 rounded-lg border text-center text-xs font-bold cursor-pointer transition-all ${type === t ? 'bg-[#009B4D] border-[#009B4D] text-white' : 'border-gray-700 text-gray-400 hover:border-gray-500'}`}>
+                          <input type="radio" value={t} {...register('property_type')} className="hidden"/> {t}
                        </label>
                     ))}
                  </div>
+                 <div className="mt-4">
+                    <label className="text-xs font-bold text-gray-400 uppercase">Barrio / Ubicación Visible</label>
+                    <input {...register('address_visible')} placeholder="Ej: Rosales, Chía..." className="w-full bg-[#050b14] border border-gray-700 p-3 rounded-lg mt-1 outline-none focus:border-[#009B4D]" required/>
+                 </div>
               </div>
 
-              {/* 2. FINANCIERO (VERDE TENUE) */}
-              <div className="bg-[#e8f5e9] p-6 rounded-2xl border border-green-200 text-green-900">
-                 <h3 className="font-bold uppercase mb-4 flex items-center gap-2 text-green-800"><DollarSign size={18}/> Datos Financieros</h3>
-                 
+              {/* FINANCIERO (VERDE TENUE) */}
+              <div className="bg-[#0f2e1d] p-6 rounded-2xl border border-[#009B4D]/30">
+                 <h3 className="text-[#009B4D] font-bold uppercase mb-4 flex items-center gap-2"><DollarSign size={18}/> Financiero</h3>
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div><label className="text-xs font-bold block mb-1">Precio Venta (COP)</label><input {...register('price_cop')} type="number" className="w-full p-2 rounded border border-green-300 focus:ring-2 focus:ring-green-500 outline-none" /></div>
-                    <div><label className="text-xs font-bold block mb-1">Precio (USD)</label><input {...register('price_usd')} type="number" className="w-full p-2 rounded border border-green-300 outline-none" /></div>
-                    <div><label className="text-xs font-bold block mb-1">Avalúo</label><input {...register('appraisal')} type="number" className="w-full p-2 rounded border border-green-300 outline-none" /></div>
-                    <div><label className="text-xs font-bold block mb-1">Administración</label><input {...register('admin')} type="number" className="w-full p-2 rounded border border-green-300 outline-none" /></div>
+                    <div><label className="text-[10px] uppercase font-bold text-[#009B4D]">Precio (COP)</label><input {...register('price_cop')} type="number" className="w-full bg-black/20 border border-[#009B4D]/30 p-2 rounded text-white" required/></div>
+                    <div><label className="text-[10px] uppercase font-bold text-[#009B4D]">Precio (USD - Auto)</label><input {...register('price_usd')} readOnly className="w-full bg-black/40 border border-[#009B4D]/10 p-2 rounded text-gray-400 cursor-not-allowed"/></div>
+                    <div><label className="text-[10px] uppercase font-bold text-[#009B4D]">Avalúo</label><input {...register('appraisal_price')} className="w-full bg-black/20 border border-[#009B4D]/30 p-2 rounded text-white"/></div>
+                    <div><label className="text-[10px] uppercase font-bold text-[#009B4D]">Admon</label><input {...register('admin_price')} className="w-full bg-black/20 border border-[#009B4D]/30 p-2 rounded text-white"/></div>
                  </div>
-
-                 {type === 'Lote' && (
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div><label className="text-xs font-bold block mb-1">Precio x m²</label><input {...register('price_m2')} className="w-full p-2 rounded border border-green-300 outline-none" /></div>
-                        <div><label className="text-xs font-bold block mb-1">Impuesto Predial</label><input {...register('tax')} className="w-full p-2 rounded border border-green-300 outline-none" /></div>
-                    </div>
-                 )}
-
-                 <div className="flex flex-wrap gap-4 text-xs font-bold mt-4 pt-4 border-t border-green-200">
-                    <label className="flex items-center gap-1"><input type="checkbox" {...register('mortgage')} /> Hipoteca</label>
-                    <label className="flex items-center gap-1"><input type="checkbox" {...register('patrimony')} /> Patrimonio Fam.</label>
-                    <label className="flex items-center gap-1"><input type="checkbox" {...register('succession')} /> Sucesión</label>
-                    <label className="flex items-center gap-1"><input type="checkbox" {...register('affectation')} /> Afectación Viv.</label>
+                 <div className="flex flex-wrap gap-4 text-xs font-bold text-[#009B4D]">
+                    <label className="flex items-center gap-2"><input type="checkbox" {...register('mortgage')} /> Hipoteca</label>
+                    <label className="flex items-center gap-2"><input type="checkbox" {...register('patrimony')} /> Patrimonio Fam.</label>
+                    <label className="flex items-center gap-2"><input type="checkbox" {...register('succession')} /> Sucesión</label>
+                    <label className="flex items-center gap-2"><input type="checkbox" {...register('affectation')} /> Afectación Viv.</label>
                  </div>
               </div>
 
-              {/* 3. CAMPOS ESPECÍFICOS (MUTANTES) */}
-              <div className={`${theme.card} p-6 rounded-2xl border shadow-sm`}>
-                 <h3 className={`${theme.accent} font-bold uppercase mb-6 flex items-center gap-2`}><Layout size={18}/> Especificaciones: {type}</h3>
-
+              {/* ESPECIFICACIONES DINÁMICAS */}
+              <div className="bg-[#0f172a] p-6 rounded-2xl border border-gray-800">
+                 <h3 className="text-white font-bold uppercase mb-4 flex items-center gap-2"><Layout size={18}/> Detalles: {type}</h3>
+                 
                  {/* --- CASA --- */}
                  {type === 'Casa' && (
                     <div className="space-y-4">
                        <div className="grid grid-cols-3 gap-4">
-                          <input {...register('levels')} placeholder="Niveles" className="p-3 rounded border w-full bg-transparent border-gray-400/30" />
-                          <input {...register('area_lot')} placeholder="Área Lote m²" className="p-3 rounded border w-full bg-transparent border-gray-400/30" />
-                          <input {...register('area_built')} placeholder="Área Const. m²" className="p-3 rounded border w-full bg-transparent border-gray-400/30" />
+                          <input {...register('levels')} placeholder="Niveles" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
+                          <input {...register('area_lot')} placeholder="Área Lote m²" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
+                          <input {...register('area_built')} placeholder="Área Const. m²" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
                        </div>
-                       {/* Expandibles */}
-                       <details className="bg-black/5 p-4 rounded-lg"><summary className="font-bold cursor-pointer text-sm">Detalle Locales</summary><textarea {...register('locales')} className="w-full mt-2 bg-transparent border-b border-gray-400/50 p-2 text-sm" placeholder="Área, baño, renta..."/></details>
-                       <details className="bg-black/5 p-4 rounded-lg"><summary className="font-bold cursor-pointer text-sm">Aptos Independientes</summary><textarea {...register('apts_indep')} className="w-full mt-2 bg-transparent border-b border-gray-400/50 p-2 text-sm" placeholder="Habitaciones, cocina, estado..."/></details>
+                       <textarea {...register('locals_detail')} placeholder="Detalle Locales (Área, baño, renta)..." className="w-full bg-[#050b14] border border-gray-700 p-3 rounded h-20 text-sm"/>
+                       <textarea {...register('apts_detail')} placeholder="Detalle Aptos Independientes..." className="w-full bg-[#050b14] border border-gray-700 p-3 rounded h-20 text-sm"/>
                     </div>
                  )}
 
                  {/* --- APARTAMENTO --- */}
                  {type === 'Apartamento' && (
-                    <div className="space-y-4">
-                       <div className="grid grid-cols-4 gap-4">
-                          <input {...register('floor')} placeholder="Piso N°" className="p-3 rounded border w-full bg-transparent border-gray-400/30" />
-                          <label className="flex items-center gap-2 border p-2 rounded"><input type="checkbox" {...register('duplex')} /> Duplex</label>
-                          <label className="flex items-center gap-2 border p-2 rounded"><input type="checkbox" {...register('elevator')} /> Ascensor</label>
-                          <select {...register('view')} className="p-3 rounded border w-full bg-transparent border-gray-400/30"><option>Interior</option><option>Exterior</option></select>
-                       </div>
-                       <div className="p-4 bg-black/5 rounded-lg">
-                          <span className="text-xs font-bold block mb-2">Zonas Comunes</span>
-                          <div className="flex flex-wrap gap-4 text-sm">
-                             {['Gimnasio','Piscina','Salón','Parques'].map(z=><label key={z}><input type="checkbox" {...register(`zones.${z}`)}/> {z}</label>)}
-                          </div>
-                       </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                       <input {...register('floor')} placeholder="Piso" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
+                       <input {...register('estrato')} placeholder="Estrato" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
+                       <label className="flex items-center gap-2 border border-gray-700 p-2 rounded"><input type="checkbox" {...register('elevator')}/> Ascensor</label>
+                       <label className="flex items-center gap-2 border border-gray-700 p-2 rounded"><input type="checkbox" {...register('duplex')}/> Duplex</label>
                     </div>
                  )}
 
                  {/* --- BODEGA --- */}
                  {type === 'Bodega' && (
                     <div className="space-y-4">
-                       <div className="grid grid-cols-3 gap-4 bg-yellow-500/10 p-4 rounded-lg border border-yellow-500/20">
-                          <label className="flex items-center gap-2 font-bold text-yellow-600"><input type="checkbox" {...register('zona_franca')} /> ZONA FRANCA</label>
-                          <input {...register('height')} placeholder="Altura (m)" className="p-2 rounded border bg-transparent" />
-                          <select {...register('energy')} className="p-2 rounded border bg-transparent"><option>Trifásica</option><option>Monofásica</option></select>
+                       <div className="flex gap-4">
+                          <label className="flex items-center gap-2 font-bold text-yellow-500"><input type="checkbox" {...register('industrial_specs.zona_franca')}/> ZONA FRANCA</label>
+                          <input {...register('industrial_specs.rent_value')} placeholder="Valor Arriendo (Si aplica)" className="bg-[#050b14] border border-gray-700 p-2 rounded flex-1"/>
                        </div>
-                       <div className="grid grid-cols-2 gap-4 text-sm">
-                          <label><input type="checkbox" {...register('truck_door')} /> Puerta Tractomula</label>
-                          <label><input type="checkbox" {...register('resistance_floor')} /> Piso Alta Resistencia</label>
+                       <div className="grid grid-cols-3 gap-4">
+                          <input {...register('industrial_specs.height')} placeholder="Altura (m)" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
+                          <input {...register('industrial_specs.kVA')} placeholder="Energía (Tri/Mono)" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
+                          <input {...register('industrial_specs.entries')} placeholder="N° Entradas" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
                        </div>
                     </div>
                  )}
 
-                 {/* --- LOTES (NUEVO) --- */}
+                 {/* --- LOTE (NUEVO) --- */}
                  {type === 'Lote' && (
                     <div className="space-y-4">
                        <div className="grid grid-cols-2 gap-4">
-                          <div><label className="text-xs block font-bold mb-1">Uso de Suelo</label><select {...register('land_use')} className="w-full p-2 border rounded bg-transparent"><option>Residencial</option><option>Industrial</option><option>Agrícola</option></select></div>
-                          <div><label className="text-xs block font-bold mb-1">Estado Legal</label><select {...register('legal_status')} className="w-full p-2 border rounded bg-transparent"><option>Desenglobado</option><option>En Proceso</option></select></div>
+                          <input {...register('area_lot')} placeholder="Área Total m²" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
+                          <input {...register('price_m2')} placeholder="Precio x m²" className="bg-[#050b14] border border-gray-700 p-2 rounded"/>
                        </div>
-                       <div className="p-4 border rounded bg-black/5">
-                          <span className="text-xs font-bold block mb-2">Infraestructura</span>
-                          <div className="flex flex-wrap gap-4 text-sm">
-                             {['Agua','Luz','Gas','Alcantarillado','Vías'].map(i=><label key={i}><input type="checkbox" {...register(`infra.${i}`)}/> {i}</label>)}
+                       <div className="p-3 border border-gray-700 rounded">
+                          <p className="text-xs font-bold text-gray-400 mb-2">INFRAESTRUCTURA</p>
+                          <div className="flex flex-wrap gap-3 text-sm">
+                             {['Agua','Luz','Gas','Alcantarillado','Vías','Alumbrado'].map(i=><label key={i}><input type="checkbox" {...register(`specs.infra.${i}`)}/> {i}</label>)}
                           </div>
                        </div>
                     </div>
                  )}
               </div>
+
+              {/* COMENTARIOS */}
+              <div className="bg-[#0f172a] p-6 rounded-2xl border border-gray-800">
+                 <label className="text-xs font-bold text-gray-400 uppercase block mb-2">Comentarios / Observaciones</label>
+                 <textarea {...register('comments')} className="w-full bg-[#050b14] border border-gray-700 p-3 rounded h-24 outline-none focus:border-[#009B4D]"></textarea>
+              </div>
            </div>
 
-           {/* LATERAL DERECHO */}
-           <div className="space-y-6">
-              <div className="bg-red-50 p-6 rounded-2xl border border-red-200">
-                 <h3 className="text-red-800 font-bold uppercase mb-4 text-xs tracking-widest flex items-center gap-2"><ShieldCheck size={14}/> Datos Privados (Confidencial)</h3>
-                 <div className="space-y-3">
-                    <input {...register('owner_name')} placeholder="Nombre Propietario" className="w-full p-3 bg-white border border-red-200 rounded text-sm" />
-                    <input {...register('owner_phone')} placeholder="Teléfono" className="w-full p-3 bg-white border border-red-200 rounded text-sm" />
-                    <input {...register('email')} placeholder="Correo" className="w-full p-3 bg-white border border-red-200 rounded text-sm" />
-                    <input {...register('address_real')} placeholder="Dirección Exacta / Ficha" className="w-full p-3 bg-white border border-red-200 rounded text-sm" />
-                 </div>
+           {/* PRIVADO */}
+           <div className="bg-red-900/10 p-6 rounded-2xl border border-red-900/30 h-fit sticky top-4">
+              <h3 className="text-red-400 font-bold uppercase mb-6 flex items-center gap-2"><ShieldCheck size={18}/> Privado</h3>
+              <div className="space-y-4">
+                 <input {...register('owner_name')} placeholder="Nombre Propietario" className="w-full bg-[#050b14] border border-red-900/30 p-3 rounded focus:border-red-500 outline-none" required/>
+                 <input {...register('owner_phone')} placeholder="Teléfono" className="w-full bg-[#050b14] border border-red-900/30 p-3 rounded focus:border-red-500 outline-none" required/>
+                 <input {...register('owner_email')} placeholder="Email" className="w-full bg-[#050b14] border border-red-900/30 p-3 rounded focus:border-red-500 outline-none" required/>
+                 <input {...register('real_address')} placeholder="Dirección Exacta / Ficha" className="w-full bg-[#050b14] border border-red-900/30 p-3 rounded focus:border-red-500 outline-none" required/>
               </div>
-
-              <button disabled={loading} className={`w-full py-4 rounded-xl text-white font-black uppercase tracking-widest shadow-lg transform active:scale-95 transition-all ${theme.btn}`}>
-                 {loading ? 'Guardando...' : 'Publicar Inmueble'}
+              <button disabled={loading} className="w-full mt-8 py-4 bg-[#009B4D] hover:bg-green-600 text-white font-black rounded-xl uppercase tracking-widest shadow-lg flex items-center justify-center gap-2">
+                 {loading ? 'Generando AYC...' : <><Save size={20}/> Guardar Inmueble</>}
               </button>
            </div>
 
