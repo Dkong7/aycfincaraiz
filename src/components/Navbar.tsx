@@ -56,7 +56,7 @@ const Navbar = () => {
     );
   }
 
-  // --- MODO PÚBLICO (CURVA RESTAURADA) ---
+  // --- MODO PÃšBLICO (CURVA RESTAURADA) ---
   const PHONE_NUMBER = "+57 313 466 3832";
   
   return (
@@ -65,18 +65,18 @@ const Navbar = () => {
       {/* BARRA BLANCA SUPERIOR */}
       <div className="bg-white shadow-md relative z-50 px-4 py-2 w-full lg:rounded-none rounded-b-[30px] transition-all duration-300">
         <div className="max-w-7xl mx-auto flex justify-between items-center h-16 md:h-20">
-            <Link to="/" className="flex-shrink-0 z-50"><img className="h-10 md:h-20 w-auto object-contain" src="/ayclogo.svg" alt="A&C Finca Raíz" /></Link>
+            <Link to="/" className="flex-shrink-0 z-50"><img className="h-10 md:h-20 w-auto object-contain" src="/ayclogo.svg" alt="A&C Finca RaÃ­z" /></Link>
 
             <div className="hidden lg:flex items-center gap-6 text-slate-800">
                <div className="flex items-center gap-3 text-sm font-bold border-r border-gray-200 pr-6">
-                  <span className="flex items-center gap-2"><FontAwesomeIcon icon={faPhone} className="text-yellow-500" /> {PHONE_NUMBER}</span>
+                  <span className="flex items-center gap-2"><FontAwesomeIcon icon={faPhone} className="text-green-600" /> {PHONE_NUMBER}</span>
                   <span className="text-gray-300">|</span>
-                  <span className="text-gray-500 font-normal">Bogotá & Cundinamarca</span>
+                  <span className="text-gray-500 font-normal">BogotÃ¡ & Cundinamarca</span>
                </div>
                <div className="flex items-center gap-4">
-                  <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faFacebookF} /></a>
-                  <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faInstagram} /></a>
-                  <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faWhatsapp} /></a>
+                  <a href="#" className="hover:text-green-600 transition text-xl"><FontAwesomeIcon icon={faFacebookF} /></a>
+                  <a href="#" className="hover:text-green-600 transition text-xl"><FontAwesomeIcon icon={faInstagram} /></a>
+                  <a href="#" className="hover:text-green-600 transition text-xl"><FontAwesomeIcon icon={faWhatsapp} /></a>
                   <button onClick={toggleLang} className="ml-2 text-xs font-bold border-2 border-slate-200 px-3 py-1 rounded-full hover:bg-slate-100 flex gap-2 items-center"><FontAwesomeIcon icon={faGlobe} /> {lang}</button>
                </div>
             </div>
@@ -95,40 +95,40 @@ const Navbar = () => {
                  <path d="M0,0 H1000 C900,0 800,70 500,70 C200,70 100,0 0,0 Z" fill="#1e293b"></path>
              </svg>
              <nav className="absolute top-0 left-0 w-full h-full flex justify-center items-start pt-3 gap-8 text-white font-bold text-sm uppercase tracking-wider">
-                <Link to="/" className="hover:text-yellow-400 transition hover:-translate-y-0.5">{t("nav_home")}</Link>
-                <Link to="/inmuebles" className="hover:text-yellow-400 transition hover:-translate-y-0.5">{t("nav_properties")}</Link>
+                <Link to="/" className="hover:text-green-500 transition hover:-translate-y-0.5">{t("nav_home")}</Link>
+                <Link to="/inmuebles" className="hover:text-green-500 transition hover:-translate-y-0.5">{t("nav_properties")}</Link>
                 <div className="relative group">
-                   <button className="hover:text-yellow-400 transition flex items-center gap-1 hover:-translate-y-0.5">
+                   <button className="hover:text-green-500 transition flex items-center gap-1 hover:-translate-y-0.5">
                       {t("nav_services")} <FontAwesomeIcon icon={faChevronDown} size="xs" />
                    </button>
-                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-60 bg-white text-slate-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden text-left normal-case border-t-4 border-yellow-500">
-                      <Link to="/servicios/avaluos" className="block px-6 py-3 hover:bg-slate-50 border-b font-medium"><FontAwesomeIcon icon={faChartLine} className="mr-2 text-yellow-500"/>{t("srv_appraisals")}</Link>
-                      <Link to="/servicios/legal" className="block px-6 py-3 hover:bg-slate-50 border-b font-medium"><FontAwesomeIcon icon={faGavel} className="mr-2 text-yellow-500"/>{t("srv_legal")}</Link>
-                      <Link to="/servicios/audiovisual" className="block px-6 py-3 hover:bg-slate-50 font-medium"><FontAwesomeIcon icon={faCamera} className="mr-2 text-yellow-500"/>{t("srv_audio")}</Link>
+                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-60 bg-white text-slate-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden text-left normal-case border-t-4 border-green-600">
+                      <Link to="/servicios/avaluos" className="block px-6 py-3 hover:bg-slate-50 border-b font-medium"><FontAwesomeIcon icon={faChartLine} className="mr-2 text-green-600"/>{t("srv_appraisals")}</Link>
+                      <Link to="/servicios/legal" className="block px-6 py-3 hover:bg-slate-50 border-b font-medium"><FontAwesomeIcon icon={faGavel} className="mr-2 text-green-600"/>{t("srv_legal")}</Link>
+                      <Link to="/servicios/audiovisual" className="block px-6 py-3 hover:bg-slate-50 font-medium"><FontAwesomeIcon icon={faCamera} className="mr-2 text-green-600"/>{t("srv_audio")}</Link>
                    </div>
                 </div>
-                <Link to="/blog" className="hover:text-yellow-400 transition hover:-translate-y-0.5">{t("nav_blog")}</Link>
-                <Link to="/nosotros" className="hover:text-yellow-400 transition hover:-translate-y-0.5">{t("nav_about")}</Link>
-                <Link to="/contacto" className="text-yellow-400 hover:text-white transition hover:-translate-y-0.5">{t("nav_contact")}</Link>
+                <Link to="/blog" className="hover:text-green-500 transition hover:-translate-y-0.5">{t("nav_blog")}</Link>
+                <Link to="/nosotros" className="hover:text-green-500 transition hover:-translate-y-0.5">{t("nav_about")}</Link>
+                <Link to="/contacto" className="text-green-500 hover:text-white transition hover:-translate-y-0.5">{t("nav_contact")}</Link>
              </nav>
          </div>
       </div>
 
-      {/* MENÚ MÓVIL */}
+      {/* MENÃš MÃ“VIL */}
       <div className={`fixed inset-0 bg-slate-900/95 z-[1000] backdrop-blur-sm transition-all duration-300 lg:hidden flex flex-col items-center justify-center ${isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}>
          <div className="flex flex-col gap-6 text-center w-full px-8 max-h-screen overflow-y-auto">
-            <button onClick={() => handleNavigation("/")} className="text-xl font-bold text-white uppercase hover:text-yellow-400 flex items-center justify-center gap-2"><FontAwesomeIcon icon={faHome} className="text-yellow-500"/> {t("nav_home")}</button>
-            <button onClick={() => handleNavigation("/inmuebles")} className="text-xl font-bold text-white uppercase hover:text-yellow-400 flex items-center justify-center gap-2"><FontAwesomeIcon icon={faBuilding} className="text-yellow-500"/> {t("nav_properties")}</button>
+            <button onClick={() => handleNavigation("/")} className="text-xl font-bold text-white uppercase hover:text-green-500 flex items-center justify-center gap-2"><FontAwesomeIcon icon={faHome} className="text-green-600"/> {t("nav_home")}</button>
+            <button onClick={() => handleNavigation("/inmuebles")} className="text-xl font-bold text-white uppercase hover:text-green-500 flex items-center justify-center gap-2"><FontAwesomeIcon icon={faBuilding} className="text-green-600"/> {t("nav_properties")}</button>
             <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 w-full max-w-xs mx-auto">
-               <p className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-3 border-b border-slate-700 pb-2">{t("nav_services")}</p>
+               <p className="text-green-600 text-xs font-bold uppercase tracking-widest mb-3 border-b border-slate-700 pb-2">{t("nav_services")}</p>
                <div className="flex flex-col gap-3">
                   <button onClick={() => handleNavigation("/servicios/avaluos")} className="text-base text-slate-200 hover:text-white flex items-center gap-2 justify-center"><FontAwesomeIcon icon={faChartLine} className="text-slate-500"/> {t("srv_appraisals")}</button>
                   <button onClick={() => handleNavigation("/servicios/legal")} className="text-base text-slate-200 hover:text-white flex items-center gap-2 justify-center"><FontAwesomeIcon icon={faGavel} className="text-slate-500"/> {t("srv_legal")}</button>
                   <button onClick={() => handleNavigation("/servicios/audiovisual")} className="text-base text-slate-200 hover:text-white flex items-center gap-2 justify-center"><FontAwesomeIcon icon={faCamera} className="text-slate-500"/> {t("srv_audio")}</button>
                </div>
             </div>
-            <button onClick={() => handleNavigation("/blog")} className="text-xl font-bold text-white uppercase hover:text-yellow-400">{t("nav_blog")}</button>
-            <button onClick={() => handleNavigation("/contacto")} className="bg-yellow-500 text-slate-900 px-8 py-3 rounded-full font-bold uppercase shadow-lg active:scale-95 transition-transform">{t("nav_contact")}</button>
+            <button onClick={() => handleNavigation("/blog")} className="text-xl font-bold text-white uppercase hover:text-green-500">{t("nav_blog")}</button>
+            <button onClick={() => handleNavigation("/contacto")} className="bg-green-600 text-slate-900 px-8 py-3 rounded-full font-bold uppercase shadow-lg active:scale-95 transition-transform">{t("nav_contact")}</button>
          </div>
       </div>
     </header>
