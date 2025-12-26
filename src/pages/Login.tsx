@@ -5,9 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faSmile, faAngry, faDizzy, faSkull, faDoorOpen } from "@fortawesome/free-solid-svg-icons";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); // Cambiado de email a username
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // ESTADO DEL OJITO
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [welcomeMsg, setWelcomeMsg] = useState({ title: "Maestro", name: "" });
   const navigate = useNavigate();
@@ -19,9 +19,13 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
+    // TRUCO: Limpiar espacios, pasar a minúsculas y agregar dominio fantasma
+    const cleanUser = username.trim().toLowerCase();
+    const finalEmail = cleanUser.includes("@") ? cleanUser : `${cleanUser}@ayc.local`;
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: finalEmail,
+      password: password,
     });
 
     if (error || !data.session) {
@@ -44,7 +48,7 @@ const Login = () => {
       }
     } else {
       const meta = data.user?.user_metadata;
-      setWelcomeMsg({ title: meta?.custom_title || "Maestro", name: meta?.full_name || "" });
+      setWelcomeMsg({ title: meta?.custom_title || "Usuario", name: meta?.full_name || "" });
       setStatus("SUCCESS");
       setTimeout(() => { navigate("/admin"); }, 2000);
     }
@@ -106,22 +110,29 @@ const Login = () => {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-[10px] font-bold text-red-900 uppercase mb-2 tracking-widest">Identificación</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black border border-slate-800 text-slate-300 p-4 rounded-xl focus:outline-none focus:border-red-600 focus:text-white transition-all text-center tracking-widest placeholder-slate-800" placeholder="USUARIO" required />
+            <label className="block text-[10px] font-bold text-red-900 uppercase mb-2 tracking-widest">Usuario</label>
+            {/* INPUT DE TEXTO, YA NO DE EMAIL */}
+            <input 
+               type="text" 
+               value={username} 
+               onChange={(e) => setUsername(e.target.value)} 
+               className="w-full bg-black border border-slate-800 text-slate-300 p-4 rounded-xl focus:outline-none focus:border-red-600 focus:text-white transition-all text-center tracking-widest placeholder-slate-800 uppercase" 
+               placeholder="IDENTIFICACIÓN" 
+               required 
+            />
           </div>
           
           <div className="relative">
             <label className="block text-[10px] font-bold text-red-900 uppercase mb-2 tracking-widest">Contraseña</label>
             <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"} // TOGGLE TIPO
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-black border border-slate-800 text-slate-300 p-4 rounded-xl focus:outline-none focus:border-red-600 focus:text-white transition-all text-center tracking-widest placeholder-slate-800 pr-12"
                   placeholder="••••••••"
                   required
                 />
-                {/* BOTÓN OJITO */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -133,7 +144,7 @@ const Login = () => {
           </div>
 
           <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-slate-900 via-red-900 to-slate-900 text-white font-bold py-4 rounded-xl transition-all duration-300 uppercase tracking-widest border border-slate-700 hover:border-red-500 shadow-lg hover:shadow-red-900/20 mt-4 text-xs">
-            {loading ? "Verificando ADN..." : "INTENTAR ACCESO"}
+            {loading ? "Verificando..." : "INTENTAR ACCESO"}
           </button>
         </form>
       </div>
