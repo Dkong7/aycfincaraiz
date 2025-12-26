@@ -33,6 +33,17 @@ const Home = () => {
   const handleQuickSearch = () => { if(quickCode) navigate(`/inmuebles?code=${quickCode}`); else navigate("/inmuebles"); };
   const getLoc = (es: any, en: any) => (lang === "EN" && en) ? en : es;
 
+  // --- LÓGICA DE COLORES RECUPERADA ---
+  const getTypeColor = (type: string) => {
+    switch(type?.toLowerCase()) {
+      case "apartamento": return "bg-blue-600 border-blue-500";
+      case "casa": return "bg-green-600 border-green-500";
+      case "casa campestre": return "bg-purple-700 border-purple-600";
+      case "bodega": return "bg-orange-600 border-orange-500";
+      default: return "bg-slate-700 border-slate-600";
+    }
+  };
+
   const handleZoneSearch = async () => {
      if(!zoneInput.trim()) return;
      setSearchingZone(true);
@@ -47,6 +58,7 @@ const Home = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen w-full overflow-hidden">
+      
       {/* MODAL ZONAS */}
       {showZoneModal && (
          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
@@ -60,7 +72,7 @@ const Home = () => {
          </div>
       )}
 
-      {/* HERO SECTION (z-0 para que navbar cuelgue) */}
+      {/* HERO SECTION */}
       {featured.length > 0 && (
       <div className="relative bg-white pb-12 z-0">
          <div className="max-w-7xl mx-auto md:p-6 p-0">
@@ -69,7 +81,10 @@ const Home = () => {
                   <div className="absolute inset-0 bg-slate-900/30 z-10"></div>
                   <img src={current.images[0]} alt={current.title} className="w-full h-full object-cover transition-all duration-700 hover:scale-105" />
                   <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center text-white p-4">
-                     <span className="bg-yellow-500 text-slate-900 text-xs font-bold px-3 py-1 rounded uppercase mb-4 tracking-widest shadow-sm">{getLoc(current.property_type, current.property_type_en)}</span>
+                     {/* TAG DINÁMICO RESTAURADO */}
+                     <span className={`${getTypeColor(current.property_type)} text-white text-xs font-bold px-3 py-1 rounded uppercase mb-4 tracking-widest border shadow-sm`}>
+                        {getLoc(current.property_type, current.property_type_en)}
+                     </span>
                      <h2 className="text-3xl md:text-5xl font-bold drop-shadow-lg mb-2 leading-tight px-2">{getLoc(current.title, current.title_en)}</h2>
                      <button onClick={() => navigate(`/inmuebles/${current.id}`)} className="px-8 py-3 bg-white text-slate-800 font-bold rounded-full hover:bg-yellow-400 hover:text-slate-900 transition shadow-lg uppercase text-sm tracking-widest mt-4">{t("hero_btn")}</button>
                   </div>
@@ -111,7 +126,7 @@ const Home = () => {
          </div>
       </div>
 
-      {/* --- SELECCIÓN PREMIUM (4 Cards Compactas) --- */}
+      {/* --- SELECCIÓN PREMIUM --- */}
       <div className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
          <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-200 pb-4">
             <div className="max-w-2xl">
@@ -144,42 +159,29 @@ const Home = () => {
 
       {/* --- SERVICIOS ESTRATÉGICOS (SPLIT BANNER) --- */}
       <div className="grid grid-cols-1 md:grid-cols-2">
-         {/* LADO LEGAL */}
          <div className="bg-slate-100 p-12 md:p-20 flex flex-col justify-center items-start group hover:bg-slate-200 transition-colors border-r border-slate-200">
             <div className="w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center text-3xl mb-6 shadow-xl group-hover:scale-110 transition-transform">
                <FontAwesomeIcon icon={faBalanceScale} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Blindaje Jurídico Inmobiliario</h3>
-            <p className="text-slate-600 mb-8 max-w-md leading-relaxed">
-               No arriesgues tu patrimonio. Nuestro equipo de abogados expertos realiza estudios de títulos, saneamiento y acompañamiento notarial para garantizar una transacción segura.
-            </p>
-            <Link to="/servicios/legal" className="text-slate-900 font-bold uppercase tracking-widest text-sm border-b-2 border-slate-900 hover:text-blue-700 hover:border-blue-700 transition pb-1">
-               Consultar Abogados <FontAwesomeIcon icon={faArrowRight} className="ml-2"/>
-            </Link>
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Blindaje Jurídico</h3>
+            <p className="text-slate-600 mb-8 max-w-md leading-relaxed">Expertos en estudios de títulos y saneamiento.</p>
+            <Link to="/servicios/legal" className="text-slate-900 font-bold uppercase tracking-widest text-sm border-b-2 border-slate-900 hover:text-blue-700 hover:border-blue-700 transition pb-1">Consultar <FontAwesomeIcon icon={faArrowRight} className="ml-2"/></Link>
          </div>
-
-         {/* LADO AUDIOVISUAL */}
          <div className="bg-slate-900 p-12 md:p-20 flex flex-col justify-center items-start group hover:bg-slate-800 transition-colors relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
             <div className="w-16 h-16 bg-yellow-500 text-slate-900 rounded-full flex items-center justify-center text-3xl mb-6 shadow-xl group-hover:scale-110 transition-transform relative z-10">
                <FontAwesomeIcon icon={faCamera} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 relative z-10">Producción Audiovisual 4K</h3>
-            <p className="text-slate-400 mb-8 max-w-md leading-relaxed relative z-10">
-               Vende más rápido con tecnología de punta. Drones, recorridos virtuales 360° y fotografía arquitectónica que enamora a primera vista.
-            </p>
-            <Link to="/servicios/audiovisual" className="text-yellow-500 font-bold uppercase tracking-widest text-sm border-b-2 border-yellow-500 hover:text-white hover:border-white transition pb-1 relative z-10">
-               Ver Portafolio <FontAwesomeIcon icon={faArrowRight} className="ml-2"/>
-            </Link>
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 relative z-10">Audiovisual 4K</h3>
+            <p className="text-slate-400 mb-8 max-w-md leading-relaxed relative z-10">Drones y recorridos virtuales que venden.</p>
+            <Link to="/servicios/audiovisual" className="text-yellow-500 font-bold uppercase tracking-widest text-sm border-b-2 border-yellow-500 hover:text-white hover:border-white transition pb-1 relative z-10">Ver Demo <FontAwesomeIcon icon={faArrowRight} className="ml-2"/></Link>
          </div>
       </div>
 
       {/* BLOG */}
       <div className="bg-white py-20 px-4 border-t border-gray-100">
          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-               <h2 className="text-3xl font-bold text-slate-800">{t("blog_home_title")}</h2>
-            </div>
+            <div className="text-center mb-12"><h2 className="text-3xl font-bold text-slate-800">{t("blog_home_title")}</h2></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                {blogPosts.map(post => (
                   <Link to={`/blog/${post.id}`} key={post.id} className="bg-gray-50 rounded-xl overflow-hidden shadow hover:shadow-lg transition group border border-gray-100">
