@@ -18,14 +18,24 @@ import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import Contact from "./pages/Contact";
 import BlogManager from "./pages/admin/BlogManager"; 
-import CreateBlog from "./pages/admin/CreateBlog"; // IMPORTAR EDITOR
+import CreateBlog from "./pages/admin/CreateBlog"; 
 
 function App() {
+  // Función auxiliar para determinar si mostrar el footer
+  const shouldShowFooter = () => {
+    const path = window.location.pathname;
+    // Ocultar en Admin y en Rutas de Login Secretas
+    if (path.startsWith("/admin")) return false;
+    if (path === "/claclacla") return false;
+    if (path === "/alfalfalf") return false;
+    return true;
+  };
+
   return (
     <AppProvider>
       <AuthProvider>
         <Router>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen bg-white">
             <Navbar />
             <main className="flex-grow">
               <Routes>
@@ -39,28 +49,23 @@ function App() {
                 <Route path="/contacto" element={<Contact />} />
                 <Route path="/servicios/:type" element={<ServicePage />} />
 
-                {/* SECRETAS */}
+                {/* SECRETAS (LOGIN) */}
                 <Route path="/claclacla" element={<Login />} />
                 <Route path="/alfalfalf" element={<Login />} />
                 <Route path="/login" element={<Navigate to="/" replace />} />
 
                 {/* ADMIN PROTEGIDAS */}
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                
-                {/* INMUEBLES */}
                 <Route path="/admin/crear" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
                 <Route path="/admin/editar/:id" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
                 <Route path="/admin/inmuebles" element={<ProtectedRoute><PropertiesList /></ProtectedRoute>} />
-                
-                {/* BLOG (Rutas Nuevas) */}
                 <Route path="/admin/blog" element={<ProtectedRoute><BlogManager /></ProtectedRoute>} />
                 <Route path="/admin/blog/crear" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
                 <Route path="/admin/blog/editar/:id" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
-
                 <Route path="/admin/asesores" element={<ProtectedRoute><ManageAdvisors /></ProtectedRoute>} />
               </Routes>
             </main>
-            {!window.location.pathname.startsWith("/admin") && <Footer />}
+            {shouldShowFooter() && <Footer />}
           </div>
         </Router>
       </AuthProvider>
