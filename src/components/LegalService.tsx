@@ -1,61 +1,61 @@
 ﻿import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShieldAlt, faBalanceScale, faFileContract, faUserShield, faArrowRight, faTimes, faWhatsapp } from "@fortawesome/free-solid-svg-icons";
+import { faShieldAlt, faBalanceScale, faFileContract, faArrowRight, faTimes, faWhatsapp, faUserShield } from "@fortawesome/free-solid-svg-icons";
 
 const LegalService = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section className="bg-white py-24 px-6 border-b border-slate-100 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+    <section className="bg-white py-32 px-6 border-b border-slate-100 relative overflow-hidden text-left">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
         <div className="lg:w-1/2">
-           <div className="flex items-center gap-2 mb-4 text-green-600 font-black uppercase tracking-tighter">
-              <FontAwesomeIcon icon={faShieldAlt} /> Seguridad de Patrimonio
+           <div className="flex items-center gap-2 mb-6 text-green-600 font-black uppercase tracking-[0.2em] text-xs">
+              <FontAwesomeIcon icon={faShieldAlt} /> Protocolo de Blindaje
            </div>
-           <h2 className="text-5xl md:text-7xl font-black text-slate-900 leading-[0.9] mb-8">
-              Tu tranquilidad <br/><span className="text-green-600">no es negociable.</span>
+           <h2 className="text-5xl md:text-8xl font-black text-slate-950 leading-[0.85] mb-10 tracking-tighter">
+              Tu patrimonio <br/><span className="text-green-600">es sagrado.</span>
            </h2>
-           <p className="text-xl text-slate-500 font-light mb-10 max-w-lg">
-              En A&C no solo cerramos negocios; blindamos sueños. Nuestro equipo jurídico asegura que cada centavo de tu inversión esté protegido bajo las leyes vigentes.
+           <p className="text-xl text-slate-500 font-light mb-12 max-w-lg leading-relaxed">
+              No cerramos negocios basados en la confianza interpersonal; lo hacemos sobre cimientos jurídicos inquebrantables. <strong>En A&C, la seguridad es la norma, no el extra.</strong>
            </p>
-           <button onClick={() => setIsOpen(true)} className="bg-slate-900 text-white font-black px-10 py-5 rounded-full hover:bg-green-600 transition-all shadow-xl uppercase text-xs tracking-widest">
-              ¿Cómo protegemos tu dinero? <FontAwesomeIcon icon={faArrowRight} className="ml-2"/>
+           <button onClick={() => setIsOpen(true)} className="bg-slate-950 text-white font-black px-12 py-6 rounded-full hover:bg-green-600 transition-all shadow-2xl uppercase text-xs tracking-widest">
+              Conocer nuestro protocolo <FontAwesomeIcon icon={faArrowRight} className="ml-2"/>
            </button>
         </div>
-        <div className="lg:w-1/2 grid grid-cols-2 gap-4 relative">
-           <div className="bg-slate-50 p-8 rounded-[3rem] border border-slate-100 flex flex-col items-center text-center group hover:bg-white transition-all shadow-sm">
-              <FontAwesomeIcon icon={faFileContract} className="text-4xl text-slate-400 mb-4 group-hover:text-green-600" />
-              <h4 className="font-bold text-slate-800">Estudio de Títulos</h4>
+        <div className="lg:w-1/2 grid grid-cols-2 gap-8 relative">
+           <div className="bg-slate-50 p-12 rounded-[4rem] border border-slate-100 flex flex-col items-center text-center group hover:bg-white transition-all shadow-sm">
+              <FontAwesomeIcon icon={faFileContract} className="text-5xl text-slate-300 mb-6 group-hover:text-green-600" />
+              <h4 className="font-black text-slate-950 uppercase text-sm tracking-widest italic">Análisis de <br/>Títulos</h4>
            </div>
-           <div className="bg-green-600 p-8 rounded-[3rem] text-white flex flex-col items-center text-center mt-12 shadow-2xl shadow-green-200">
-              <FontAwesomeIcon icon={faBalanceScale} className="text-4xl mb-4" />
-              <h4 className="font-bold">Saneamiento Real</h4>
+           <div className="bg-green-600 p-12 rounded-[4rem] text-white flex flex-col items-center text-center mt-16 shadow-2xl shadow-green-200">
+              <FontAwesomeIcon icon={faBalanceScale} className="text-5xl mb-6" />
+              <h4 className="font-black uppercase text-sm tracking-widest italic">Saneamiento <br/>Jurídico</h4>
            </div>
         </div>
       </div>
 
-      {/* MODAL DETALLADO */}
+      {/* MODAL AMPLIADO */}
       {isOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/90 backdrop-blur-xl p-4">
-          <div className="bg-white w-full max-w-4xl rounded-[3rem] overflow-hidden shadow-2xl relative animate-fade-in flex flex-col max-h-[90vh]">
-            <button onClick={() => setIsOpen(false)} className="absolute top-8 right-8 text-slate-400 hover:text-red-500"><FontAwesomeIcon icon={faTimes} size="2x"/></button>
-            <div className="p-12 overflow-y-auto">
-              <h3 className="text-4xl font-black text-slate-900 mb-8">Protocolo de Blindaje A&C</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-green-600 flex-shrink-0"><FontAwesomeIcon icon={faShieldAlt}/></div>
-                    <div><h4 className="font-bold text-lg">Debida Diligencia</h4><p className="text-slate-500 text-sm">Investigación en bases de datos de la Fiscalía, listas restrictivas y antecedentes para prevenir lavado de activos.</p></div>
+        <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-slate-900/95 backdrop-blur-2xl p-4">
+          <div className="bg-white w-full max-w-5xl rounded-[4rem] overflow-hidden shadow-2xl relative animate-fade-in flex flex-col max-h-[90vh]">
+            <button onClick={() => setIsOpen(false)} className="absolute top-10 right-10 text-slate-400 hover:text-red-500 transition-all"><FontAwesomeIcon icon={faTimes} size="2x"/></button>
+            <div className="p-16 overflow-y-auto">
+              <h3 className="text-5xl font-black text-slate-950 mb-12 italic tracking-tighter">Seguridad Jurídica <span className="text-green-600">Nivel A&C</span></h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <div className="space-y-10">
+                  <div className="flex gap-6">
+                    <div className="w-16 h-16 bg-green-100 rounded-3xl flex items-center justify-center text-green-600 flex-shrink-0 text-2xl"><FontAwesomeIcon icon={faUserShield}/></div>
+                    <div><h4 className="font-black text-xl mb-2 text-slate-900 italic">Debida Diligencia</h4><p className="text-slate-500 leading-relaxed font-light">Investigación profunda de antecedentes penales, fiscales y disciplinarios de todas las partes involucradas.</p></div>
                   </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 flex-shrink-0"><FontAwesomeIcon icon={faFileContract}/></div>
-                    <div><h4 className="font-bold text-lg">Tradición Garantizada</h4><p className="text-slate-500 text-sm">Revisión de los últimos 20 años de historia del inmueble para evitar falsas tradiciones o herencias ocultas.</p></div>
+                  <div className="flex gap-6">
+                    <div className="w-16 h-16 bg-blue-100 rounded-3xl flex items-center justify-center text-blue-600 flex-shrink-0 text-2xl"><FontAwesomeIcon icon={faFileContract}/></div>
+                    <div><h4 className="font-black text-xl mb-2 text-slate-900 italic">Trazabilidad de 20 años</h4><p className="text-slate-500 leading-relaxed font-light">Auditamos la historia del inmueble durante dos décadas para descartar falsas tradiciones o litigios ocultos.</p></div>
                   </div>
                 </div>
-                <div className="space-y-6">
-                   <p className="text-slate-600 leading-relaxed">Nuestra asesoría jurídica no termina en la firma. Te acompañamos en la liquidación de impuestos, trámites notariales y registro en la Oficina de Instrumentos Públicos.</p>
-                   <a href="https://wa.me/573134663832" target="_blank" className="block w-full bg-green-500 text-white font-black text-center py-6 rounded-2xl shadow-lg hover:bg-green-600 transition-all uppercase tracking-widest">
-                      Hablar con un Abogado A&C <FontAwesomeIcon icon={faWhatsapp} className="ml-2"/>
+                <div className="bg-slate-50 p-10 rounded-[3rem] flex flex-col justify-center text-center">
+                   <p className="text-slate-600 text-lg mb-10 italic">"Nuestro compromiso es que usted solo se preocupe por el color de las cortinas; del resto nos encargamos nosotros."</p>
+                   <a href="https://wa.me/573134663832" target="_blank" className="block w-full bg-green-600 text-white font-black text-center py-8 rounded-[2rem] shadow-xl hover:bg-slate-950 transition-all uppercase tracking-widest text-xs">
+                      Hablar con nuestra Dirección Jurídica <FontAwesomeIcon icon={faWhatsapp} className="ml-2 text-xl"/>
                    </a>
                 </div>
               </div>
