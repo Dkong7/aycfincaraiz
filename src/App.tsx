@@ -1,74 +1,70 @@
-﻿import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AppProvider } from "./context/AppContext";
-import { AuthProvider } from "./context/AuthContext";
-import ScrollToTop from "./components/ScrollToTop";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Properties from "./pages/Properties";
-import PropertyDetail from "./pages/PropertyDetail";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import CreateProperty from "./pages/admin/CreateProperty";
-import PropertiesList from "./pages/admin/PropertiesList";
-import ManageAgents from "./pages/admin/ManageAgents";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ServicePage from "./pages/ServicePage";
-import About from "./pages/About";
-import Blog from "./pages/Blog";
-import BlogDetail from "./pages/BlogDetail";
-import Contact from "./pages/Contact";
-import BlogManager from "./pages/admin/BlogManager"; 
-import CreateBlog from "./pages/admin/CreateBlog"; 
-import ServiceLegal from "./pages/ServiceLegal";
-import ServiceAudio from "./pages/ServiceAudio";
+﻿import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { LanguageProvider } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
+
+// Layouts & Components
+import NavbarCustom from './components/layout/NavbarCustom';
+import FooterCustom from './components/layout/FooterCustom';
+import HeroSection from './components/hero/HeroSection';
+import { FeaturedProperties, ServicesIntro, LatestBlog } from './components/home/HomeSections';
+import { SearchBar } from './components/search/SearchBar'; // <--- IMPORT CORREGIDO
+
+// Pages
+import Inmuebles from './pages/Inmuebles';
+import About from './pages/About';
+import Blog from './pages/Blog';
+import Contacto from './pages/Contacto';
+import Audiovisual from './pages/services/Audiovisual';
+
+// Auth & Dashboard
+import LoginSpecial from './pages/auth/LoginSpecial';
+import Dashboard from './pages/dashboard/Dashboard';
+import CreateProperty from './pages/dashboard/CreateProperty';
+
+const PagePlaceholder = ({title}) => <div className="pt-32 text-center min-h-screen"><h1 className="text-3xl font-bold text-[#0A192F] uppercase">{title}</h1></div>;
+
+const HomePage = () => (
+  <div className="flex flex-col bg-white">
+      <div className="mt-20 relative z-0">
+        <HeroSection />
+      </div>
+      <SearchBar />
+      <FeaturedProperties />
+      <ServicesIntro />
+      <LatestBlog />
+  </div>
+);
 
 function App() {
-  const shouldShowFooter = () => {
-    const path = window.location.pathname;
-    if (path.startsWith("/admin")) return false;
-    if (path === "/claclacla" || path === "/alfalfalf" || path === "/agenteayc") return false;
-    return true;
-  };
-
   return (
-    <AppProvider>
-      <AuthProvider>
-        <Router>
-          <ScrollToTop />
-          <div className="flex flex-col min-h-screen bg-white">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/inmuebles" element={<Properties />} />
-                <Route path="/inmuebles/:id" element={<PropertyDetail />} />
-                <Route path="/nosotros" element={<About />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:id" element={<BlogDetail />} />
-                <Route path="/contacto" element={<Contact />} />
-                <Route path="/servicios/legal" element={<ServiceLegal />} />
-                <Route path="/servicios/audiovisual" element={<ServiceAudio />} />
-                <Route path="/servicios/:type" element={<ServicePage />} />
-                <Route path="/claclacla" element={<Login />} />
-                <Route path="/alfalfalf" element={<Login />} />
-                <Route path="/agenteayc" element={<Login />} />
-                <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                <Route path="/admin/crear" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
-                <Route path="/admin/editar/:id" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
-                <Route path="/admin/inmuebles" element={<ProtectedRoute><PropertiesList /></ProtectedRoute>} />
-                <Route path="/admin/blog" element={<ProtectedRoute><BlogManager /></ProtectedRoute>} />
-                <Route path="/admin/blog/crear" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
-                <Route path="/admin/blog/editar/:id" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
-                <Route path="/admin/asesores" element={<ProtectedRoute><ManageAgents /></ProtectedRoute>} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            {shouldShowFooter() && <Footer />}
-          </div>
-        </Router>
-      </AuthProvider>
-    </AppProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* RUTAS PÚBLICAS */}
+            <Route path="/" element={<><NavbarCustom /><HomePage /><FooterCustom /></>} />
+            <Route path="/inmuebles" element={<><NavbarCustom /><Inmuebles /><FooterCustom /></>} />
+            <Route path="/nosotros" element={<><NavbarCustom /><About /><FooterCustom /></>} />
+            <Route path="/blog" element={<><NavbarCustom /><Blog /><FooterCustom /></>} />
+            <Route path="/contacto" element={<><NavbarCustom /><Contacto /><FooterCustom /></>} />
+            
+            {/* SERVICIOS */}
+            <Route path="/servicios/audiovisual" element={<><NavbarCustom /><Audiovisual /><FooterCustom /></>} />
+            <Route path="/servicios/avaluos" element={<><NavbarCustom /><PagePlaceholder title="Avalúos Comerciales" /><FooterCustom /></>} />
+            <Route path="/servicios/juridico" element={<><NavbarCustom /><PagePlaceholder title="Asesoría Jurídica" /><FooterCustom /></>} />
+
+            {/* RUTAS PRIVADAS (SIN NAVBAR PÚBLICO) */}
+            <Route path="/claclacla" element={<LoginSpecial />} />
+            <Route path="/alfalfalf" element={<LoginSpecial />} />
+            <Route path="/agentes" element={<LoginSpecial />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/nuevo" element={<CreateProperty />} />
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
+
 export default App;

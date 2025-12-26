@@ -1,34 +1,38 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* BLINDAJE TOTAL RESPONSIVO */
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  position: relative;
+:root {
+  --ayc-emerald: #15803d;
+  --ayc-navy: #0A192F;
+  --ayc-gold: #D4AF37; /* Dorado Premium */
 }
 
-#root {
-  width: 100%;
-  overflow-x: hidden;
+/* ANIMACIÓN SHAKE (Call to Action) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
+.animate-shake-hover:hover {
+  animation: shake 0.4s ease-in-out;
 }
 
-/* Animaciones */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* EFECTO DORADO RELUCIENTE */
+@keyframes shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+.bg-shine-gold {
+  background: linear-gradient(90deg, #D4AF37 25%, #F8F0C6 50%, #D4AF37 75%);
+  background-size: 200% auto;
+  animation: shine 3s linear infinite;
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
+/* Tags de Inmuebles */
+.bg-tag-Apartamento { background-color: #0ea5e9; color: white; }
+.bg-tag-Casa { background-color: #15803d; color: white; }
+.bg-tag-Bodega { background-color: #eab308; color: black; }
+.bg-tag-CasaCampo { background-color: #9333ea; color: white; }
+.bg-tag-Lote { background-color: #64748b; color: white; }
