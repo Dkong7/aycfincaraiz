@@ -22,7 +22,7 @@ import LoginSpecial from './pages/auth/LoginSpecial';
 import Dashboard from './pages/dashboard/Dashboard';
 import CreateProperty from './pages/dashboard/CreateProperty';
 
-const PagePlaceholder = ({title}) => <div className="pt-32 text-center min-h-screen"><h1 className="text-3xl font-bold text-[#0A192F] uppercase">{title}</h1></div>;
+const PagePlaceholder = ({title}: {title: any}) => <div className="pt-32 text-center min-h-screen"><h1 className="text-3xl font-bold text-[#0A192F] uppercase">{title}</h1></div>;
 
 const HomePage = () => (
   <div className="flex flex-col bg-white">
@@ -68,3 +68,4 @@ function App() {
 }
 
 export default App;
+
