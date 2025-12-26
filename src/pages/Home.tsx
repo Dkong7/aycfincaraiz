@@ -18,7 +18,7 @@ const Home = () => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [quickCode, setQuickCode] = useState("");
   
-  // BÚSQUEDA ZONAL AVANZADA
+  // BÃšSQUEDA ZONAL AVANZADA
   const [zoneInput, setZoneInput] = useState("");
   const [zoneResults, setZoneResults] = useState<any[]>([]);
   const [showZoneModal, setShowZoneModal] = useState(false);
@@ -36,7 +36,7 @@ const Home = () => {
   const handleQuickSearch = () => { if(quickCode) navigate(`/inmuebles?code=${quickCode}`); else navigate("/inmuebles"); };
   const getLoc = (es: any, en: any) => (lang === "EN" && en) ? en : es;
 
-  // LÓGICA DE COLORES TAGS (PREMIUM)
+  // LÃ“GICA DE COLORES TAGS (PREMIUM)
   const getTypeColorClass = (type: string) => {
     switch(type?.toLowerCase()) {
       case "apartamento": return "text-blue-500";
@@ -59,13 +59,13 @@ const Home = () => {
 
   // BASE DE DATOS DE ZONAS (SIMULADA CAMACOL)
   const zoneIntelligence: Record<string, any> = {
-     "kennedy": { name: "Kennedy / Occidente", price: "$4.2M/m²", growth: "+12.5%", demand: "Muy Alta", vibe: "Comercial & Residencial" },
-     "usaquén": { name: "Usaquén / Norte", price: "$7.8M/m²", growth: "+8.2%", demand: "Alta", vibe: "Exclusivo & Gastronómico" },
-     "suba": { name: "Suba / Colina", price: "$5.5M/m²", growth: "+10.1%", demand: "Alta", vibe: "Residencial & Verde" },
-     "fontibón": { name: "Fontibón / Salitre", price: "$6.1M/m²", growth: "+15.3%", demand: "Explosiva", vibe: "Ejecutivo & Conectado" },
-     "chapinero": { name: "Chapinero / Chicó", price: "$9.2M/m²", growth: "+5.4%", demand: "Estable", vibe: "Lujo & Financiero" },
-     "chía": { name: "Chía / Sabana", price: "$4.8M/m²", growth: "+18.0%", demand: "Muy Alta", vibe: "Campestre & Familiar" },
-     "cajicá": { name: "Cajicá", price: "$4.5M/m²", growth: "+19.2%", demand: "Muy Alta", vibe: "Expansión Urbana" }
+     "kennedy": { name: "Kennedy / Occidente", price: "$4.2M/mÂ²", growth: "+12.5%", demand: "Muy Alta", vibe: "Comercial & Residencial" },
+     "usaquÃ©n": { name: "UsaquÃ©n / Norte", price: "$7.8M/mÂ²", growth: "+8.2%", demand: "Alta", vibe: "Exclusivo & GastronÃ³mico" },
+     "suba": { name: "Suba / Colina", price: "$5.5M/mÂ²", growth: "+10.1%", demand: "Alta", vibe: "Residencial & Verde" },
+     "fontibÃ³n": { name: "FontibÃ³n / Salitre", price: "$6.1M/mÂ²", growth: "+15.3%", demand: "Explosiva", vibe: "Ejecutivo & Conectado" },
+     "chapinero": { name: "Chapinero / ChicÃ³", price: "$9.2M/mÂ²", growth: "+5.4%", demand: "Estable", vibe: "Lujo & Financiero" },
+     "chÃ­a": { name: "ChÃ­a / Sabana", price: "$4.8M/mÂ²", growth: "+18.0%", demand: "Muy Alta", vibe: "Campestre & Familiar" },
+     "cajicÃ¡": { name: "CajicÃ¡", price: "$4.5M/mÂ²", growth: "+19.2%", demand: "Muy Alta", vibe: "ExpansiÃ³n Urbana" }
   };
 
   const handleZoneSearch = async () => {
@@ -75,16 +75,16 @@ const Home = () => {
      // MAPEO BARRIO -> ZONA
      const zoneMap: Record<string, string> = { 
         "marsella": "kennedy", "mandalay": "kennedy", "castilla": "kennedy", "americas": "kennedy",
-        "cedritos": "usaquén", "santa barbara": "usaquén", "country": "usaquén", "unicentro": "usaquén",
+        "cedritos": "usaquÃ©n", "santa barbara": "usaquÃ©n", "country": "usaquÃ©n", "unicentro": "usaquÃ©n",
         "colina": "suba", "niza": "suba", "mazuren": "suba", "batan": "suba",
-        "salitre": "fontibón", "modelia": "fontibón", "hayuelos": "fontibón", "capellania": "fontibón",
+        "salitre": "fontibÃ³n", "modelia": "fontibÃ³n", "hayuelos": "fontibÃ³n", "capellania": "fontibÃ³n",
         "centro": "candelaria", "macarena": "santa fe",
         "chico": "chapinero", "rosales": "chapinero", "virrey": "chapinero", "cabrera": "chapinero",
-        "fagua": "chía", "balsillas": "chía"
+        "fagua": "chÃ­a", "balsillas": "chÃ­a"
      };
 
      const query = zoneInput.toLowerCase();
-     let targetZone = query; // Default: busca lo que escribió
+     let targetZone = query; // Default: busca lo que escribiÃ³
      
      // Detectar zona padre
      for (const [barrio, localidad] of Object.entries(zoneMap)) { 
@@ -95,10 +95,10 @@ const Home = () => {
      if (zoneIntelligence[query]) targetZone = query;
 
      // Cargar Stats
-     const stats = zoneIntelligence[targetZone] || { name: zoneInput, price: "Calculando...", growth: "Análisis en curso", demand: "Variable", vibe: "Zona en estudio" };
+     const stats = zoneIntelligence[targetZone] || { name: zoneInput, price: "Calculando...", growth: "AnÃ¡lisis en curso", demand: "Variable", vibe: "Zona en estudio" };
      setCurrentZoneStats(stats);
 
-     // Consulta Híbrida: Busca por Localidad (targetZone) O por el texto exacto del usuario (query)
+     // Consulta HÃ­brida: Busca por Localidad (targetZone) O por el texto exacto del usuario (query)
      const { data } = await supabase
         .from("properties")
         .select("*")
@@ -121,10 +121,10 @@ const Home = () => {
             <div className="bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col border border-white/20">
                <button onClick={() => setShowZoneModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 z-10 p-2 bg-white/10 rounded-full transition"><FontAwesomeIcon icon={faTimes} size="lg" /></button>
                
-               {/* HEADER: FICHA TÉCNICA ZONA */}
+               {/* HEADER: FICHA TÃ‰CNICA ZONA */}
                <div className="p-8 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                   <div>
-                     <span className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-1 block"><FontAwesomeIcon icon={faMapMarkedAlt}/> Análisis de Mercado</span>
+                     <span className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-1 block"><FontAwesomeIcon icon={faMapMarkedAlt}/> AnÃ¡lisis de Mercado</span>
                      <h3 className="text-3xl font-black">{currentZoneStats?.name}</h3>
                      <p className="text-slate-400 text-sm mt-1 flex items-center gap-2"><FontAwesomeIcon icon={faCity}/> {currentZoneStats?.vibe}</p>
                   </div>
@@ -132,12 +132,12 @@ const Home = () => {
                   {/* METRICAS DE ZONA */}
                   <div className="flex gap-4 md:gap-8 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
                      <div className="text-center">
-                        <p className="text-xs text-slate-400 uppercase">Valor m²</p>
+                        <p className="text-xs text-slate-400 uppercase">Valor mÂ²</p>
                         <p className="text-lg font-bold text-white">{currentZoneStats?.price}</p>
                      </div>
                      <div className="w-px bg-white/10"></div>
                      <div className="text-center">
-                        <p className="text-xs text-slate-400 uppercase">Valorización</p>
+                        <p className="text-xs text-slate-400 uppercase">ValorizaciÃ³n</p>
                         <p className="text-lg font-bold text-green-400">{currentZoneStats?.growth}</p>
                      </div>
                      <div className="w-px bg-white/10"></div>
@@ -174,9 +174,9 @@ const Home = () => {
                   ) : (
                      <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-300">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl"><FontAwesomeIcon icon={faSearch} /></div>
-                        <p className="text-slate-800 font-bold">¡Zona de Alta Demanda!</p>
+                        <p className="text-slate-800 font-bold">Â¡Zona de Alta Demanda!</p>
                         <p className="text-slate-500 text-sm mb-6 max-w-md mx-auto">Actualmente no tenemos activos publicados en esta micro-zona exacta, pero nuestros agentes pueden buscar por ti en la red privada.</p>
-                        <Link to="/contacto" className="inline-block bg-slate-900 text-white font-bold px-8 py-3 rounded-full hover:bg-slate-700 shadow-lg">Solicitar Búsqueda Privada</Link>
+                        <Link to="/contacto" className="inline-block bg-slate-900 text-white font-bold px-8 py-3 rounded-full hover:bg-slate-700 shadow-lg">Solicitar BÃºsqueda Privada</Link>
                      </div>
                   )}
                </div>
@@ -214,7 +214,7 @@ const Home = () => {
       </div>
       )}
 
-      {/* --- MÓDULO INTELIGENCIA DE MERCADO (REDISEÑADO) --- */}
+      {/* --- MÃ“DULO INTELIGENCIA DE MERCADO (REDISEÃ‘ADO) --- */}
       <div className="bg-slate-950 py-24 px-4 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4"></div>
          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20 relative z-10">
@@ -226,10 +226,10 @@ const Home = () => {
                    <span className="text-yellow-500 font-bold tracking-widest text-xs uppercase">Camacol Data Driven</span>
                 </div>
                 <h2 className="text-4xl md:text-6xl font-black mb-6 leading-none tracking-tight">
-                   Inversión <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Inteligente.</span>
+                   InversiÃ³n <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Inteligente.</span>
                 </h2>
                 <p className="text-slate-400 text-lg mb-10 leading-relaxed font-light max-w-lg">
-                   No adivines. Usamos analítica de datos de valorización barrial para decirte dónde poner tu capital. ¿Qué zona te interesa?
+                   No adivines. Usamos analÃ­tica de datos de valorizaciÃ³n barrial para decirte dÃ³nde poner tu capital. Â¿QuÃ© zona te interesa?
                 </p>
                 
                 <div className="bg-white p-2 rounded-full flex items-center shadow-2xl max-w-md transform hover:scale-105 transition duration-300">
@@ -254,21 +254,21 @@ const Home = () => {
                <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition duration-500 group">
                   <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faChartLine} /></div>
                   <h4 className="text-3xl font-black text-white mb-1">+12%</h4>
-                  <p className="text-xs text-slate-400 uppercase tracking-wider">Valorización Promedio</p>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">ValorizaciÃ³n Promedio</p>
                   <p className="text-[10px] text-slate-500 mt-2">Sabana Norte (2024-2025)</p>
                </div>
                {/* CARD 2 */}
                <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition duration-500 group mt-8">
                   <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faLeaf} /></div>
                   <h4 className="text-3xl font-black text-white mb-1">A+</h4>
-                  <p className="text-xs text-slate-400 uppercase tracking-wider">Certificación Sostenible</p>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">CertificaciÃ³n Sostenible</p>
                   <p className="text-[10px] text-slate-500 mt-2">Nuevos proyectos VIS/NO VIS</p>
                </div>
                {/* CARD 3 */}
                <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition duration-500 group">
                   <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faBuilding} /></div>
                   <h4 className="text-3xl font-black text-white mb-1">95%</h4>
-                  <p className="text-xs text-slate-400 uppercase tracking-wider">Ocupación Arriendos</p>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">OcupaciÃ³n Arriendos</p>
                   <p className="text-[10px] text-slate-500 mt-2">Zonas Cedritos / Salitre</p>
                </div>
                {/* CARD 4 */}
@@ -276,13 +276,13 @@ const Home = () => {
                   <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faArrowUp} /></div>
                   <h4 className="text-3xl font-black text-white mb-1">Top 3</h4>
                   <p className="text-xs text-slate-400 uppercase tracking-wider">Rentabilidad Latam</p>
-                  <p className="text-[10px] text-slate-500 mt-2">Inversión Finca Raíz Col.</p>
+                  <p className="text-[10px] text-slate-500 mt-2">InversiÃ³n Finca RaÃ­z Col.</p>
                </div>
             </div>
          </div>
       </div>
 
-      {/* --- SELECCIÓN PREMIUM (4 Cards Compactas) --- */}
+      {/* --- SELECCIÃ“N PREMIUM (4 Cards Compactas) --- */}
       <div className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
          <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-200 pb-4">
             <div className="max-w-2xl">
@@ -316,14 +316,14 @@ const Home = () => {
          </div>
       </div>
 
-      {/* --- SERVICIOS ESTRATÉGICOS (SPLIT BANNER) --- */}
+      {/* --- SERVICIOS ESTRATÃ‰GICOS (SPLIT BANNER) --- */}
       <div className="grid grid-cols-1 md:grid-cols-2">
          <div className="bg-slate-100 p-12 md:p-20 flex flex-col justify-center items-start group hover:bg-slate-200 transition-colors border-r border-slate-200">
             <div className="w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center text-3xl mb-6 shadow-xl group-hover:scale-110 transition-transform">
                <FontAwesomeIcon icon={faBalanceScale} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Blindaje Jurídico</h3>
-            <p className="text-slate-600 mb-8 max-w-md leading-relaxed">Expertos en estudios de títulos y saneamiento.</p>
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Blindaje JurÃ­dico</h3>
+            <p className="text-slate-600 mb-8 max-w-md leading-relaxed">Expertos en estudios de tÃ­tulos y saneamiento.</p>
             <Link to="/servicios/legal" className="text-slate-900 font-bold uppercase tracking-widest text-sm border-b-2 border-slate-900 hover:text-blue-700 hover:border-blue-700 transition pb-1">Consultar <FontAwesomeIcon icon={faArrowRight} className="ml-2"/></Link>
          </div>
          <div className="bg-slate-900 p-12 md:p-20 flex flex-col justify-center items-start group hover:bg-slate-800 transition-colors relative overflow-hidden">
