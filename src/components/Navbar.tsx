@@ -36,7 +36,7 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
            <div className="flex items-center gap-4">
               <Link to={isAdminRoute ? "/admin" : "/"}>
-                <img className="h-12 w-auto object-contain" src="/ayclogo.svg" alt="A&C Admin" style={{ filter: "hue-rotate(-120deg) saturate(300%) brightness(0.9)" }} />
+                <img className="h-8 md:h-12 w-auto object-contain" src="/ayclogo.svg" alt="A&C Admin" style={{ filter: "hue-rotate(-120deg) saturate(300%) brightness(0.9)" }} />
               </Link>
               {isAdminRoute && (
                   <span className="text-[10px] font-mono text-red-500 tracking-[0.2em] border border-red-900 px-2 py-1 rounded bg-red-900/10 uppercase">
@@ -73,7 +73,7 @@ const Navbar = () => {
                <div className="flex items-center gap-3 text-sm font-bold border-r border-gray-200 pr-6">
                   <span className="flex items-center gap-2"><FontAwesomeIcon icon={faPhone} className="text-yellow-500" /> {PHONE_NUMBER}</span>
                   <span className="text-gray-300">|</span>
-                  <span className="text-gray-500 font-normal">Bogotá & Cundinamarca</span>
+                  <span className="text-gray-500 font-normal">BogotÃ¡ & Cundinamarca</span>
                </div>
                <div className="flex items-center gap-4">
                   <a href="#" className="hover:text-yellow-500 transition text-xl"><FontAwesomeIcon icon={faFacebookF} /></a>
