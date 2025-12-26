@@ -10,7 +10,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CreateProperty from "./pages/admin/CreateProperty";
 import PropertiesList from "./pages/admin/PropertiesList";
-import ManageAdvisors from "./pages/admin/ManageAdvisors";
+import ManageAgents from "./pages/admin/ManageAgents"; // CAMBIADO NOMBRE
 import ProtectedRoute from "./components/ProtectedRoute";
 import ServicePage from "./pages/ServicePage";
 import About from "./pages/About";
@@ -21,13 +21,10 @@ import BlogManager from "./pages/admin/BlogManager";
 import CreateBlog from "./pages/admin/CreateBlog"; 
 
 function App() {
-  // Función auxiliar para determinar si mostrar el footer
   const shouldShowFooter = () => {
     const path = window.location.pathname;
-    // Ocultar en Admin y en Rutas de Login Secretas
     if (path.startsWith("/admin")) return false;
-    if (path === "/claclacla") return false;
-    if (path === "/alfalfalf") return false;
+    if (path === "/claclacla" || path === "/alfalfalf" || path === "/agenteayc") return false;
     return true;
   };
 
@@ -49,12 +46,13 @@ function App() {
                 <Route path="/contacto" element={<Contact />} />
                 <Route path="/servicios/:type" element={<ServicePage />} />
 
-                {/* SECRETAS (LOGIN) */}
+                {/* LOGINS */}
                 <Route path="/claclacla" element={<Login />} />
                 <Route path="/alfalfalf" element={<Login />} />
+                <Route path="/agenteayc" element={<Login />} />
                 <Route path="/login" element={<Navigate to="/" replace />} />
 
-                {/* ADMIN PROTEGIDAS */}
+                {/* ADMIN */}
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                 <Route path="/admin/crear" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
                 <Route path="/admin/editar/:id" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
@@ -62,7 +60,7 @@ function App() {
                 <Route path="/admin/blog" element={<ProtectedRoute><BlogManager /></ProtectedRoute>} />
                 <Route path="/admin/blog/crear" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
                 <Route path="/admin/blog/editar/:id" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
-                <Route path="/admin/asesores" element={<ProtectedRoute><ManageAdvisors /></ProtectedRoute>} />
+                <Route path="/admin/asesores" element={<ProtectedRoute><ManageAgents /></ProtectedRoute>} />
               </Routes>
             </main>
             {shouldShowFooter() && <Footer />}
@@ -72,5 +70,4 @@ function App() {
     </AppProvider>
   );
 }
-
 export default App;
