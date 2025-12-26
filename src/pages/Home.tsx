@@ -4,7 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faChevronLeft, faChevronRight, faSearch, faHashtag, faTimes,
   faChartLine, faGavel, faVideo, faArrowRight, faStar, faGem, faShieldAlt, faPercent, 
-  faMapMarkedAlt, faPaperPlane, faCity, faTag, faChartBar, faBalanceScale, faCamera 
+  faMapMarkedAlt, faPaperPlane, faCity, faTag, faChartBar, faBalanceScale, faCamera,
+  faChartPie, faBuilding, faArrowUp, faLeaf
 } from "@fortawesome/free-solid-svg-icons";
 import { useApp } from "../context/AppContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -17,10 +18,12 @@ const Home = () => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [quickCode, setQuickCode] = useState("");
   
+  // BÚSQUEDA ZONAL AVANZADA
   const [zoneInput, setZoneInput] = useState("");
   const [zoneResults, setZoneResults] = useState<any[]>([]);
   const [showZoneModal, setShowZoneModal] = useState(false);
   const [searchingZone, setSearchingZone] = useState(false);
+  const [currentZoneStats, setCurrentZoneStats] = useState<any>(null);
 
   useEffect(() => {
     const fetchFeatured = async () => { const { data } = await supabase.from("properties").select("*").limit(4); if (data) setFeatured(data); };
@@ -33,8 +36,18 @@ const Home = () => {
   const handleQuickSearch = () => { if(quickCode) navigate(`/inmuebles?code=${quickCode}`); else navigate("/inmuebles"); };
   const getLoc = (es: any, en: any) => (lang === "EN" && en) ? en : es;
 
-  // --- LÓGICA DE COLORES RECUPERADA ---
-  const getTypeColor = (type: string) => {
+  // LÓGICA DE COLORES TAGS (PREMIUM)
+  const getTypeColorClass = (type: string) => {
+    switch(type?.toLowerCase()) {
+      case "apartamento": return "text-blue-500";
+      case "casa": return "text-green-500";
+      case "casa campestre": return "text-purple-500";
+      case "bodega": return "text-orange-500";
+      default: return "text-slate-400";
+    }
+  };
+  
+  const getTypeBgClass = (type: string) => {
     switch(type?.toLowerCase()) {
       case "apartamento": return "bg-blue-600 border-blue-500";
       case "casa": return "bg-green-600 border-green-500";
@@ -44,14 +57,57 @@ const Home = () => {
     }
   };
 
+  // BASE DE DATOS DE ZONAS (SIMULADA CAMACOL)
+  const zoneIntelligence: Record<string, any> = {
+     "kennedy": { name: "Kennedy / Occidente", price: "$4.2M/m²", growth: "+12.5%", demand: "Muy Alta", vibe: "Comercial & Residencial" },
+     "usaquén": { name: "Usaquén / Norte", price: "$7.8M/m²", growth: "+8.2%", demand: "Alta", vibe: "Exclusivo & Gastronómico" },
+     "suba": { name: "Suba / Colina", price: "$5.5M/m²", growth: "+10.1%", demand: "Alta", vibe: "Residencial & Verde" },
+     "fontibón": { name: "Fontibón / Salitre", price: "$6.1M/m²", growth: "+15.3%", demand: "Explosiva", vibe: "Ejecutivo & Conectado" },
+     "chapinero": { name: "Chapinero / Chicó", price: "$9.2M/m²", growth: "+5.4%", demand: "Estable", vibe: "Lujo & Financiero" },
+     "chía": { name: "Chía / Sabana", price: "$4.8M/m²", growth: "+18.0%", demand: "Muy Alta", vibe: "Campestre & Familiar" },
+     "cajicá": { name: "Cajicá", price: "$4.5M/m²", growth: "+19.2%", demand: "Muy Alta", vibe: "Expansión Urbana" }
+  };
+
   const handleZoneSearch = async () => {
      if(!zoneInput.trim()) return;
      setSearchingZone(true);
-     const zoneMap: Record<string, string> = { "marsella": "Kennedy", "cedritos": "Usaquén", "colina": "Suba", "salitre": "Fontibón", "modelia": "Fontibón", "centro": "La Candelaria" };
-     let searchTerm = zoneInput.toLowerCase();
-     for (const [barrio, localidad] of Object.entries(zoneMap)) { if (searchTerm.includes(barrio)) { searchTerm = localidad.toLowerCase(); break; } }
-     const { data } = await supabase.from("properties").select("*").or(`city.ilike.%${searchTerm}%,neighborhood.ilike.%${searchTerm}%`).limit(6);
-     setZoneResults(data || []); setShowZoneModal(true); setSearchingZone(false);
+     
+     // MAPEO BARRIO -> ZONA
+     const zoneMap: Record<string, string> = { 
+        "marsella": "kennedy", "mandalay": "kennedy", "castilla": "kennedy", "americas": "kennedy",
+        "cedritos": "usaquén", "santa barbara": "usaquén", "country": "usaquén", "unicentro": "usaquén",
+        "colina": "suba", "niza": "suba", "mazuren": "suba", "batan": "suba",
+        "salitre": "fontibón", "modelia": "fontibón", "hayuelos": "fontibón", "capellania": "fontibón",
+        "centro": "candelaria", "macarena": "santa fe",
+        "chico": "chapinero", "rosales": "chapinero", "virrey": "chapinero", "cabrera": "chapinero",
+        "fagua": "chía", "balsillas": "chía"
+     };
+
+     const query = zoneInput.toLowerCase();
+     let targetZone = query; // Default: busca lo que escribió
+     
+     // Detectar zona padre
+     for (const [barrio, localidad] of Object.entries(zoneMap)) { 
+        if (query.includes(barrio)) { targetZone = localidad; break; } 
+     }
+
+     // Si el input es directo una zona (ej: "Kennedy")
+     if (zoneIntelligence[query]) targetZone = query;
+
+     // Cargar Stats
+     const stats = zoneIntelligence[targetZone] || { name: zoneInput, price: "Calculando...", growth: "Análisis en curso", demand: "Variable", vibe: "Zona en estudio" };
+     setCurrentZoneStats(stats);
+
+     // Consulta Híbrida: Busca por Localidad (targetZone) O por el texto exacto del usuario (query)
+     const { data } = await supabase
+        .from("properties")
+        .select("*")
+        .or(`city.ilike.%${targetZone}%,neighborhood.ilike.%${targetZone}%,neighborhood.ilike.%${query}%`)
+        .limit(10);
+
+     setZoneResults(data || []);
+     setShowZoneModal(true);
+     setSearchingZone(false);
   };
 
   const current = featured[currentIdx] || {};
@@ -59,14 +115,70 @@ const Home = () => {
   return (
     <div className="bg-gray-50 min-h-screen w-full overflow-hidden">
       
-      {/* MODAL ZONAS */}
+      {/* --- MODAL INTELLIGENCE --- */}
       {showZoneModal && (
-         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-white w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
-               <button onClick={() => setShowZoneModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 z-10"><FontAwesomeIcon icon={faTimes} size="2x" /></button>
-               <div className="p-8 bg-slate-900 text-white"><h3 className="text-2xl font-bold"><FontAwesomeIcon icon={faCity} className="text-yellow-500 mr-2"/>Resultados</h3></div>
-               <div className="p-8 overflow-y-auto bg-gray-50 flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {zoneResults.map(p => (<Link to={`/inmuebles/${p.id}`} key={p.id} className="bg-white rounded-xl shadow p-4 hover:shadow-xl"><h4 className="font-bold">{p.title}</h4></Link>))}
+         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 animate-fade-in">
+            <div className="bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col border border-white/20">
+               <button onClick={() => setShowZoneModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 z-10 p-2 bg-white/10 rounded-full transition"><FontAwesomeIcon icon={faTimes} size="lg" /></button>
+               
+               {/* HEADER: FICHA TÉCNICA ZONA */}
+               <div className="p-8 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                  <div>
+                     <span className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-1 block"><FontAwesomeIcon icon={faMapMarkedAlt}/> Análisis de Mercado</span>
+                     <h3 className="text-3xl font-black">{currentZoneStats?.name}</h3>
+                     <p className="text-slate-400 text-sm mt-1 flex items-center gap-2"><FontAwesomeIcon icon={faCity}/> {currentZoneStats?.vibe}</p>
+                  </div>
+                  
+                  {/* METRICAS DE ZONA */}
+                  <div className="flex gap-4 md:gap-8 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                     <div className="text-center">
+                        <p className="text-xs text-slate-400 uppercase">Valor m²</p>
+                        <p className="text-lg font-bold text-white">{currentZoneStats?.price}</p>
+                     </div>
+                     <div className="w-px bg-white/10"></div>
+                     <div className="text-center">
+                        <p className="text-xs text-slate-400 uppercase">Valorización</p>
+                        <p className="text-lg font-bold text-green-400">{currentZoneStats?.growth}</p>
+                     </div>
+                     <div className="w-px bg-white/10"></div>
+                     <div className="text-center">
+                        <p className="text-xs text-slate-400 uppercase">Demanda</p>
+                        <p className="text-lg font-bold text-yellow-400">{currentZoneStats?.demand}</p>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="p-8 overflow-y-auto bg-gray-50 flex-grow">
+                  <h4 className="font-bold text-slate-700 mb-6 text-lg">Oportunidades Disponibles en la Zona</h4>
+                  {zoneResults.length > 0 ? (
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {zoneResults.map(prop => (
+                           <Link to={`/inmuebles/${prop.id}`} key={prop.id} className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl transition group border border-gray-100 flex flex-col h-full">
+                              <div className="h-48 bg-gray-200 relative overflow-hidden">
+                                 {prop.images && prop.images[0] && <img src={prop.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />}
+                                 <span className={`absolute top-3 left-3 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider ${getTypeBgClass(prop.property_type)}`}>
+                                    {prop.property_type}
+                                 </span>
+                              </div>
+                              <div className="p-5 flex flex-col flex-grow">
+                                 <h4 className="font-bold text-slate-800 text-base leading-tight mb-2 line-clamp-2">{prop.title}</h4>
+                                 <p className="text-xs text-slate-500 mb-4 flex items-center gap-1"><FontAwesomeIcon icon={faMapMarkedAlt}/> {prop.neighborhood}</p>
+                                 <div className="mt-auto flex justify-between items-center border-t border-gray-100 pt-3">
+                                    <p className="text-green-600 font-black text-lg">{formatPrice(prop.price)}</p>
+                                    <span className="text-xs text-blue-600 font-bold hover:underline">Ver Detalles</span>
+                                 </div>
+                              </div>
+                           </Link>
+                        ))}
+                     </div>
+                  ) : (
+                     <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-300">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl"><FontAwesomeIcon icon={faSearch} /></div>
+                        <p className="text-slate-800 font-bold">¡Zona de Alta Demanda!</p>
+                        <p className="text-slate-500 text-sm mb-6 max-w-md mx-auto">Actualmente no tenemos activos publicados en esta micro-zona exacta, pero nuestros agentes pueden buscar por ti en la red privada.</p>
+                        <Link to="/contacto" className="inline-block bg-slate-900 text-white font-bold px-8 py-3 rounded-full hover:bg-slate-700 shadow-lg">Solicitar Búsqueda Privada</Link>
+                     </div>
+                  )}
                </div>
             </div>
          </div>
@@ -81,15 +193,14 @@ const Home = () => {
                   <div className="absolute inset-0 bg-slate-900/30 z-10"></div>
                   <img src={current.images[0]} alt={current.title} className="w-full h-full object-cover transition-all duration-700 hover:scale-105" />
                   <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center text-white p-4">
-                     {/* TAG DINÁMICO RESTAURADO */}
-                     <span className={`${getTypeColor(current.property_type)} text-white text-xs font-bold px-3 py-1 rounded uppercase mb-4 tracking-widest border shadow-sm`}>
+                     <span className={`${getTypeBgClass(current.property_type)} text-white text-xs font-bold px-3 py-1 rounded uppercase mb-4 tracking-widest border shadow-sm`}>
                         {getLoc(current.property_type, current.property_type_en)}
                      </span>
                      <h2 className="text-3xl md:text-5xl font-bold drop-shadow-lg mb-2 leading-tight px-2">{getLoc(current.title, current.title_en)}</h2>
                      <button onClick={() => navigate(`/inmuebles/${current.id}`)} className="px-8 py-3 bg-white text-slate-800 font-bold rounded-full hover:bg-yellow-400 hover:text-slate-900 transition shadow-lg uppercase text-sm tracking-widest mt-4">{t("hero_btn")}</button>
                   </div>
-                  <button onClick={prevProp} className="absolute top-1/2 left-2 z-30 text-white text-3xl"><FontAwesomeIcon icon={faChevronLeft} /></button>
-                  <button onClick={nextProp} className="absolute top-1/2 right-2 z-30 text-white text-3xl"><FontAwesomeIcon icon={faChevronRight} /></button>
+                  <button onClick={prevProp} className="absolute top-1/2 left-2 z-30 w-12 h-12 border-2 border-white text-white rounded-full flex items-center justify-center hover:bg-white hover:text-slate-800 transition"><FontAwesomeIcon icon={faChevronLeft} /></button>
+                  <button onClick={nextProp} className="absolute top-1/2 right-2 z-30 w-12 h-12 border-2 border-white text-white rounded-full flex items-center justify-center hover:bg-white hover:text-slate-800 transition"><FontAwesomeIcon icon={faChevronRight} /></button>
                </div>
                <div className="lg:w-[30%] bg-gray-100 p-6 md:p-8 flex flex-col justify-center border-l border-gray-200">
                   <h3 className="text-slate-800 font-bold text-center text-lg mb-6 uppercase tracking-widest border-b-2 border-slate-800 pb-2 inline-block mx-auto">{t("search_title")}</h3>
@@ -103,30 +214,75 @@ const Home = () => {
       </div>
       )}
 
-      {/* MÓDULO CAMACOL */}
-      <div className="bg-slate-900 py-20 px-4 relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
+      {/* --- MÓDULO INTELIGENCIA DE MERCADO (REDISEÑADO) --- */}
+      <div className="bg-slate-950 py-24 px-4 relative overflow-hidden">
+         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4"></div>
+         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20 relative z-10">
+            
+            {/* LADO IZQ: INPUT */}
             <div className="lg:w-1/2 text-white">
-                <span className="text-yellow-400 font-bold tracking-widest text-xs uppercase mb-2 block"><FontAwesomeIcon icon={faMapMarkedAlt} /> Inteligencia de Mercado</span>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">¿Dónde proyectas <br/>tu próxima inversión?</h2>
-                <p className="text-slate-300 text-lg mb-8 leading-relaxed font-light">Analizamos datos de <strong>CAMACOL</strong>. Dinos dónde buscas.</p>
-                <div className="bg-white/10 backdrop-blur-md p-2 rounded-full flex items-center max-w-md border border-white/20">
-                   <input className="bg-transparent border-none outline-none text-white placeholder-slate-400 flex-grow px-6 py-2" placeholder="Ej: Cedritos..." value={zoneInput} onChange={(e) => setZoneInput(e.target.value)} />
-                   <button onClick={handleZoneSearch} className="bg-yellow-500 text-slate-900 w-12 h-12 rounded-full"><FontAwesomeIcon icon={faPaperPlane} /></button>
+                <div className="flex items-center gap-2 mb-4">
+                   <div className="h-px w-8 bg-yellow-500"></div>
+                   <span className="text-yellow-500 font-bold tracking-widest text-xs uppercase">Camacol Data Driven</span>
                 </div>
+                <h2 className="text-4xl md:text-6xl font-black mb-6 leading-none tracking-tight">
+                   Inversión <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Inteligente.</span>
+                </h2>
+                <p className="text-slate-400 text-lg mb-10 leading-relaxed font-light max-w-lg">
+                   No adivines. Usamos analítica de datos de valorización barrial para decirte dónde poner tu capital. ¿Qué zona te interesa?
+                </p>
+                
+                <div className="bg-white p-2 rounded-full flex items-center shadow-2xl max-w-md transform hover:scale-105 transition duration-300">
+                   <div className="pl-6 text-slate-400"><FontAwesomeIcon icon={faSearch} /></div>
+                   <input 
+                      className="bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 flex-grow px-4 py-3 font-medium" 
+                      placeholder="Ej: Marsella, Cedritos, Modelia..." 
+                      value={zoneInput} 
+                      onChange={(e) => setZoneInput(e.target.value)} 
+                      onKeyDown={(e) => e.key === "Enter" && handleZoneSearch()}
+                   />
+                   <button onClick={handleZoneSearch} className="bg-slate-900 text-white w-14 h-14 rounded-full flex items-center justify-center hover:bg-blue-600 transition shadow-lg">
+                      {searchingZone ? <FontAwesomeIcon icon={faChartPie} spin /> : <FontAwesomeIcon icon={faArrowRight} />}
+                   </button>
+                </div>
+                <p className="text-xs text-slate-600 mt-4 ml-6 italic">Prueba escribiendo "Marsella" o "Cedritos".</p>
             </div>
-            <div className="lg:w-1/2 w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
-               <h3 className="text-white font-bold mb-8 flex justify-between items-end"><span>Demanda Actual</span></h3>
-               <div className="space-y-6">
-                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Sabana Norte</span> <span>85%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 w-[85%] rounded-full shadow-yellow"></div></div></div>
-                  <div><div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Bogotá Norte</span> <span>72%</span></div><div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 w-[72%] rounded-full"></div></div></div>
+
+            {/* LADO DER: METRICS GRID (VISUALMENTE RICO) */}
+            <div className="lg:w-1/2 w-full grid grid-cols-2 gap-4">
+               {/* CARD 1 */}
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition duration-500 group">
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faChartLine} /></div>
+                  <h4 className="text-3xl font-black text-white mb-1">+12%</h4>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">Valorización Promedio</p>
+                  <p className="text-[10px] text-slate-500 mt-2">Sabana Norte (2024-2025)</p>
+               </div>
+               {/* CARD 2 */}
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition duration-500 group mt-8">
+                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faLeaf} /></div>
+                  <h4 className="text-3xl font-black text-white mb-1">A+</h4>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">Certificación Sostenible</p>
+                  <p className="text-[10px] text-slate-500 mt-2">Nuevos proyectos VIS/NO VIS</p>
+               </div>
+               {/* CARD 3 */}
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition duration-500 group">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faBuilding} /></div>
+                  <h4 className="text-3xl font-black text-white mb-1">95%</h4>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">Ocupación Arriendos</p>
+                  <p className="text-[10px] text-slate-500 mt-2">Zonas Cedritos / Salitre</p>
+               </div>
+               {/* CARD 4 */}
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition duration-500 group mt-8">
+                  <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-400 text-xl mb-4 group-hover:scale-110 transition"><FontAwesomeIcon icon={faArrowUp} /></div>
+                  <h4 className="text-3xl font-black text-white mb-1">Top 3</h4>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">Rentabilidad Latam</p>
+                  <p className="text-[10px] text-slate-500 mt-2">Inversión Finca Raíz Col.</p>
                </div>
             </div>
          </div>
       </div>
 
-      {/* --- SELECCIÓN PREMIUM --- */}
+      {/* --- SELECCIÓN PREMIUM (4 Cards Compactas) --- */}
       <div className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
          <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-200 pb-4">
             <div className="max-w-2xl">
@@ -149,7 +305,10 @@ const Home = () => {
                      <p className="text-lg font-bold text-yellow-400">{formatPrice(prop.price)}</p>
                      <div className="border-t border-white/20 pt-3 mt-3 flex justify-between items-center text-[10px] text-slate-300">
                         <span className="flex items-center gap-1"><FontAwesomeIcon icon={faChartBar} className="text-green-400"/> Alta Demanda</span>
-                        <span className="flex items-center gap-1"><FontAwesomeIcon icon={faTag} className="text-blue-400"/> {prop.property_type}</span>
+                        {/* TAG CON COLOR DINAMICO RESTAURADO */}
+                        <span className={`flex items-center gap-1 ${getTypeColorClass(prop.property_type)}`}>
+                           <FontAwesomeIcon icon={faTag} /> {prop.property_type}
+                        </span>
                      </div>
                   </div>
                </Link>
