@@ -25,7 +25,7 @@ const CinemaService = () => {
             </div>
           </div>
           <Link to="/servicios/audiovisual" className="inline-block bg-white text-slate-950 font-black px-14 py-6 rounded-full hover:bg-green-600 hover:text-white transition-all shadow-3xl uppercase text-xs tracking-widest">
-            Solicitar Producción <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+            Solicitar ProducciÃ³n <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
           </Link>
         </div>
         <div className="lg:w-1/2 relative group">
