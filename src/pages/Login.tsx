@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faSmile, faAngry, faDizzy, faSkull, faDoorOpen } from "@fortawesome/free-solid-svg-icons";
 
 const Login = () => {
-  const [username, setUsername] = useState(""); // Cambiado de email a username
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -14,14 +14,18 @@ const Login = () => {
 
   const [failCount, setFailCount] = useState(0);
   const [status, setStatus] = useState<"IDLE" | "SUCCESS" | "ANGRY_1" | "ANGRY_2" | "DEMON" | "GAME_OVER">("IDLE");
+  const [debugError, setDebugError] = useState(""); // VARIABLE PARA VER EL ERROR REAL
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setDebugError("");
 
-    // TRUCO: Limpiar espacios, pasar a minúsculas y agregar dominio fantasma
+    // TRUCO: Si no tiene @, agregamos el dominio local
     const cleanUser = username.trim().toLowerCase();
     const finalEmail = cleanUser.includes("@") ? cleanUser : `${cleanUser}@ayc.local`;
+
+    console.log("Intentando login con:", finalEmail); // DEBUG EN CONSOLA
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: finalEmail,
@@ -29,19 +33,22 @@ const Login = () => {
     });
 
     if (error || !data.session) {
+      console.error("Error Login:", error?.message);
+      setDebugError(error?.message || "Sesión no creada");
+      
       const newFail = failCount + 1;
       setFailCount(newFail);
       setLoading(false);
 
       if (newFail === 1) {
          setStatus("ANGRY_1");
-         setTimeout(() => setStatus("IDLE"), 1500);
+         setTimeout(() => setStatus("IDLE"), 2500); // Un poco más de tiempo para leer error
       } else if (newFail === 2) {
          setStatus("ANGRY_2");
-         setTimeout(() => setStatus("IDLE"), 1500);
+         setTimeout(() => setStatus("IDLE"), 2500);
       } else if (newFail === 3) {
          setStatus("DEMON");
-         setTimeout(() => setStatus("IDLE"), 2000);
+         setTimeout(() => setStatus("IDLE"), 2500);
       } else if (newFail >= 4) {
          setStatus("GAME_OVER");
          setTimeout(() => { window.location.href = "https://www.pixar.com"; }, 3000);
@@ -63,55 +70,47 @@ const Login = () => {
          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 animate-fade-in backdrop-blur-md">
             {status === "SUCCESS" && (
                 <div className="text-center animate-bounce">
-                   <FontAwesomeIcon icon={faSmile} className="text-[150px] text-green-500 mb-6 drop-shadow-[0_0_30px_rgba(0,255,0,0.5)]" />
-                   <h2 className="text-3xl text-white font-black uppercase tracking-widest">Bienvenid{welcomeMsg.title === "Maestra" ? "a" : "o"} {welcomeMsg.title}</h2>
-                   <p className="text-xl text-green-400 font-bold mt-2">{welcomeMsg.name}</p>
+                   <FontAwesomeIcon icon={faSmile} className="text-[150px] text-green-500 mb-6" />
+                   <h2 className="text-3xl text-white font-black uppercase">Acceso Concedido</h2>
+                   <p className="text-xl text-green-400 font-bold mt-2">{welcomeMsg.title} {welcomeMsg.name}</p>
                 </div>
             )}
-            {status === "ANGRY_1" && (
+            
+            {/* ESTADOS DE FALLO CON DEBUG ERROR VISIBLE */}
+            {(status === "ANGRY_1" || status === "ANGRY_2" || status === "DEMON") && (
                 <div className="text-center animate-pulse">
-                   <FontAwesomeIcon icon={faAngry} className="text-[150px] text-orange-500 mb-6" />
-                   <h2 className="text-3xl text-white font-bold uppercase tracking-widest">¿Te equivocaste?</h2>
-                   <p className="text-orange-400">Primer aviso...</p>
+                   <FontAwesomeIcon 
+                      icon={status === "ANGRY_1" ? faAngry : status === "ANGRY_2" ? faDizzy : faSkull} 
+                      className={`text-[150px] mb-6 ${status === "ANGRY_1" ? "text-orange-500" : status === "ANGRY_2" ? "text-red-600" : "text-purple-600"}`} 
+                   />
+                   <h2 className="text-3xl text-white font-bold uppercase tracking-widest">ACCESO DENEGADO</h2>
+                   <p className="text-red-400 font-mono mt-4 border border-red-900 bg-red-950/50 p-2 rounded text-xs">
+                      Error del Sistema: {debugError}
+                   </p>
                 </div>
             )}
-            {status === "ANGRY_2" && (
-                <div className="text-center animate-ping-slow">
-                   <FontAwesomeIcon icon={faDizzy} className="text-[180px] text-red-600 mb-6 drop-shadow-[0_0_50px_rgba(255,0,0,0.8)]" />
-                   <h2 className="text-5xl text-red-500 font-black uppercase tracking-tighter glitch-effect">¡NO ME HAGAS REPETIRLO!</h2>
-                </div>
-            )}
-            {status === "DEMON" && (
-                <div className="text-center animate-pulse">
-                   <FontAwesomeIcon icon={faSkull} className="text-[200px] text-purple-600 mb-6 drop-shadow-[0_0_60px_rgba(147,51,234,0.8)]" />
-                   <h2 className="text-6xl text-purple-500 font-black uppercase tracking-widest">¿OSAS DESAFIARME?</h2>
-                   <p className="text-white text-xl mt-4">Un error más y te vas.</p>
-                </div>
-            )}
+
             {status === "GAME_OVER" && (
                 <div className="text-center">
                    <FontAwesomeIcon icon={faDoorOpen} className="text-[150px] text-blue-400 mb-6 animate-bounce" />
                    <h2 className="text-6xl text-white font-black uppercase tracking-tighter mb-4">¡TE LO DIJE!</h2>
-                   <p className="text-blue-300 text-2xl">Llevándote a un lugar más... apropiado para ti.</p>
                    <p className="text-xs text-gray-500 mt-8 animate-pulse">Redirigiendo a Pixar.com...</p>
                 </div>
             )}
          </div>
       )}
 
-      <div className="relative z-10 bg-slate-900 border border-slate-800 p-10 rounded-3xl shadow-2xl max-w-md w-full mx-4 group hover:border-red-900/50 transition-colors duration-500">
+      <div className="relative z-10 bg-slate-900 border border-slate-800 p-10 rounded-3xl shadow-2xl max-w-md w-full mx-4">
         <div className="text-center mb-10">
-           <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-900 shadow-[0_0_25px_rgba(255,0,0,0.4)] animate-pulse">
+           <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-900 animate-pulse">
               <FontAwesomeIcon icon={faEye} className="text-5xl text-red-600" />
            </div>
            <h1 className="text-2xl font-bold text-slate-200 uppercase tracking-[0.2em]">¿Quién osa entrar?</h1>
-           <p className="text-slate-600 text-[10px] uppercase mt-3 tracking-widest">Solo personal autorizado por la orden</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-[10px] font-bold text-red-900 uppercase mb-2 tracking-widest">Usuario</label>
-            {/* INPUT DE TEXTO, YA NO DE EMAIL */}
             <input 
                type="text" 
                value={username} 
