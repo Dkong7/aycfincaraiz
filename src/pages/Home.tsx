@@ -1,9 +1,9 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faChevronLeft, faChevronRight, faSearch, faHashtag, 
-  faChartLine, faGavel, faVideo, faHardHat, faArrowRight, faStar, faGem, faShieldAlt, faPercent 
+  faChartLine, faGavel, faVideo, faHardHat, faArrowRight, faStar, faGem, faShieldAlt, faPercent, faMapMarkedAlt, faPaperPlane 
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useApp } from "../context/AppContext";
@@ -39,7 +39,6 @@ const Home = () => {
   };
 
   const getLoc = (es: any, en: any) => (lang === "EN" && en) ? en : es;
-
   const getTypeColor = (type: string) => {
     switch(type?.toLowerCase()) {
       case "apartamento": return "bg-blue-600 border-blue-500";
@@ -56,11 +55,10 @@ const Home = () => {
   return (
     <div className="bg-gray-50 min-h-screen w-full overflow-hidden">
       
-      {/* 1. HERO SECTION (Responsive Height) */}
+      {/* HERO SECTION */}
       <div className="relative bg-white pb-12">
          <div className="max-w-7xl mx-auto md:p-6 p-0">
             <div className="flex flex-col lg:flex-row shadow-2xl md:rounded-2xl rounded-none overflow-hidden bg-white min-h-[auto] lg:min-h-[500px]">
-               {/* Slider */}
                <div className="lg:w-[70%] relative h-[400px] lg:h-[500px] bg-black group overflow-hidden">
                   <div className="absolute inset-0 bg-slate-900/30 z-10"></div>
                   <img src={current.images[0]} alt={current.title} className="w-full h-full object-cover transition-all duration-700 hover:scale-105" />
@@ -80,15 +78,13 @@ const Home = () => {
                   <button onClick={prevProp} className="absolute top-1/2 left-2 md:left-4 z-30 w-10 h-10 md:w-12 md:h-12 border-2 border-white text-white rounded-full flex items-center justify-center hover:bg-white hover:text-slate-800 transition"><FontAwesomeIcon icon={faChevronLeft} /></button>
                   <button onClick={nextProp} className="absolute top-1/2 right-2 md:right-4 z-30 w-10 h-10 md:w-12 md:h-12 border-2 border-white text-white rounded-full flex items-center justify-center hover:bg-white hover:text-slate-800 transition"><FontAwesomeIcon icon={faChevronRight} /></button>
                </div>
-               
-               {/* Quick Search */}
                <div className="lg:w-[30%] bg-gray-100 p-6 md:p-8 flex flex-col justify-center border-l border-gray-200">
                   <h3 className="text-slate-800 font-bold text-center text-lg mb-6 uppercase tracking-widest border-b-2 border-slate-800 pb-2 inline-block mx-auto">{t("search_title")}</h3>
                   <div className="space-y-6 flex-1">
                      <div>
                         <label className="text-xs font-bold text-gray-500 uppercase block mb-2">{t("search_code")}</label>
                         <div className="relative">
-                           <input className="w-full p-4 pl-10 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-slate-800 outline-none transition-shadow" placeholder="Ej: 1005" value={quickCode} onChange={(e) => setQuickCode(e.target.value)} />
+                           <input className="w-full p-4 pl-10 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-slate-800 outline-none transition-shadow" placeholder="Ej: 2501" value={quickCode} onChange={(e) => setQuickCode(e.target.value)} />
                            <FontAwesomeIcon icon={faHashtag} className="absolute left-3.5 top-4 text-gray-400" />
                         </div>
                      </div>
@@ -104,14 +100,13 @@ const Home = () => {
          </div>
       </div>
 
-      {/* 2. SERVICIOS (Grid Responsiva 1 -> 3) */}
+      {/* SERVICIOS */}
       <div className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
          <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">{t("home_serv_title")}</h2>
             <div className="w-24 h-1 bg-yellow-500 mx-auto"></div>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Cards Servicios */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-900 text-3xl mb-6 group-hover:bg-blue-900 group-hover:text-yellow-400 transition-colors"><FontAwesomeIcon icon={faChartLine} /></div>
                <h3 className="text-xl font-bold text-slate-800 mb-4">{t("serv_aval_title")}</h3>
@@ -133,28 +128,76 @@ const Home = () => {
          </div>
       </div>
 
-      {/* 3. B2B SECTION (Stack Vertical en Móvil) */}
-      <div className="bg-slate-800 py-20 px-4 md:px-6 relative overflow-hidden">
-         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
-            <div className="md:w-1/2 text-white">
-               <div className="flex items-center gap-3 mb-4 text-yellow-500">
-                  <FontAwesomeIcon icon={faHardHat} className="text-2xl" />
-                  <span className="font-bold uppercase tracking-widest">B2B & Partners</span>
-               </div>
-               <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">{t("home_b2b_title")}</h2>
-               <p className="text-slate-300 text-lg mb-8 leading-relaxed">{t("home_b2b_desc")}</p>
-               <a href="https://wa.me/573134663832" target="_blank" className="w-full md:w-auto inline-flex items-center justify-center gap-3 bg-yellow-500 text-slate-900 font-bold px-8 py-3 rounded-full hover:bg-yellow-400 transition shadow-lg uppercase text-sm tracking-widest">
-                  <FontAwesomeIcon icon={faWhatsapp} className="text-2xl text-slate-900" /> Agendar Reunión
-               </a>
+      {/* --- MÓDULO CAMACOL & ZONA DESEADA (NUEVO) --- */}
+      <div className="bg-slate-900 py-20 px-4 relative overflow-hidden">
+         <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
+            
+            {/* LADO IZQ: INVITACIÓN CORDIAL */}
+            <div className="lg:w-1/2 text-white">
+                <span className="text-yellow-400 font-bold tracking-widest text-xs uppercase mb-2 block"><FontAwesomeIcon icon={faMapMarkedAlt} /> Tendencias de Mercado</span>
+                <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">¿En qué zona sueñas <br/>tu próximo hogar?</h2>
+                <p className="text-slate-300 text-lg mb-8 leading-relaxed font-light">
+                   Sabemos que la ubicación lo es todo. Analizamos datos de <strong>CAMACOL</strong> para identificar las zonas de mayor valorización en Bogotá y la Sabana. Cuéntanos dónde buscas y nosotros nos encargamos de encontrar la joya oculta.
+                </p>
+                
+                <div className="bg-white/10 backdrop-blur-md p-2 rounded-full flex items-center max-w-md border border-white/20">
+                   <input type="text" placeholder="Ej: Chía, Cedritos, La Colina..." className="bg-transparent border-none outline-none text-white placeholder-slate-400 flex-grow px-6 py-2" />
+                   <button className="bg-yellow-500 hover:bg-yellow-400 text-slate-900 w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg">
+                      <FontAwesomeIcon icon={faPaperPlane} />
+                   </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-4 ml-4">Te enviaremos opciones exclusivas en esa zona.</p>
             </div>
-            <div className="md:w-1/2 w-full">
-               <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80" className="w-full rounded-xl shadow-2xl border-4 border-slate-700 transform rotate-2 hover:rotate-0 transition duration-500" alt="Constructores" />
+
+            {/* LADO DER: GRÁFICA ZONAS (CSS BARS) */}
+            <div className="lg:w-1/2 w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
+               <h3 className="text-white font-bold mb-8 flex justify-between items-end">
+                  <span>Demanda Actual</span>
+                  <span className="text-xs text-slate-400 font-normal">Fuente: Camacol Proyecciones</span>
+               </h3>
+               
+               <div className="space-y-6">
+                  {/* BARRA 1 */}
+                  <div>
+                     <div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Sabana Norte (Chía/Cajicá)</span> <span>85%</span></div>
+                     <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 w-[85%] rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
+                     </div>
+                  </div>
+                  {/* BARRA 2 */}
+                  <div>
+                     <div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Bogotá Norte (Cedritos/Colina)</span> <span>72%</span></div>
+                     <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 w-[72%] rounded-full"></div>
+                     </div>
+                  </div>
+                  {/* BARRA 3 */}
+                  <div>
+                     <div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Sabana Occidente (Madrid/Mosquera)</span> <span>64%</span></div>
+                     <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-green-600 to-green-400 w-[64%] rounded-full"></div>
+                     </div>
+                  </div>
+                  {/* BARRA 4 */}
+                  <div>
+                     <div className="flex justify-between text-xs text-slate-300 mb-2 font-bold uppercase"><span>Bogotá Salitre/Modelia</span> <span>58%</span></div>
+                     <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-purple-600 to-purple-400 w-[58%] rounded-full"></div>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-4 text-xs text-slate-400">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                  <span>Datos actualizados en tiempo real según búsquedas activas.</span>
+               </div>
             </div>
          </div>
       </div>
+      {/* ------------------------------------------- */}
 
-      {/* 4. PREMIUM SELECTION */}
+      {/* PREMIUM SELECTION */}
       <div className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
          <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-200 pb-4">
             <div className="max-w-2xl">
