@@ -1,92 +1,99 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MapPin, Maximize, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, Maximize, ArrowRight } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import { useLanguage } from '../../context/LanguageContext';
+import { Link } from 'react-router-dom';
+import { useTRM } from '../../hooks/useTRM';
 
 const HeroSection = () => {
   const { t, lang } = useLanguage();
+  const trm = useTRM();
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
-  const [animating, setAnimating] = useState(false);
   const [activeImage, setActiveImage] = useState(null);
+  const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
     const fetchHero = async () => {
-      const { data } = await supabase.from('properties').select('*').eq('is_hero', true).order('hero_order', { ascending: true }).limit(5);
-      if (data && data.length > 0) {
-        setSlides(data);
-        setActiveImage(data[0].main_media_url);
-      } else {
-        // Fallback
-        setSlides([{ id: 1, property_type: 'Apartamento', address_visible: 'Penthouse Rosales', price_cop: 1250000000, main_media_url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c', gallery_images: [] }]);
-        setActiveImage('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c');
+      // Ordenamos por hero_order para respetar el orden de Alfonso
+      const { data } = await supabase.from('properties').select('*').eq('is_hero', true).order('hero_order', { ascending: true });
+      if (data && data.length > 0) { 
+          setSlides(data); 
+          // Aseguramos que cargue la imagen del primero
+          setActiveImage(data[0].main_media_url);
       }
     };
     fetchHero();
   }, []);
 
   const changeSlide = (dir) => {
-    if (animating || slides.length === 0) return;
+    if (animating || !slides.length) return;
     setAnimating(true);
-    setTimeout(() => setAnimating(false), 600);
+    setTimeout(() => setAnimating(false), 500);
     
-    let nextIndex = (dir === 'next') 
-      ? (current === slides.length - 1 ? 0 : current + 1)
-      : (current === 0 ? slides.length - 1 : current - 1);
-    
-    setCurrent(nextIndex);
-    setActiveImage(slides[nextIndex].main_media_url);
+    let next = dir === 'next' ? (current === slides.length - 1 ? 0 : current + 1) : (current === 0 ? slides.length - 1 : current - 1);
+    setCurrent(next);
+    setActiveImage(slides[next].main_media_url);
   };
 
-  if (slides.length === 0) return null;
-  const activeProp = slides[current];
-  const currentGallery = [activeProp.main_media_url, ...(activeProp.gallery_images || [])].slice(0, 5);
+  if (!slides.length) return <div className="h-[90vh] bg-[#0A192F] flex items-center justify-center text-white">Cargando Portafolio...</div>;
+  
+  const p = slides[current];
+  const gallery = [p.main_media_url, ...(p.gallery_images || [])].slice(0, 5);
 
   return (
-    <div className="relative h-[85vh] w-full bg-[#0A192F] overflow-hidden font-sans text-white group mt-0">
+    <div className="relative h-[90vh] w-full bg-[#0A192F] overflow-hidden group">
       {/* FONDO */}
-      <div className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${animating ? 'opacity-50' : 'opacity-100'}`}>
-          <img src={activeImage} className="w-full h-full object-cover transform scale-105" alt="Hero" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A192F]/95 via-[#0A192F]/40 to-transparent" />
+      <div className={`absolute inset-0 transition-opacity duration-500 ${animating ? 'opacity-50' : 'opacity-100'}`}>
+        <img src={activeImage} className="w-full h-full object-cover" alt="Hero" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A192F]/95 via-[#0A192F]/30 to-transparent" />
       </div>
 
-      {/* TEXTO */}
-      <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-24 max-w-5xl h-full pb-20">
-        <div className={`flex items-center gap-2 px-4 py-1.5 w-fit rounded shadow-lg mb-6 bg-tag-${activeProp.property_type}`}>
-          <Maximize size={14} className="text-white"/><span className="font-black text-xs tracking-[0.2em] uppercase text-white">{activeProp.property_type}</span>
-        </div>
-        <h1 className={`text-5xl md:text-8xl font-black uppercase leading-[0.9] tracking-tighter mb-6 drop-shadow-2xl transition-all duration-500 delay-100 ${animating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-          {activeProp.address_visible}
-        </h1>
-        <div className={`flex items-center gap-4 text-lg transition-all duration-500 delay-200 ${animating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-          <MapPin className="text-[#15803d]" /> <span className="font-medium">{activeProp.real_address || 'Bogotá'}</span>
-          <div className="w-px h-6 bg-gray-600 mx-2"></div>
-          <div className="text-3xl font-bold flex items-center gap-2">
-            {lang === 'es' ? `$${new Intl.NumberFormat('es-CO').format(activeProp.price_cop)}` : `USD $${new Intl.NumberFormat('en-US').format(activeProp.price_usd || 0)}`}
-          </div>
-        </div>
+      {/* TEXTO + CTA */}
+      <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-24 max-w-6xl h-full pb-20">
+         <div className={`transition-all duration-500 ${animating ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <div className={`px-4 py-1 rounded mb-6 bg-tag-${p.property_type} w-fit text-xs font-black uppercase tracking-widest shadow-lg flex items-center gap-2`}>
+               <Maximize size={12}/> {lang === 'es' ? p.property_type : (p.property_type === 'Apartamento' ? 'Apartment' : 'House')}
+            </div>
+            <h1 className="text-5xl md:text-8xl font-black uppercase leading-[0.9] mb-4 tracking-tighter drop-shadow-2xl text-white">
+               {p.address_visible}
+            </h1>
+            <div className="flex items-center gap-6 text-2xl md:text-3xl font-bold text-white mt-4 mb-8">
+               <span className="flex items-center gap-2 text-gray-300 text-lg"><MapPin className="text-[var(--ayc-emerald)]"/> {p.real_address}</span>
+               <div className="h-6 w-px bg-white/50"></div>
+               {lang === 'es' ? (
+                 <span>${new Intl.NumberFormat('es-CO').format(p.price_cop)}</span>
+               ) : (
+                 <span>USD ${new Intl.NumberFormat('en-US').format((p.price_cop / trm).toFixed(0))}</span>
+               )}
+            </div>
+
+            {/* CTA BUTTON */}
+            <Link to={`/inmuebles/${p.ayc_id}`} className="inline-flex items-center gap-3 bg-[var(--ayc-emerald)] hover:bg-[#166534] text-white px-8 py-4 rounded-full font-black uppercase tracking-widest transition-all hover:scale-105 shadow-[0_0_20px_rgba(0,155,77,0.4)]">
+               {lang === 'es' ? 'Ver Inmueble' : 'View Property'} <ArrowRight size={20}/>
+            </Link>
+         </div>
       </div>
 
       {/* CONTROLES */}
-      <div className="absolute top-1/2 right-4 md:right-10 z-30 flex flex-col gap-4 -translate-y-1/2">
-        <button onClick={() => changeSlide('prev')} className="p-4 border border-white/20 rounded-full hover:bg-[#15803d] hover:border-transparent transition-all"><ChevronLeft size={24}/></button>
-        <button onClick={() => changeSlide('next')} className="p-4 border border-white/20 rounded-full hover:bg-[#15803d] hover:border-transparent transition-all"><ChevronRight size={24}/></button>
+      <button onClick={() => changeSlide('prev')} className="absolute left-4 top-1/2 -translate-y-1/2 p-4 rounded-full border border-white/20 hover:bg-[var(--ayc-emerald)] hover:border-transparent transition-all z-30 text-white backdrop-blur-sm group-hover:opacity-100 opacity-0"><ChevronLeft size={32}/></button>
+      <button onClick={() => changeSlide('next')} className="absolute right-4 top-1/2 -translate-y-1/2 p-4 rounded-full border border-white/20 hover:bg-[var(--ayc-emerald)] hover:border-transparent transition-all z-30 text-white backdrop-blur-sm group-hover:opacity-100 opacity-0"><ChevronRight size={32}/></button>
+
+      {/* MINIATURAS */}
+      <div className="absolute bottom-24 right-6 md:right-24 z-30 flex gap-4">
+         {gallery.map((img, idx) => (
+            <div key={idx} onClick={() => setActiveImage(img)} 
+                 className={`w-24 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all hover:-translate-y-1 shadow-lg ${activeImage === img ? 'border-[var(--ayc-emerald)] scale-110' : 'border-white/30 opacity-70'}`}>
+               <img src={img} className="w-full h-full object-cover" />
+            </div>
+         ))}
       </div>
 
-      {/* MINIATURAS (GALERÍA) */}
-      <div className="absolute bottom-24 left-6 md:left-24 z-30 hidden md:flex gap-4">
-        {currentGallery.map((img, idx) => (
-          <div key={idx} onClick={() => setActiveImage(img)} className={`relative h-20 w-32 cursor-pointer rounded-lg overflow-hidden border-2 transition-all hover:-translate-y-1 ${activeImage === img ? 'border-[#15803d] scale-105' : 'border-white/20 opacity-60 hover:opacity-100'}`}>
-            <img src={img} className="w-full h-full object-cover" />
-          </div>
-        ))}
-      </div>
-      
-      {/* CURVA */}
-      <div className="absolute bottom-0 w-full z-20 leading-[0]">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-[60px] md:h-[100px]">
-            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" className="fill-white"></path>
-        </svg>
+      {/* CURVA BLANCA */}
+      <div className="absolute bottom-0 left-0 w-full z-20 overflow-hidden leading-[0]">
+         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-[80px] md:h-[120px]">
+             <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" className="fill-white transform rotate-180 origin-center translate-y-full"></path>
+         </svg>
       </div>
     </div>
   );

@@ -1,64 +1,75 @@
-import React from 'react';
-import { Facebook, Instagram, Linkedin, ArrowUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { Facebook, Instagram, Youtube, Phone, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const FooterCustom = () => {
+  const { t } = useLanguage();
+  const [testimonyIdx, setTestimonyIdx] = useState(0);
+
+  const testimonials = [
+    { name: "Carlos Ruiz", role: "Inversionista", text: "La asesorÃ­a legal de A&C me ahorrÃ³ millones en un trÃ¡mite complejo. Excelencia total.", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200" },
+    { name: "Maria Fernanda", role: "Propietaria", text: "Vendieron mi casa en Rosales en tiempo rÃ©cord gracias a sus videos tipo cine.", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200" },
+    { name: "Juan David", role: "Comprador", text: "Su transparencia y Ã©tica me dieron la confianza para invertir mi patrimonio.", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200" }
+  ];
+
+  const nextTestimony = () => setTestimonyIdx((prev) => (prev + 1) % testimonials.length);
+  const prevTestimony = () => setTestimonyIdx((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+
   return (
-    <footer className="bg-[#111] text-white pt-0 relative mt-0 font-sans">
-      {/* BARRA VERDE SUPERIOR */}
-      <div className="w-full h-2 bg-[#009B4D] absolute top-0 left-0" />
+    <footer className="bg-[#0A192F] text-white pt-20 pb-10 border-t border-gray-800">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+           
+           {/* COL 1: CONTACTO */}
+           <div>
+              <img src="/ayclogo.svg" className="h-16 mb-6 brightness-0 invert" alt="A&C" />
+              <p className="text-gray-400 mb-6 text-sm leading-relaxed">
+                 BogotÃ¡ & Cundinamarca<br/>
+                 Calle 123 # 45-67, Of. 301<br/>
+                 Edificio Torre Central
+              </p>
+              <div className="flex gap-4">
+                 <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-[var(--ayc-emerald)] transition-colors"><Instagram size={20}/></a>
+                 <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-[var(--ayc-emerald)] transition-colors"><Facebook size={20}/></a>
+                 <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-[var(--ayc-emerald)] transition-colors"><Youtube size={20}/></a>
+                 <a href="https://tiktok.com" className="p-2 bg-white/5 rounded-full hover:bg-[var(--ayc-emerald)] transition-colors text-xs font-bold flex items-center justify-center w-9 h-9">Tk</a>
+              </div>
+           </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
-        <div>
-          <h3 className="text-2xl font-black mb-4 flex items-center gap-2">
-            <span className="bg-[#004d25] px-2 rounded">A&C</span> FINCA RAÍZ
-          </h3>
-          <p className="text-gray-400 text-sm leading-relaxed">
-            Expertos en finca raíz en Bogotá y Cundinamarca. Conectamos sueños con realidades.
-          </p>
-          <div className="flex gap-4 mt-6">
-            <div className="p-2 bg-gray-800 rounded hover:bg-[#39FF14] hover:text-black transition-colors cursor-pointer"><Facebook size={20}/></div>
-            <div className="p-2 bg-gray-800 rounded hover:bg-[#39FF14] hover:text-black transition-colors cursor-pointer"><Instagram size={20}/></div>
-            <div className="p-2 bg-gray-800 rounded hover:bg-[#39FF14] hover:text-black transition-colors cursor-pointer"><Linkedin size={20}/></div>
-          </div>
-        </div>
+           {/* COL 2: TESTIMONIOS */}
+           <div>
+              <h3 className="text-[var(--ayc-emerald)] font-bold uppercase tracking-widest mb-6 text-sm">Testimonios</h3>
+              <div className="bg-white/5 p-6 rounded-2xl relative">
+                 <div className="flex items-center gap-4 mb-4">
+                    <img src={testimonials[testimonyIdx].img} className="w-12 h-12 rounded-full object-cover border-2 border-[var(--ayc-emerald)]" />
+                    <div>
+                       <p className="font-bold text-white">{testimonials[testimonyIdx].name}</p>
+                       <p className="text-xs text-gray-400 uppercase">{testimonials[testimonyIdx].role}</p>
+                    </div>
+                 </div>
+                 <p className="text-gray-300 text-sm italic">"{testimonials[testimonyIdx].text}"</p>
+                 
+                 <div className="absolute top-4 right-4 flex gap-1">
+                    <button onClick={prevTestimony} className="p-1 hover:text-[var(--ayc-emerald)]"><ChevronLeft size={16}/></button>
+                    <button onClick={nextTestimony} className="p-1 hover:text-[var(--ayc-emerald)]"><ChevronRight size={16}/></button>
+                 </div>
+              </div>
+           </div>
 
-        <div>
-          <h4 className="font-bold text-lg mb-6 uppercase tracking-wider">Enlaces Rápidos</h4>
-          <ul className="space-y-3 text-gray-400 text-sm">
-            <li className="hover:text-[#39FF14] cursor-pointer">Inmuebles</li>
-            <li className="hover:text-[#39FF14] cursor-pointer">Avalúos</li>
-            <li className="hover:text-[#39FF14] cursor-pointer">Servicios</li>
-            <li className="hover:text-[#39FF14] cursor-pointer">Contacto</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="font-bold text-lg mb-6 uppercase tracking-wider">Contacto</h4>
-          <ul className="space-y-4 text-gray-400 text-sm">
-            <li className="flex items-start gap-3"><span className="text-[#39FF14]">??</span> Calle 20 Sur # 69B - 80, Bogotá D.C</li>
-            <li className="flex items-center gap-3"><span className="text-[#39FF14]">??</span> +57 313 466 3832</li>
-            <li className="flex items-center gap-3"><span className="text-[#39FF14]">??</span> info@aycfincaraiz.com</li>
-          </ul>
-        </div>
-
-        <div className="bg-gray-900 p-6 rounded-xl border border-gray-800">
-           <h4 className="font-bold text-xs text-[#39FF14] mb-4 uppercase">Testimonio</h4>
-           <p className="italic text-gray-300 text-sm mb-4">"Gracias al avalúo certificado de A&C logramos cerrar la venta..."</p>
-           <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
-              <div><p className="font-bold text-sm">Carlos M.</p><p className="text-xs text-gray-500">Logística S.A.S</p></div>
+           {/* COL 3: LEGAL */}
+           <div>
+              <h3 className="text-[var(--ayc-emerald)] font-bold uppercase tracking-widest mb-6 text-sm">{t.footer.contact}</h3>
+              <div className="space-y-4 text-gray-400 text-sm">
+                 <p className="flex items-center gap-3"><Phone size={16} className="text-[var(--ayc-emerald)]"/> +57 313 466 3832</p>
+                 <p className="flex items-center gap-3"><Mail size={16} className="text-[var(--ayc-emerald)]"/> info@aycfincaraiz.com</p>
+              </div>
            </div>
         </div>
-      </div>
 
-      <div className="border-t border-gray-800 py-6 px-6 bg-black flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-        <p>© 2026 A&C Finca Raíz. Todos los derechos reservados.</p>
-        <p>Desarrollado por <span className="text-[#39FF14] font-bold">WillowTreeMedia</span></p>
+        <div className="border-t border-gray-800 pt-8 text-center text-xs text-gray-500">
+           <p>&copy; {new Date().getFullYear()} A&C Finca RaÃ­z. {t.footer.rights}</p>
+        </div>
       </div>
-      
-      <button onClick={() => window.scrollTo({top:0, behavior:'smooth'})} className="fixed bottom-6 right-6 bg-[#0a0a0a] border border-gray-700 p-3 rounded-full hover:bg-[#39FF14] hover:text-black transition-all z-50">
-        <ArrowUp size={20} />
-      </button>
     </footer>
   );
 };

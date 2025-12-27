@@ -10,6 +10,7 @@ import { FeaturedProperties, ServicesIntro, LatestBlog } from './components/home
 import { SearchBar } from './components/search/SearchBar';
 
 import Inmuebles from './pages/Inmuebles';
+import PropertyDetail from './pages/PropertyDetail';
 import About from './pages/About';
 import Blog from './pages/Blog';
 import Contacto from './pages/Contacto';
@@ -41,12 +42,13 @@ function App() {
           <Routes>
             <Route path="/" element={<><NavbarCustom /><HomePage /><FooterCustom /></>} />
             <Route path="/inmuebles" element={<><NavbarCustom /><Inmuebles /><FooterCustom /></>} />
+            <Route path="/inmuebles/:id" element={<PropertyDetail />} />
             <Route path="/nosotros" element={<><NavbarCustom /><About /><FooterCustom /></>} />
             <Route path="/blog" element={<><NavbarCustom /><Blog /><FooterCustom /></>} />
             <Route path="/contacto" element={<><NavbarCustom /><Contacto /><FooterCustom /></>} />
             <Route path="/servicios/audiovisual" element={<><NavbarCustom /><Audiovisual /><FooterCustom /></>} />
-            <Route path="/servicios/avaluos" element={<><NavbarCustom /><PagePlaceholder title="Avalúos Comerciales" /><FooterCustom /></>} />
-            <Route path="/servicios/juridico" element={<><NavbarCustom /><PagePlaceholder title="Asesoría Jurídica" /><FooterCustom /></>} />
+            <Route path="/servicios/avaluos" element={<><NavbarCustom /><PagePlaceholder title="AvalÃƒÂºos Comerciales" /><FooterCustom /></>} />
+            <Route path="/servicios/juridico" element={<><NavbarCustom /><PagePlaceholder title="AsesorÃƒÂ­a JurÃƒÂ­dica" /><FooterCustom /></>} />
 
             {/* RUTAS PRIVADAS */}
             <Route path="/claclacla" element={<LoginSpecial />} />
@@ -55,7 +57,7 @@ function App() {
             
             {/* DASHBOARD */}
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/nuevo" element={<CreateProperty />} />
+            <Route path="/dashboard/nuevo" element={<CreateProperty />} />`n            <Route path="/dashboard/editar/:id" element={<CreateProperty />} />
             <Route path="/dashboard/inventario" element={<Inventory />} />
             <Route path="/dashboard/hero" element={<ManageHero />} /> {/* <--- RUTA CONECTADA */}
           </Routes>
