@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import { MapPin, DollarSign, Layout, ArrowLeft, CheckCircle, Maximize, Bed, Bath, Car, FileText, ChefHat, Layers, ShieldCheck, Home } from 'lucide-react';
+import { 
+  MapPin, DollarSign, Layout, ArrowLeft, CheckCircle, Maximize, Bed, Bath, Car, FileText, 
+  ChefHat, Layers, ShieldCheck, Home, Mountain, Building2, Warehouse, TreePine, Zap, DoorOpen,
+  Store, Briefcase, Wifi, Monitor, ShoppingBag, Coffee, Eye
+} from 'lucide-react';
 import NavbarCustom from '../components/layout/NavbarCustom';
 import FooterCustom from '../components/layout/FooterCustom';
 import { useTRM } from '../hooks/useTRM';
@@ -30,36 +34,37 @@ const PropertyDetail = () => {
   if (!prop) return <div className="min-h-screen pt-32 text-center">No encontrado.</div>;
 
   const allImages = [prop.main_media_url, ...(prop.gallery_images || [])].filter(Boolean);
+  
+  // CONFIG VISUAL POR TIPO
+  const typeConfig = {
+     Casa: { icon: <Home/>, color: 'bg-green-600' },
+     Apartamento: { icon: <Building2/>, color: 'bg-blue-600' },
+     Bodega: { icon: <Warehouse/>, color: 'bg-yellow-600' },
+     CasaCampo: { icon: <Mountain/>, color: 'bg-purple-600' },
+     Lote: { icon: <Layout/>, color: 'bg-gray-500' },
+     Local: { icon: <Store/>, color: 'bg-pink-600' },
+     Oficina: { icon: <Briefcase/>, color: 'bg-lime-600' }
+  };
+  const theme = typeConfig[prop.property_type] || typeConfig['Casa'];
 
   return (
     <div className="bg-[#F3F4F6] min-h-screen font-sans">
       <NavbarCustom />
       
-      {/* HEADER */}
+      {/* HERO */}
       <div className="relative h-[70vh] bg-gray-900 group">
          <img src={allImages[activeImg]} className="w-full h-full object-cover transition-opacity duration-500 opacity-90" />
          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
          <div className="absolute bottom-0 left-0 w-full p-6 md:p-16 text-white max-w-7xl mx-auto pt-32">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded mb-4 text-xs font-black uppercase tracking-widest bg-[#009B4D]">
-               <Home size={12}/> {prop.property_type}
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded mb-4 text-xs font-black uppercase tracking-widest ${theme.color}`}>
+               {theme.icon} {prop.property_type}
             </div>
             <h1 className="text-4xl md:text-7xl font-black uppercase leading-none mb-4 drop-shadow-xl">{prop.title || prop.address_visible}</h1>
             <div className="flex items-center gap-4 text-xl font-medium mb-6">
                <span className="flex items-center gap-1"><MapPin size={20} className="text-[#009B4D]"/> {prop.address_visible}</span>
                <span className="bg-white/20 px-2 py-0.5 rounded text-sm font-mono border border-white/30">{prop.ayc_id}</span>
             </div>
-            <div className="flex gap-8 items-end">
-               <div>
-                  <p className="text-xs text-gray-400 font-bold uppercase mb-1">PRECIO VENTA</p>
-                  <div className="text-5xl font-black text-[#009B4D]">${new Intl.NumberFormat('es-CO', { notation: "compact" }).format(prop.price_cop)}</div>
-               </div>
-               {prop.admin_price > 0 && (
-                  <div>
-                     <p className="text-xs text-gray-400 font-bold uppercase mb-1">ADMINISTRACIÓN</p>
-                     <div className="text-2xl font-bold text-white">${new Intl.NumberFormat('es-CO').format(prop.admin_price)}</div>
-                  </div>
-               )}
-            </div>
+            <div className="text-5xl font-black text-[#009B4D]">${new Intl.NumberFormat('es-CO', { notation: "compact" }).format(prop.price_cop)}</div>
          </div>
       </div>
 
@@ -68,70 +73,76 @@ const PropertyDetail = () => {
             
             {/* ICONOS RESUMEN */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-4 gap-4 text-center">
-               <div><Maximize className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xl">{prop.area_built || prop.area_lot}</span> <span className="text-[10px] uppercase font-bold text-gray-400">Metros²</span></div>
-               {prop.habs && <div><Bed className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xl">{prop.habs}</span> <span className="text-[10px] uppercase font-bold text-gray-400">Habs</span></div>}
-               {prop.baths && <div><Bath className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xl">{prop.baths}</span> <span className="text-[10px] uppercase font-bold text-gray-400">Baños</span></div>}
+               <div><Maximize className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xl">{prop.area_built || prop.area_lot || prop.area_lot_ha}</span> <span className="text-[10px] uppercase font-bold text-gray-400">{prop.property_type==='CasaCampo'?'Ha':'m²'}</span></div>
+               
+               {/* Condicionales según tipo */}
+               {prop.habs > 0 && <div><Bed className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xl">{prop.habs}</span> <span className="text-[10px] uppercase font-bold text-gray-400">Habs</span></div>}
+               {prop.baths > 0 && <div><Bath className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xl">{prop.baths}</span> <span className="text-[10px] uppercase font-bold text-gray-400">Baños</span></div>}
                {prop.parking_type && <div><Car className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xs uppercase pt-2 leading-tight">{prop.parking_type}</span> <span className="text-[10px] uppercase font-bold text-gray-400">Garaje</span></div>}
+               
+               {/* Específicos Lote/Bodega */}
+               {prop.property_type === 'Bodega' && <div><ArrowLeft className="mx-auto text-gray-400 mb-1 rotate-90"/> <span className="block font-black text-xl">{prop.height}m</span> <span className="text-[10px] uppercase font-bold text-gray-400">Altura</span></div>}
+               {prop.property_type === 'Lote' && <div><Layout className="mx-auto text-gray-400 mb-1"/> <span className="block font-black text-xs pt-2">{prop.soil_use}</span> <span className="text-[10px] uppercase font-bold text-gray-400">Uso</span></div>}
             </div>
 
-            {/* DESCRIPCIÓN */}
             <div className="bg-white p-8 rounded-2xl shadow-sm">
                <h3 className="text-xl font-black uppercase text-[#0A192F] mb-4">Descripción</h3>
                <p className="text-gray-600 whitespace-pre-line leading-relaxed">{prop.description}</p>
             </div>
 
-            {/* FICHA TÉCNICA (CASA DETALLADA) */}
+            {/* FICHA TÉCNICA DINÁMICA */}
             <div className="bg-white p-8 rounded-2xl shadow-sm">
                <h3 className="text-xl font-black uppercase text-[#0A192F] mb-6 flex items-center gap-2"><Layout size={20}/> Ficha Técnica</h3>
-               
-               {/* Dimensiones */}
-               <div className="mb-6">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 border-b pb-1">Dimensiones</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                     {prop.area_lot && <div><span className="text-gray-500 block text-xs">Lote</span> <span className="font-bold">{prop.area_lot} m²</span></div>}
-                     {prop.area_built && <div><span className="text-gray-500 block text-xs">Construida</span> <span className="font-bold">{prop.area_built} m²</span></div>}
-                     {prop.front && <div><span className="text-gray-500 block text-xs">Frente</span> <span className="font-bold">{prop.front} m</span></div>}
-                     {prop.depth && <div><span className="text-gray-500 block text-xs">Fondo</span> <span className="font-bold">{prop.depth} m</span></div>}
-                  </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                  
+                  {/* LOCAL */}
+                  {prop.property_type === 'Local' && (
+                     <>
+                        <div className="flex justify-between border-b pb-2"><span>Vitrina</span> <span className="font-bold">{prop.showcase_front} m</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Centro Comercial</span> <span className="font-bold">{prop.in_shopping_center ? 'Sí' : 'No'}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Piso</span> <span className="font-bold">{prop.floor_number}</span></div>
+                     </>
+                  )}
+
+                  {/* OFICINA */}
+                  {prop.property_type === 'Oficina' && (
+                     <>
+                        <div className="flex justify-between border-b pb-2"><span>Red Estructurada</span> <span className="font-bold">{prop.has_network ? 'Sí' : 'No'}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Sala Juntas</span> <span className="font-bold">{prop.meeting_room ? 'Sí' : 'No'}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Cafetería</span> <span className="font-bold">{prop.has_cafeteria ? 'Sí' : 'No'}</span></div>
+                     </>
+                  )}
+
+                  {/* BODEGA */}
+                  {prop.property_type === 'Bodega' && (
+                     <>
+                        <div className="flex justify-between border-b pb-2"><span>Energía</span> <span className="font-bold">{prop.energy_type}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Muelle</span> <span className="font-bold">{prop.dock?'Sí':'No'}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Entradas</span> <span className="font-bold">{prop.entrance_count}</span></div>
+                     </>
+                  )}
+
+                  {/* CASA CAMPO */}
+                  {prop.property_type === 'CasaCampo' && (
+                     <>
+                        <div className="flex justify-between border-b pb-2"><span>Topografía</span> <span className="font-bold">{prop.topography}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Agua</span> <span className="font-bold">{prop.water_source}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Cerramiento</span> <span className="font-bold">{prop.fencing}</span></div>
+                     </>
+                  )}
+
+                  {/* LOTE */}
+                  {prop.property_type === 'Lote' && (
+                     <>
+                        <div className="flex justify-between border-b pb-2"><span>Índice Ocupación</span> <span className="font-bold">{prop.occupation_index}</span></div>
+                        <div className="flex justify-between border-b pb-2"><span>Índice Construcción</span> <span className="font-bold">{prop.construction_index}</span></div>
+                     </>
+                  )}
+
+                  {/* COMUNES */}
+                  {prop.estrato && <div className="flex justify-between border-b pb-2"><span>Estrato</span> <span className="font-bold">{prop.estrato}</span></div>}
+                  {prop.admin_price > 0 && <div className="flex justify-between border-b pb-2"><span>Admon</span> <span className="font-bold">${new Intl.NumberFormat('es-CO').format(prop.admin_price)}</span></div>}
                </div>
-
-               {/* Detalles Interior */}
-               <div className="mb-6">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 border-b pb-1">Interior</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                     {prop.kitchen_type && <div className="flex items-center gap-2"><ChefHat size={16} className="text-[#009B4D]"/> <span>Cocina {prop.kitchen_type}</span></div>}
-                     {prop.dining_type && <div className="flex items-center gap-2"><Layout size={16} className="text-[#009B4D]"/> <span>Comedor {prop.dining_type}</span></div>}
-                     {prop.fireplace && <div className="flex items-center gap-2"><CheckCircle size={16} className="text-[#009B4D]"/> <span>Chimenea</span></div>}
-                     {prop.gas_type && <div className="flex items-center gap-2"><CheckCircle size={16} className="text-[#009B4D]"/> <span>Gas {prop.gas_type}</span></div>}
-                  </div>
-               </div>
-
-               {/* Zonas Comunes (Si es conjunto) */}
-               {prop.is_gated && prop.common_areas && (
-                  <div className="mb-6">
-                     <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 border-b pb-1">Conjunto Cerrado / Zonas Comunes</h4>
-                     <div className="grid grid-cols-2 gap-2 text-sm">
-                        {Object.keys(prop.common_areas).map(area => prop.common_areas[area] && (
-                           <div key={area} className="flex items-center gap-2"><ShieldCheck size={16} className="text-[#009B4D]"/> {area}</div>
-                        ))}
-                     </div>
-                  </div>
-               )}
-
-               {/* Niveles (Loop) */}
-               {prop.specs?.levels_data && prop.specs.levels_data.length > 0 && (
-                  <div>
-                     <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 border-b pb-1">Distribución por Niveles</h4>
-                     <div className="space-y-3">
-                        {prop.specs.levels_data.map((lvl, i) => (
-                           <div key={i} className="bg-gray-50 p-3 rounded-lg text-sm">
-                              <span className="font-bold text-[#009B4D] text-xs uppercase block mb-1">Nivel {lvl.level}</span>
-                              <p className="text-gray-600">{lvl.desc}</p>
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-               )}
             </div>
 
             {/* GALERÍA */}

@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Star, Trash2, Edit, Crown, ArrowLeft, LogOut, Home, Building2, Warehouse, Mountain, Map } from 'lucide-react';
+import { Star, Trash2, Edit, Crown, ArrowLeft, LogOut, Home, Building2, Warehouse, Mountain, Map, DollarSign } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import CustomModal from '../../components/ui/CustomModal';
 
 const Inventory = () => {
   const [props, setProps] = useState([]);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [modal, setModal] = useState({ open: false, type: 'success', msg: '' });
 
   const fetchProps = async () => {
     const { data } = await supabase.from('properties').select('*')
@@ -23,8 +21,8 @@ const Inventory = () => {
 
   const toggleSlot = async (id, type) => {
     const rpcName = type === 'hero' ? 'toggle_hero_slot' : 'toggle_opportunity_slot';
-    const { data, error } = await supabase.rpc(rpcName, { p_id: id });
-    if (error || !data.success) alert(error?.message || data?.msg);
+    const { data } = await supabase.rpc(rpcName, { p_id: id });
+    if (!data.success) alert(data.msg);
     else fetchProps();
   };
 
@@ -34,7 +32,6 @@ const Inventory = () => {
     fetchProps();
   };
 
-  // CONFIGURACIÓN DE TAGS VISUALES
   const typeConfig = {
     Casa: { color: 'bg-green-500/20 text-green-400 border-green-500/50', icon: <Home size={12}/>, label: 'Casa' },
     Apartamento: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/50', icon: <Building2 size={12}/>, label: 'Apto' },
@@ -60,8 +57,8 @@ const Inventory = () => {
              <table className="w-full text-sm text-gray-300">
                 <thead className="bg-black/40 text-xs font-bold text-gray-400 uppercase tracking-wider">
                    <tr>
-                      <th className="p-4 text-left">Inmueble</th>
-                      <th className="p-4 text-center">Tipo</th> {/* COLUMNA NUEVA */}
+                      <th className="p-4 text-left">Inmueble / Precio</th>
+                      <th className="p-4 text-center">Tipo</th>
                       <th className="p-4 text-center text-blue-400"><Star size={14} className="inline"/> Hero</th>
                       <th className="p-4 text-center text-yellow-400"><Crown size={14} className="inline"/> Reina</th>
                       <th className="p-4 text-center text-green-400">Fav</th>
@@ -74,34 +71,38 @@ const Inventory = () => {
                       return (
                       <tr key={p.id} className="hover:bg-white/5 transition-colors">
                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                               <img src={p.main_media_url} className="w-12 h-12 rounded-lg bg-gray-800 object-cover border border-gray-700"/>
+                            <div className="flex items-center gap-4">
+                               <img src={p.main_media_url} className="w-16 h-16 rounded-lg bg-gray-800 object-cover border border-gray-700"/>
                                <div>
-                                  <div className="font-bold text-white text-sm">{p.address_visible}</div>
-                                  <div className="text-[10px] font-mono text-[#009B4D] opacity-80">{p.ayc_id}</div>
+                                  {/* Muestra Título si existe, sino Barrio */}
+                                  <div className="font-bold text-white text-base">{p.title || p.address_visible}</div>
+                                  <div className="text-[10px] font-mono text-gray-400 mb-1">{p.ayc_id}</div>
+                                  {/* PRECIO VISIBLE */}
+                                  <div className="flex items-center gap-1 text-[#009B4D] font-black text-sm bg-[#009B4D]/10 px-2 py-0.5 rounded w-fit">
+                                     <DollarSign size={12}/> {new Intl.NumberFormat('es-CO').format(p.price_cop)}
+                                  </div>
                                </div>
                             </div>
                          </td>
                          
-                         {/* TAG DE COLOR ELEGANTE */}
                          <td className="p-4 text-center">
                             <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase border ${typeData.color}`}>
                                {typeData.icon} {typeData.label}
                             </div>
                          </td>
 
-                         <td className="p-4 text-center cursor-pointer hover:bg-blue-900/20 transition-colors" onClick={() => toggleSlot(p.id, 'hero')}>
-                            {p.is_hero ? <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center mx-auto shadow-lg shadow-blue-500/40">{p.hero_order}</div> : <div className="w-8 h-8 rounded-full border border-gray-700 mx-auto opacity-20 hover:border-blue-500"></div>}
+                         <td className="p-4 text-center cursor-pointer hover:bg-blue-900/20" onClick={() => toggleSlot(p.id, 'hero')}>
+                            {p.is_hero ? <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center mx-auto shadow-lg">{p.hero_order}</div> : <div className="w-8 h-8 rounded-full border border-gray-700 mx-auto opacity-20"></div>}
                          </td>
-                         <td className="p-4 text-center cursor-pointer hover:bg-yellow-900/20 transition-colors" onClick={() => toggleSlot(p.id, 'opportunity')}>
-                            <Crown size={24} className={`mx-auto transition-all ${p.is_opportunity ? 'text-yellow-400 fill-yellow-400 scale-110 drop-shadow-lg' : 'text-gray-700 opacity-20 hover:text-yellow-500'}`}/>
+                         <td className="p-4 text-center cursor-pointer hover:bg-yellow-900/20" onClick={() => toggleSlot(p.id, 'opportunity')}>
+                            <Crown size={24} className={`mx-auto transition-all ${p.is_opportunity ? 'text-yellow-400 fill-yellow-400 scale-110 drop-shadow-lg' : 'text-gray-700 opacity-20'}`}/>
                          </td>
                          <td className="p-4 text-center cursor-pointer" onClick={async () => { await supabase.from('properties').update({is_ayc_favorite: !p.is_ayc_favorite}).eq('id', p.id); fetchProps(); }}>
-                            <Star size={20} className={`mx-auto transition-all ${p.is_ayc_favorite ? 'text-green-500 fill-green-500 scale-110' : 'text-gray-700 opacity-20 hover:text-green-500'}`}/>
+                            <Star size={20} className={`mx-auto transition-all ${p.is_ayc_favorite ? 'text-green-500 fill-green-500 scale-110' : 'text-gray-700 opacity-20'}`}/>
                          </td>
                          <td className="p-4 text-right flex justify-end gap-2">
-                            <button onClick={() => navigate(`/dashboard/editar/${p.id}`)} className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-600 hover:text-white transition-all border border-blue-500/20"><Edit size={16}/></button>
-                            <button onClick={() => deleteProp(p.id)} className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-600 hover:text-white transition-all border border-red-500/20"><Trash2 size={16}/></button>
+                            <button onClick={() => navigate(`/dashboard/editar/${p.id}`)} className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-600 hover:text-white transition-all"><Edit size={16}/></button>
+                            <button onClick={() => deleteProp(p.id)} className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-600 hover:text-white transition-all"><Trash2 size={16}/></button>
                          </td>
                       </tr>
                    )})}
