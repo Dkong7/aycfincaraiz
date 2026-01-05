@@ -12,8 +12,8 @@ const LoginSpecial = () => {
   const { login } = useAuth();
 
   const getConfig = () => {
-    if (location.pathname === '/claclacla') return { theme: 'pink', bg: 'bg-pink-50', text: 'text-pink-600', btn: 'bg-pink-500 hover:bg-pink-600', title: 'BIENVENIDA MAESTRA', role: 'claudia' };
-    if (location.pathname === '/alfalfalf') return { theme: 'blue', bg: 'bg-[#050b14]', text: 'text-blue-400', btn: 'bg-blue-900 border-blue-500/30', title: 'SISTEMA CENTRAL', role: 'alfonso' };
+    if (location.pathname === '/claclacla') return { theme: 'pink', bg: 'bg-pink-50', text: 'text-pink-600', btn: 'bg-pink-500 hover:bg-pink-600', title: 'BIENVENIDA MA', role: 'claudia' };
+    if (location.pathname === '/alfalfalf') return { theme: 'blue', bg: 'bg-[#050b14]', text: 'text-blue-400', btn: 'bg-blue-900 border-blue-500/30', title: 'BIENVENIDO PA', role: 'alfonso' };
     return { theme: 'green', bg: 'bg-[#1a1a1a]', text: 'text-green-500', btn: 'bg-[#009B4D]', title: 'PORTAL AGENTES', role: 'agente' };
   };
   const config = getConfig();

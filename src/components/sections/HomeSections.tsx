@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { ArrowRight, Crown, Star, CheckCircle } from "lucide-react";
+import { ArrowRight, Crown, Star, CheckCircle, Calendar, X } from "lucide-react"; // Añadí Calendar y X
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlane, faVrCardboard, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import { pb } from "../../api";
 
 const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
 
+// ... (FeaturedProperties se mantiene IGUAL) ...
 export const FeaturedProperties = () => {
   const { t } = useLanguage();
   const [opportunity, setOpportunity] = useState<any>(null);
@@ -16,11 +17,9 @@ export const FeaturedProperties = () => {
   useEffect(() => {
     const fetchFeatured = async () => {
        try {
-         // SOLO UNA OPORTUNIDAD (REINA)
          const opp = await pb.collection("properties").getList(1, 1, { filter: "is_opportunity=true", sort: "-created", requestKey: null });
          if (opp.items.length > 0) setOpportunity(opp.items[0]);
 
-         // FAVORITOS (VERDES - HASTA 3 EN HOME, PERO EN DB PUEDEN SER 10)
          const favs = await pb.collection("properties").getList(1, 3, { filter: "is_ayc_favorite=true && is_opportunity=false", sort: "-created", requestKey: null });
          setFavorites(favs.items);
        } catch (e) { console.error(e); }
@@ -40,14 +39,9 @@ export const FeaturedProperties = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-           
-           {/* --- CARD REINA (OPORTUNIDAD CON EFECTO DORADO) --- */}
            {opportunity && (
              <div className="lg:col-span-1 bg-white rounded-2xl shadow-xl overflow-hidden group border-4 border-[#D4AF37] relative flex flex-col h-full ring-4 ring-[#D4AF37]/20 transition-transform hover:-translate-y-2">
-                
-                {/* EFECTO REFLEJO DORADO ANIMADO */}
                 <div className="absolute inset-0 z-30 pointer-events-none bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-shine"></div>
-
                 <div className="absolute top-0 left-0 w-full bg-[#D4AF37] text-white text-center text-xs font-black py-2 uppercase tracking-widest z-20 flex items-center justify-center gap-2 shadow-md">
                    <Crown size={14}/> {t.featured.goldBadge}
                 </div>
@@ -66,7 +60,6 @@ export const FeaturedProperties = () => {
              </div>
            )}
 
-           {/* --- CARDS FAVORITOS (VERDES) --- */}
            <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${opportunity ? "lg:col-span-3" : "lg:col-span-4"}`}>
               {favorites.map(p => (
                 <div key={p.id} className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:-translate-y-2 transition-all duration-300 border border-gray-100 flex flex-col">
@@ -95,7 +88,7 @@ export const FeaturedProperties = () => {
   );
 };
 
-// ... (ServicesIntro y LatestBlog se mantienen igual) ...
+// ... (ServicesIntro se mantiene IGUAL) ...
 export const ServicesIntro = () => {
   const { t } = useLanguage();
   return (
@@ -139,12 +132,44 @@ export const ServicesIntro = () => {
   );
 };
 
+// --- LATEST BLOG: AHORA SÍ CARGA DATOS ---
 export const LatestBlog = () => {
   const { t } = useLanguage();
+  const [posts, setPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+        try {
+            const res = await pb.collection("posts").getList(1, 3, { sort: "-created" });
+            setPosts(res.items);
+        } catch(e) { console.error(e); }
+    };
+    loadPosts();
+  }, []);
+
   return (
     <section className="py-24 bg-white text-center">
-       <h2 className="text-3xl font-black text-[#0A192F] uppercase mb-10">{t.blog.title}</h2>
-       <p className="text-gray-500">Conoce las últimas noticias del sector.</p>
+       <div className="max-w-6xl mx-auto px-6">
+           <h2 className="text-3xl font-black text-[#0A192F] uppercase mb-4">{t.blog.title}</h2>
+           <p className="text-gray-500 mb-12">Conoce las últimas noticias del sector.</p>
+           
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               {posts.map(p => (
+                   <Link to="/blog" key={p.id} className="group text-left block">
+                       <div className="h-64 rounded-2xl overflow-hidden mb-6 bg-gray-100 relative">
+                           {p.image && <img src={`${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>}
+                           <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-[#0A192F] px-3 py-1 text-[10px] font-bold uppercase rounded-full">
+                               {new Date(p.created).toLocaleDateString()}
+                           </div>
+                       </div>
+                       <h3 className="text-xl font-bold text-[#0A192F] mb-3 group-hover:text-green-600 transition-colors leading-tight">{p.title}</h3>
+                       <p className="text-sm text-gray-500 line-clamp-3">{p.excerpt}</p>
+                   </Link>
+               ))}
+           </div>
+           
+           {posts.length === 0 && <p className="text-sm text-gray-400 italic">No hay noticias recientes.</p>}
+       </div>
     </section>
   );
 };

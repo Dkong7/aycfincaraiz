@@ -40,9 +40,26 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
 
   // Estilos del Tema
   const s = ((t) => {
-    if(t === "claudia") return { card: "bg-white border-pink-200", btn: "bg-pink-500 hover:bg-pink-600 text-white", label: "text-pink-500" };
-    if(t === "alfonso") return { card: "bg-[#111] border-amber-900/30", btn: "bg-amber-700 hover:bg-amber-600 text-white", label: "text-amber-600" };
-    return { card: "bg-white border-gray-200", btn: "bg-[#009B4D] hover:bg-[#007a3d] text-white", label: "text-[#0A192F]" };
+    // CLAUDIA
+    if(t === "claudia") return { 
+        card: "bg-white border-pink-200 text-gray-800", 
+        btn: "bg-pink-500 hover:bg-pink-600 text-white", 
+        label: "text-pink-500" 
+    };
+    
+   // ALFONSO (TIERRA - FONDO CLARO)
+   if(t === "alfonso") return { 
+      card: "bg-[#FDFBF7] border-[#8D6E63] text-[#3E2723] shadow-xl", // Fondo Hueso/Crema
+      btn: "bg-[#5D4037] hover:bg-[#3E2723] text-[#FFE0B2] border border-[#8D6E63]", // Botón Café
+      label: "text-[#BF360C] font-bold tracking-wide" // Labels Terracota
+   };
+    
+    // DEFAULT
+    return { 
+        card: "bg-white border-gray-200 text-gray-900", 
+        btn: "bg-[#009B4D] hover:bg-[#007a3d] text-white", 
+        label: "text-[#0A192F]" 
+    };
   })(theme);
 
   // Carga inicial
@@ -149,7 +166,6 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
                  </div>
               )}
 
-              {/* AQUÍ ESTABA EL PROBLEMA: AÑADIDO "Casa Campo" y "CasaCampo" */}
               {(activeType === "Finca" || activeType === "Rural" || activeType === "Casa Campestre" || activeType === "Casa Campo" || activeType === "CasaCampo") && (
                  <div className="p-6 border-l-4 border-purple-500 bg-purple-50/10 rounded-xl shadow-sm">
                     <RuralSpecs register={register} s={s} />

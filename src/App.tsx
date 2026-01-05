@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Properties from "./pages/Properties";
 import PropertyDetail from "./pages/PropertyDetail";
 import DashboardInventario from "./pages/DashboardInventario";
+import DashboardBlog from "./pages/DashboardBlog"; // <--- IMPORTACIÓN NUEVA
 import Login from "./pages/Login";
 import About from "./pages/About"; 
 import Blog from "./pages/Blog";
@@ -21,6 +22,7 @@ const MainLayout = () => {
       <Navbar language={language} toggleLanguage={toggleLanguage} />
       <main className="flex-grow">
         <Routes>
+          {/* RUTAS PÚBLICAS */}
           <Route path="/" element={<Home />} />
           <Route path="/inmuebles" element={<Properties />} />
           <Route path="/inmuebles/:id" element={<PropertyDetail />} />
@@ -32,12 +34,14 @@ const MainLayout = () => {
           <Route path="/servicios/juridico" element={<Juridico />} />
           <Route path="/servicios/avaluos" element={<Avaluos />} />
           
+          {/* RUTAS PRIVADAS (DASHBOARD) */}
           <Route path="/dashboard/inventario" element={<DashboardInventario />} />
+          <Route path="/dashboard/blog" element={<DashboardBlog />} /> {/* <--- RUTA NUEVA */}
           
           {/* LOGINS */}
           <Route path="/claclacla" element={<Login />} />
           <Route path="/alfalfalf" element={<Login />} />
-          <Route path="/agentes" element={<Login />} /> {/* ✅ ESTA ES LA LÍNEA QUE FALTABA */}
+          <Route path="/agentes" element={<Login />} />
         </Routes>
       </main>
       <Footer />
