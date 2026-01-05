@@ -1,42 +1,81 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkerAlt, faEnvelope, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { useApp } from "../context/AppContext";
+﻿import React from "react";
+import { Mail, Phone, Instagram, Facebook, Linkedin } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const Contact = () => {
-  const { t } = useApp();
-  const PHONE = "+57 313 466 3832";
-  const ADDRESS = "Calle 20 Sur # 69B - 80";
-
+  const { t } = useLanguage();
   return (
-    <div className="bg-gray-50 min-h-screen pb-12">
-      <div className="bg-blue-900 text-white py-24 text-center relative overflow-hidden">
-         <div className="absolute inset-0 bg-[url(''https://www.transparenttextures.com/patterns/carbon-fibre.png'')] opacity-20"></div>
-         <h1 className="text-5xl font-bold relative z-10 mb-2">{t("nav_contact")}</h1>
-         <p className="text-blue-200 relative z-10 text-xl font-light">Estamos listos para asesorarte</p>
-      </div>
-      <div className="max-w-5xl mx-auto px-6 -mt-16 relative z-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white p-10 rounded-2xl shadow-xl h-fit border-t-8 border-yellow-500">
-             <h3 className="text-2xl font-bold mb-8 text-blue-900">Información de Contacto</h3>
-             <ul className="space-y-8">
-                <li className="flex gap-5 items-start"><div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-900 text-xl"><FontAwesomeIcon icon={faMapMarkerAlt} /></div><div><p className="font-bold text-gray-800 text-lg">Ubicación</p><p className="text-gray-500 text-sm leading-relaxed">{ADDRESS}<br/>Bogotá D.C.</p></div></li>
-                <li className="flex gap-5 items-start"><div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-600 text-xl"><FontAwesomeIcon icon={faWhatsapp} /></div><div><p className="font-bold text-gray-800 text-lg">WhatsApp & Móvil</p><p className="text-gray-500 text-lg font-mono font-bold">{PHONE}</p></div></li>
-                <li className="flex gap-5 items-start"><div className="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-600 text-xl"><FontAwesomeIcon icon={faEnvelope} /></div><div><p className="font-bold text-gray-800 text-lg">Email</p><p className="text-gray-500 text-sm">info@aycfincaraiz.com</p></div></li>
-             </ul>
+    <div className="bg-gray-50 min-h-screen font-sans">
+       <Navbar language="ES" toggleLanguage={() => {}} />
+       
+       <div className="pt-32 pb-20 max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16">
+          
+          {/* INFO */}
+          <div>
+             <h1 className="text-5xl font-black text-[#0A192F] uppercase mb-6">{t.contact.title}</h1>
+             <p className="text-gray-500 text-lg mb-10 leading-relaxed">
+                Estamos listos para escucharte. Ya sea para valorar tu propiedad, buscar tu nuevo hogar o estructurar un negocio inmobiliario, nuestro equipo está a tu disposición.
+             </p>
+             
+             <div className="space-y-6 mb-12">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-green-600/10 text-green-600 rounded-full flex items-center justify-center">
+                      <Phone size={24}/>
+                   </div>
+                   <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase">{t.contact.call}</p>
+                      <p className="text-xl font-bold text-[#0A192F]">+57 313 466 3832</p>
+                   </div>
+                </div>
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-green-600/10 text-green-600 rounded-full flex items-center justify-center">
+                      <Mail size={24}/>
+                   </div>
+                   <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase">{t.contact.write}</p>
+                      <p className="text-xl font-bold text-[#0A192F]">info@aycfincaraiz.com</p>
+                   </div>
+                </div>
+             </div>
+
+             <div className="flex gap-4">
+                <a href="#" className="p-3 bg-white shadow-lg rounded-full hover:bg-green-600 hover:text-white transition-all"><Instagram/></a>
+                <a href="#" className="p-3 bg-white shadow-lg rounded-full hover:bg-green-600 hover:text-white transition-all"><Facebook/></a>
+                <a href="#" className="p-3 bg-white shadow-lg rounded-full hover:bg-green-600 hover:text-white transition-all"><Linkedin/></a>
+             </div>
           </div>
-          <div className="bg-blue-900 p-10 rounded-2xl shadow-xl text-white">
-             <h3 className="text-2xl font-bold mb-2">Escríbenos</h3>
-             <p className="text-blue-200 mb-8 text-sm">Responderemos a tu solicitud en breve.</p>
-             <form className="space-y-5">
-                <div><label className="block text-xs font-bold text-blue-200 uppercase mb-2">Nombre Completo</label><input type="text" className="w-full p-4 bg-blue-800 border border-blue-700 rounded-lg focus:bg-blue-700 outline-none transition text-white placeholder-blue-400" placeholder="Tu nombre" /></div>
-                <div><label className="block text-xs font-bold text-blue-200 uppercase mb-2">Teléfono</label><input type="tel" className="w-full p-4 bg-blue-800 border border-blue-700 rounded-lg focus:bg-blue-700 outline-none transition text-white placeholder-blue-400" placeholder="+57 ..." /></div>
-                <div><label className="block text-xs font-bold text-blue-200 uppercase mb-2">Mensaje</label><textarea rows={4} className="w-full p-4 bg-blue-800 border border-blue-700 rounded-lg focus:bg-blue-700 outline-none transition text-white placeholder-blue-400" placeholder="Estoy interesado en..."></textarea></div>
-                <button type="submit" className="w-full bg-yellow-500 text-blue-900 font-bold py-4 rounded-lg hover:bg-yellow-400 transition flex items-center justify-center gap-3 shadow-lg mt-4"><FontAwesomeIcon icon={faPaperPlane} /> ENVIAR</button>
+
+          {/* FORMULARIO */}
+          <div className="bg-white p-10 rounded-3xl shadow-2xl h-fit">
+             <form className="space-y-6">
+                <div>
+                   <label className="block text-xs font-bold text-gray-400 mb-2 uppercase">{t.contact.name}</label>
+                   <input type="text" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-green-600 transition-colors" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div>
+                      <label className="block text-xs font-bold text-gray-400 mb-2 uppercase">{t.contact.phone}</label>
+                      <input type="text" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-green-600 transition-colors" />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-gray-400 mb-2 uppercase">{t.contact.email}</label>
+                      <input type="email" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-green-600 transition-colors" />
+                   </div>
+                </div>
+                <div>
+                   <label className="block text-xs font-bold text-gray-400 mb-2 uppercase">{t.contact.msg}</label>
+                   <textarea rows={4} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-green-600 transition-colors"></textarea>
+                </div>
+                <button className="w-full py-4 bg-[#0A192F] text-white font-bold rounded-xl hover:bg-green-600 transition-colors uppercase tracking-widest shadow-lg">
+                   {t.contact.send}
+                </button>
              </form>
           </div>
-        </div>
-      </div>
+
+       </div>
+       <Footer />
     </div>
   );
 };

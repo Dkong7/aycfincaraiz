@@ -1,86 +1,83 @@
-﻿import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { supabase } from "../supabaseClient";
-import { useApp } from "../context/AppContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt, faUser, faArrowRight, faNewspaper } from "@fortawesome/free-solid-svg-icons";
+﻿import React, { useEffect, useState } from "react";
+import { Calendar, User } from "lucide-react";
+import { pb } from "../api";
+import { useLanguage } from "../context/LanguageContext";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
+// DATOS DE RESPALDO (Por si no hay conexión a DB)
+const STATIC_POSTS = [
+  { id: "1", title: "El Gran Giro del 2025: Arriendos Superan a Propietarios", created: "2025-12-25", author: "Claudia Cabrera", image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800", excerpt: "El cierre del año nos ha dejado cifras que marcan un hito en la historia inmobiliaria de Colombia." },
+  { id: "2", title: "Bogotá se Transforma: Metro Calle 26 y ZiBo", created: "2025-12-24", author: "Alfonso Diaz", image: "https://images.unsplash.com/photo-1573167243872-43c6433b9d40?q=80&w=800", excerpt: "La cara de Bogotá está cambiando y con ella, las oportunidades de valorización." },
+  { id: "3", title: "¿Dónde Invertir en 2026? Logística y Lujo", created: "2025-12-23", author: "Equipo A&C", image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800", excerpt: "Las encuestas son contundentes: el 100% de los inversionistas institucionales planean nuevas apuestas." },
+  { id: "4", title: "Sostenibilidad: El nuevo estándar de lujo", created: "2025-12-20", author: "Claudia Cabrera", image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800", excerpt: "Los paneles solares y la certificación LEED ya no son un plus, son un requisito." }
+];
 
 const Blog = () => {
-  const { t, lang } = useApp();
+  const { t } = useLanguage();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
 
   useEffect(() => {
     const fetchPosts = async () => {
-      // Forzamos recarga al cambiar idioma para asegurar consistencia
-      const { data } = await supabase
-        .from("blogs")
-        .select("*")
-        .eq("active", true)
-        .order("created_at", { ascending: false });
-      if (data) setPosts(data);
-      setLoading(false);
+       try {
+         // Intentar cargar de PocketBase (Colección "posts" o "blogs")
+         const result = await pb.collection("posts").getList(1, 20, { sort: "-created" });
+         if (result.items.length > 0) {
+            setPosts(result.items);
+         } else {
+            setPosts(STATIC_POSTS); // Usar estáticos si DB vacía
+         }
+       } catch (e) {
+         console.warn("No se pudo conectar al blog en DB, usando estáticos.", e);
+         setPosts(STATIC_POSTS);
+       } finally {
+         setLoading(false);
+       }
     };
     fetchPosts();
-  }, [lang]);
+  }, []);
 
-  const formatDate = (dateString: string) => {
-    const locale = lang === "EN" ? "en-US" : "es-ES";
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(locale, options);
+  const formatDate = (dateStr: string) => {
+     if(!dateStr) return "";
+     return new Date(dateStr).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }).toUpperCase();
   };
 
-  // Helper de traducción
-  const getLoc = (es: any, en: any) => (lang === "EN" && en) ? en : es;
-
   return (
-    <div className="bg-gray-50 min-h-screen py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-           <h1 className="text-4xl font-bold text-blue-900 mb-4 uppercase tracking-wider flex items-center justify-center gap-3">
-              <FontAwesomeIcon icon={faNewspaper} /> {t("blog_title")}
-           </h1>
-           <div className="w-24 h-2 bg-yellow-500 mx-auto rounded-full"></div>
-        </div>
+    <div className="bg-white min-h-screen font-sans">
+       <Navbar language="ES" toggleLanguage={() => {}} />
+       
+       <div className="bg-[#0A192F] text-white pt-32 pb-20 px-6 text-center">
+          <h1 className="text-5xl font-black uppercase mb-4">{t.blog.title}</h1>
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg">{t.blog.subtitle}</p>
+       </div>
 
-        {loading ? (
-           <div className="flex justify-center py-20 text-blue-900 font-bold">...</div>
-        ) : posts.length === 0 ? (
-           <div className="text-center text-gray-500 py-20">
-              <p className="text-xl">{t("blog_empty")}</p>
-           </div>
-        ) : (
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                 <article key={post.id} className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 flex flex-col h-full">
-                    <div className="h-56 overflow-hidden relative">
-                       <img src={post.image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
-                    </div>
-                    <div className="p-6 flex flex-col flex-grow">
-                       <div className="flex items-center gap-4 text-xs text-gray-500 mb-4 font-medium uppercase tracking-wider">
-                          <span className="flex items-center gap-1"><FontAwesomeIcon icon={faCalendarAlt} className="text-yellow-500" /> {formatDate(post.created_at)}</span>
-                          <span className="flex items-center gap-1"><FontAwesomeIcon icon={faUser} className="text-yellow-500" /> {post.author}</span>
-                       </div>
-                       
-                       {/* TÍTULO Y CONTENIDO TRADUCIDO */}
-                       <h2 className="text-xl font-bold text-gray-800 mb-4 leading-tight line-clamp-2">
-                          {getLoc(post.title, post.title_en)}
-                       </h2>
-                       <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-6 flex-grow">
-                          {getLoc(post.content, post.content_en)}
-                       </p>
-                       
-                       <Link to={`/blog/${post.id}`} className="text-blue-900 font-bold text-sm uppercase tracking-wider flex items-center gap-2 group-hover:gap-4 transition-all mt-auto">
-                          {t("read_more")} <FontAwesomeIcon icon={faArrowRight} className="text-yellow-500" />
-                       </Link>
-                    </div>
-                 </article>
-              ))}
-           </div>
-        )}
-      </div>
+       <div className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {loading ? <div className="col-span-3 text-center py-20">Cargando noticias...</div> : posts.map(post => {
+             // Determinar imagen (URL de DB o URL Estática)
+             const imgUrl = post.collectionId 
+                ? `${PB_URL}/api/files/${post.collectionId}/${post.id}/${post.image}` 
+                : post.image;
+
+             return (
+               <article key={post.id} className="group cursor-pointer hover:-translate-y-2 transition-transform duration-300">
+                  <div className="h-60 rounded-xl overflow-hidden mb-4 bg-gray-100 relative">
+                     <img src={imgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                  </div>
+                  <div className="flex gap-4 text-xs font-bold text-green-600 mb-2 uppercase tracking-wider">
+                     <span className="flex items-center gap-1"><Calendar size={12}/> {formatDate(post.created)}</span>
+                     <span className="flex items-center gap-1"><User size={12}/> {post.author || "Redacción A&C"}</span>
+                  </div>
+                  <h2 className="text-2xl font-black text-[#0A192F] leading-tight mb-3 group-hover:text-green-600 transition-colors line-clamp-2">{post.title}</h2>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-3">{post.excerpt || post.content}</p>
+                  <span className="text-[#0A192F] font-bold text-sm border-b-2 border-green-600 pb-1 uppercase">{t.blog.readMore}</span>
+               </article>
+             );
+          })}
+       </div>
+       <Footer />
     </div>
   );
 };
-
 export default Blog;
