@@ -37,10 +37,10 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [pendingData, setPendingData] = useState<any>(null);
 
-  // Calcular imágenes para preview (mezcla nuevas y existentes)
+  // Mezcla de imágenes para preview
   const previewImages = [
-      ...images.map(file => URL.createObjectURL(file)), // Nuevas (blob)
-      ...(initialData?.images?.map((img: string) => `${PB_URL}/api/files/${initialData.collectionId}/${initialData.id}/${img}`) || []) // Existentes (URL)
+      ...images.map(file => URL.createObjectURL(file)), 
+      ...(initialData?.images?.map((img: string) => `${PB_URL}/api/files/${initialData.collectionId}/${initialData.id}/${img}`) || [])
   ];
 
   const { register, control, handleSubmit, watch, setValue, getValues, reset } = useForm({
@@ -65,31 +65,21 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
     }
   }, [initialData, reset]);
 
-  // --- DICCIONARIO MAESTRO ---
+  // --- DICCIONARIO ---
   const getLabel = (key: string) => {
       const labels: any = {
-          habs: "Habitaciones", rooms: "Habitaciones", 
-          baths: "Baños", bathrooms: "Baños",
-          garages: "Garajes", garage_type: "Tipo Garaje",
-          area_built: "Área Cons.", area_private: "Área Priv.", area_lot: "Área Lote",
-          area_total: "Área Total", area_free: "Área Libre",
-          kitchen: "Cocina", kitchen_type: "Tipo Cocina", 
-          dining: "Comedor", study: "Estudio", 
-          floors: "Pisos", floor_material: "Material Pisos",
-          view_type: "Tipo Vista", view_direction: "Dir. Vista", 
-          has_balcony: "Tiene Balcón", balcony_area: "Área Balcón",
-          floor_number: "Piso Nº", total_floors: "Total Pisos",
-          building_age: "Edad Edif.", antiquity: "Antigüedad",
-          building_name: "Edificio", unit_detail: "Int/Apto",
-          admin: "Administración", maintenance_fee: "Cuota Admin", 
-          stratum: "Estrato", legal_status: "Estado Legal", admin_contact: "Contacto Admin",
-          industrial_gas: "Gas Ind.", gas_type: "Tipo Gas", 
-          three_phase: "Trifásica", energy_kva: "KVA",
-          loading_zone: "Zona Carga", grease_trap: "Trampa Grasa", 
-          height: "Altura (m)",
-          has_rent: "Rentado", rent_type: "Tipo Renta", rent_desc: "Desc. Renta",
-          water_source: "Fuente Agua", topography: "Topografía",
-          has_social: "Salón Social", has_surveillance: "Vigilancia",
+          habs: "Habitaciones", rooms: "Habitaciones", baths: "Baños", bathrooms: "Baños",
+          garages: "Garajes", garage_type: "Tipo Garaje", area_built: "Área Cons.", area_private: "Área Priv.", 
+          area_lot: "Área Lote", area_total: "Área Total", area_free: "Área Libre",
+          kitchen: "Cocina", kitchen_type: "Tipo Cocina", dining: "Comedor", study: "Estudio", 
+          floors: "Pisos", floor_material: "Material Pisos", view_type: "Tipo Vista", view_direction: "Dir. Vista", 
+          has_balcony: "Tiene Balcón", balcony_area: "Área Balcón", floor_number: "Piso Nº", total_floors: "Total Pisos",
+          building_age: "Edad Edif.", antiquity: "Antigüedad", building_name: "Edificio", unit_detail: "Int/Apto",
+          admin: "Administración", maintenance_fee: "Cuota Admin", stratum: "Estrato", legal_status: "Estado Legal", 
+          admin_contact: "Contacto Admin", industrial_gas: "Gas Ind.", gas_type: "Tipo Gas", 
+          three_phase: "Trifásica", energy_kva: "KVA", loading_zone: "Zona Carga", grease_trap: "Trampa Grasa", 
+          height: "Altura (m)", has_rent: "Rentado", rent_type: "Tipo Renta", rent_desc: "Desc. Renta",
+          water_source: "Fuente Agua", topography: "Topografía", has_social: "Salón Social", has_surveillance: "Vigilancia",
           building_features: "Amenidades", features: "Características"
       };
       return labels[key] || key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
@@ -107,23 +97,20 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
       return String(val);
   };
 
-  // --- MAPEO DE ICONOS (Devuelve elemento directo para evitar error TS) ---
   const getIconElement = (key: string) => {
       const size = 18;
       const icons: any = {
-          habs: <Bed size={size}/>, rooms: <Bed size={size}/>, 
-          baths: <Bath size={size}/>, bathrooms: <Bath size={size}/>, 
-          garages: <Car size={size}/>, garage_type: <Car size={size}/>,
-          area_built: <Ruler size={size}/>, area_private: <Maximize size={size}/>, area_lot: <Maximize size={size}/>, balcony_area: <Maximize size={size}/>,
-          area_total: <Maximize size={size}/>, area_free: <Maximize size={size}/>,
-          kitchen: <Utensils size={size}/>, kitchen_type: <Utensils size={size}/>, dining: <Utensils size={size}/>,
-          admin: <Receipt size={size}/>, maintenance_fee: <Receipt size={size}/>, 
-          stratum: <Layers size={size}/>, floor_number: <ArrowUpFromLine size={size}/>, total_floors: <Building size={size}/>,
-          antiquity: <Calendar size={size}/>, building_age: <Calendar size={size}/>,
-          has_surveillance: <Shield size={size}/>, has_rent: <Key size={size}/>, legal_status: <FileText size={size}/>, admin_contact: <Phone size={size}/>,
-          view_type: <Eye size={size}/>, view_direction: <Eye size={size}/>,
-          industrial_gas: <Flame size={size}/>, gas_type: <Flame size={size}/>, energy_kva: <Zap size={size}/>, three_phase: <Zap size={size}/>,
-          loading_zone: <Warehouse size={size}/>, height: <ArrowUpFromLine size={size}/>,
+          habs: <Bed size={size}/>, rooms: <Bed size={size}/>, baths: <Bath size={size}/>, bathrooms: <Bath size={size}/>, 
+          garages: <Car size={size}/>, garage_type: <Car size={size}/>, area_built: <Ruler size={size}/>, 
+          area_private: <Maximize size={size}/>, area_lot: <Maximize size={size}/>, balcony_area: <Maximize size={size}/>,
+          area_total: <Maximize size={size}/>, area_free: <Maximize size={size}/>, kitchen: <Utensils size={size}/>, 
+          kitchen_type: <Utensils size={size}/>, dining: <Utensils size={size}/>, admin: <Receipt size={size}/>, 
+          maintenance_fee: <Receipt size={size}/>, stratum: <Layers size={size}/>, floor_number: <ArrowUpFromLine size={size}/>, 
+          total_floors: <Building size={size}/>, antiquity: <Calendar size={size}/>, building_age: <Calendar size={size}/>,
+          has_surveillance: <Shield size={size}/>, has_rent: <Key size={size}/>, legal_status: <FileText size={size}/>, 
+          admin_contact: <Phone size={size}/>, view_type: <Eye size={size}/>, view_direction: <Eye size={size}/>,
+          industrial_gas: <Flame size={size}/>, gas_type: <Flame size={size}/>, energy_kva: <Zap size={size}/>, 
+          three_phase: <Zap size={size}/>, loading_zone: <Warehouse size={size}/>, height: <ArrowUpFromLine size={size}/>,
           building_features: <Briefcase size={size}/>
       };
       return icons[key] || <AlignJustify size={size}/>;
@@ -143,21 +130,32 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
       formData.append("title", pendingData.title || "Sin Título");
       formData.append("property_type", activeType || "Casa");
       
+      // === CORRECCIÓN: NOMBRES DE CAMPOS EXACTOS SEGÚN POCKETBASE ===
+      formData.append("description", pendingData.description || ""); // Faltaba
+      formData.append("municipality", pendingData.municipality || "Bogotá");
+      formData.append("neighborhood", pendingData.neighborhood || "");
+      formData.append("address_text", pendingData.address_visible || ""); // Cambio address -> address_text
+      
       const cleanNumber = (val: any) => String(Number(String(val || "0").replace(/\./g, "")) || 0);
       formData.append("price_cop", cleanNumber(pendingData.price_cop));
       formData.append("price_usd", cleanNumber(pendingData.price_usd));
-      formData.append("municipality", pendingData.municipality || "Bogotá");
-      formData.append("neighborhood", pendingData.neighborhood || "");
-      formData.append("address", pendingData.address_visible || ""); 
       
       if(!initialData) formData.append("ayc_id", "AYC-" + Math.floor(Math.random()*9000+1000));
       formData.append("specs", JSON.stringify(pendingData.specs)); 
+      
+      // DATOS PRIVADOS (Deben existir las columnas en PocketBase)
       formData.append("owner_name", pendingData.owner_name || "");
       formData.append("owner_phone", pendingData.owner_phone || "");
       formData.append("owner_email", pendingData.owner_email || "");
       formData.append("address_private", pendingData.address_private || "");
       
+      // Estado legal (si aplica)
+      if (pendingData.specs.legal_status && Array.isArray(pendingData.specs.legal_status)) {
+          formData.append("legal_status", pendingData.specs.legal_status.join(", "));
+      }
+
       if (pb.authStore.model?.id) formData.append("agent", pb.authStore.model.id);
+      
       images.forEach((file) => formData.append("images", file));
 
       if (initialData) await pb.collection("properties").update(initialData.id, formData);
@@ -237,10 +235,10 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
                           </div>
                       )}
 
-                      {/* 3. GALERÍA VISUAL (Horizontal Scroll) */}
+                      {/* 3. GALERÍA VISUAL */}
                       {previewImages.length > 0 && (
                           <div>
-                              <p className="text-[10px] font-bold uppercase text-gray-400 mb-2">Galería ({previewImages.length})</p>
+                              <p className="text-[10px] font-bold uppercase text-gray-400 mb-2">Galería Total ({previewImages.length})</p>
                               <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-200">
                                   {previewImages.map((img, i) => (
                                       <img key={i} src={img} className="h-20 w-20 object-cover rounded-lg border border-gray-200 shrink-0 shadow-sm" title={`Foto ${i+1}`}/>
@@ -249,7 +247,7 @@ export default function CreatePropertyForm({ theme, initialData, onSuccess }: an
                           </div>
                       )}
 
-                      {/* 4. ICONOS EN UNA SOLA FILA (Scroll Horizontal) */}
+                      {/* 4. ICONOS */}
                       <div className="overflow-x-auto pb-2 -mx-2 px-2">
                           <div className="flex gap-3 min-w-max">
                                {['habs', 'rooms', 'baths', 'bathrooms', 'garages', 'area_built', 'area_total', 'stratum', 'antiquity', 'building_age', 'floor_number', 'total_floors'].map(key => {

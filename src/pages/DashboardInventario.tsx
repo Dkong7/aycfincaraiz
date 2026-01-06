@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { pb } from "../api"; // Asegúrate que este import apunte a tu configuración de Pocketbase
-import { LayoutGrid, PlusCircle, LogOut, Edit, Trash, Star, Crown, Zap, BookOpen } from "lucide-react";
+import { LayoutGrid, PlusCircle, LogOut, Edit, Trash, Star, Crown, Zap, BookOpen, Users } from "lucide-react";
 import CreatePropertyForm from "../components/dashboard/CreatePropertyForm";
 
 export default function DashboardInventario() {
@@ -13,7 +13,12 @@ export default function DashboardInventario() {
   const theme = localStorage.getItem("ayc_theme") || "agent";
   const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
 
-  // --- LÓGICA DE TEMAS (Aquí está el arreglo de Alfonso Tierra) ---
+  // --- OBTENER USUARIO ACTUAL Y ROL ---
+  const currentUser = pb.authStore.model;
+  // Definimos quiénes son los "Jefes"
+  const isManager = ["Alfonso", "Claudia", "admin"].includes(currentUser?.role || "");
+
+  // --- LÓGICA DE TEMAS ---
   const s = ((t) => {
       // TEMA CLAUDIA (Rosa)
       if (t === "claudia") return { 
@@ -24,13 +29,13 @@ export default function DashboardInventario() {
           tableHeader: "bg-pink-50 text-pink-400" 
       };
       
-      // TEMA ALFONSO (TIERRA / CAFÉ) - CORREGIDO
+      // TEMA ALFONSO (TIERRA / CAFÉ)
       if (t === "alfonso") return { 
-          mainBg: "bg-[#F4F1EA]", // Fondo Hueso/Crema
-          sidebar: "bg-[#1F1612] border-[#3E2C20]", // Sidebar Café Profundo
-          sidebarText: "text-[#E8DCCA]", // Texto Arena
-          activeBtn: "bg-[#3E2C20] text-[#D97706] shadow-inner", // Botón activo café medio con texto Ámbar
-          tableHeader: "bg-[#261C16] text-[#E8DCCA]" // Cabecera de tabla oscura
+          mainBg: "bg-[#F4F1EA]", 
+          sidebar: "bg-[#1F1612] border-[#3E2C20]", 
+          sidebarText: "text-[#E8DCCA]", 
+          activeBtn: "bg-[#3E2C20] text-[#D97706] shadow-inner", 
+          tableHeader: "bg-[#261C16] text-[#E8DCCA]" 
       };
       
       // TEMA DEFAULT (Agente / Azul)
@@ -47,52 +52,47 @@ export default function DashboardInventario() {
 
   const loadInventory = async () => {
     try {
+       // La regla API en PocketBase filtra automáticamente qué ve cada uno.
+       // Alfonso/Claudia ven todo, Agentes solo lo suyo (según tu regla @request.auth.role...)
        const res = await pb.collection("properties").getList(1, 100, { sort: "-created" });
        setProperties(res.items);
     } catch (e) { console.error(e); }
   };
 
   const handleEdit = (prop: any) => {
-     setEditingProp(prop);
-     setView("NEW");
+      setEditingProp(prop);
+      setView("NEW");
   };
 
   const handleDelete = async (id: string) => {
-     if(confirm("¿Eliminar definitivamente?")) {
-        await pb.collection("properties").delete(id);
-        setProperties(prev => prev.filter(p => p.id !== id));
-     }
+      if(confirm("¿Eliminar definitivamente?")) {
+        try {
+            await pb.collection("properties").delete(id);
+            setProperties(prev => prev.filter(p => p.id !== id));
+        } catch(e:any) {
+            alert("No tienes permiso para eliminar este inmueble.");
+        }
+      }
   };
 
   // --- LÓGICA DE LÍMITES ESTRICTOS ---
   const toggle = async (id: string, field: string, currentVal: boolean) => {
-     // Si estamos intentando ACTIVAR (pasar de false a true)
-     if (!currentVal) {
-        // Contar cuántos hay activos actualmente en toda la lista
+      if (!currentVal) {
         const count = properties.filter(p => p[field] === true).length;
 
-        if (field === "is_opportunity" && count >= 1) {
-           return alert("⚠️ LÍMITE ALCANZADO: Solo puede existir 1 Reina (Corona Dorada). Desmarca la anterior primero.");
-        }
-        if (field === "is_hero" && count >= 5) {
-           return alert("⚠️ LÍMITE ALCANZADO: Solo 5 inmuebles pueden estar en el Hero (Estrella Azul).");
-        }
-        if (field === "is_ayc_favorite" && count >= 10) {
-           return alert("⚠️ LÍMITE ALCANZADO: Solo 10 inmuebles pueden ser Favoritos AYC (Estrella Verde).");
-        }
-     }
+        if (field === "is_opportunity" && count >= 1) return alert("⚠️ LÍMITE: Solo 1 Reina permitida.");
+        if (field === "is_hero" && count >= 5) return alert("⚠️ LÍMITE: Solo 5 inmuebles en Hero.");
+        if (field === "is_ayc_favorite" && count >= 10) return alert("⚠️ LÍMITE: Solo 10 Favoritos.");
+      }
 
-     // Si pasa la validación, actualizamos
-     try {
+      try {
         await pb.collection("properties").update(id, { [field]: !currentVal });
-        // Actualización optimista en UI
         setProperties(prev => prev.map(p => p.id === id ? { ...p, [field]: !currentVal } : p));
-     } catch (e) {
+      } catch (e) {
         alert("Error al actualizar. Verifica permisos.");
-     }
+      }
   };
 
-  // Helper de colores para badges de tipo
   const getTypeColor = (type: string) => {
     switch(type) {
       case 'Casa': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
@@ -109,9 +109,9 @@ export default function DashboardInventario() {
   };
 
   const handleLogout = () => {
-     pb.authStore.clear();
-     localStorage.removeItem("ayc_theme");
-     navigate("/agentes");
+      pb.authStore.clear();
+      localStorage.removeItem("ayc_theme");
+      navigate("/agentes");
   };
 
   return (
@@ -123,18 +123,31 @@ export default function DashboardInventario() {
             <h1 className={`font-black text-2xl tracking-tighter ${s.sidebarText}`}>DASHBOARD</h1>
             <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest mt-1 text-gray-400">{theme}</p>
          </div>
-<nav className="px-3 space-y-1 flex-1">
+         <nav className="px-3 space-y-1 flex-1">
+            
+            {/* BOTONES COMUNES (TODOS LOS AGENTES) */}
             <button onClick={() => { setView("INVENTORY"); setEditingProp(null); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "INVENTORY" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
                <LayoutGrid size={18}/> Inventario
             </button>
             <button onClick={() => { setView("NEW"); setEditingProp(null); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "NEW" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
                <PlusCircle size={18}/> {editingProp ? "Editando..." : "Nuevo Inmueble"}
             </button>
-            
-            {/* BOTÓN AL BLOG */}
             <button onClick={() => navigate("/dashboard/blog")} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}>
                <BookOpen size={18}/> Blog / Noticias
             </button>
+
+            <div className="h-px bg-white/10 my-2 mx-4 opacity-50"></div>
+
+            {/* --- ZONA EXCLUSIVA ALFONSO / CLAUDIA --- */}
+            {isManager && (
+                <button 
+                    onClick={() => navigate("/dashboard/equipo")} 
+                    className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}
+                >
+                   <Users size={18}/> Gestión de Equipo
+                </button>
+            )}
+
          </nav>
          <div className="px-6 mt-auto">
             <button onClick={handleLogout} className="flex items-center gap-2 text-xs font-bold text-red-500 hover:text-red-400 transition-colors">
@@ -167,7 +180,6 @@ export default function DashboardInventario() {
                      <tbody className="divide-y divide-gray-100 text-gray-600">
                         {properties.map((p) => (
                            <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                              {/* Propiedad (Imagen + Titulo) */}
                               <td className="p-4 flex items-center gap-3">
                                  <div className="w-12 h-12 rounded bg-gray-200 overflow-hidden shrink-0 border border-gray-100">
                                     {p.images?.[0] ? (
@@ -181,37 +193,21 @@ export default function DashboardInventario() {
                                     <div className="text-[10px] text-gray-400 font-mono">{p.ayc_id}</div>
                                  </div>
                               </td>
-                              
-                              {/* Tipo Badge */}
                               <td className="p-4 text-center">
-                                <span className={`px-2 py-1 rounded border text-[10px] font-bold uppercase whitespace-nowrap ${getTypeColor(p.property_type)}`}>
-                                    {p.property_type}
-                                </span>
+                                <span className={`px-2 py-1 rounded border text-[10px] font-bold uppercase whitespace-nowrap ${getTypeColor(p.property_type)}`}>{p.property_type}</span>
                               </td>
-                              
-                              {/* Precio */}
                               <td className="p-4 text-center font-mono text-xs font-bold text-green-600">
                                  {p.price_cop ? `$${Number(p.price_cop).toLocaleString("es-CO")}` : '$0'}
                               </td>
-                              
-                              {/* TOGGLES */}
                               <td className="p-4 text-center">
-                                 <button onClick={() => toggle(p.id, "is_hero", p.is_hero)} className={`p-1.5 rounded-full transition-all ${p.is_hero ? "bg-blue-100 text-blue-600 ring-2 ring-blue-200 scale-110" : "text-gray-300 hover:bg-gray-100"}`}>
-                                    <Zap size={16} fill={p.is_hero ? "currentColor" : "none"}/>
-                                 </button>
+                                 <button onClick={() => toggle(p.id, "is_hero", p.is_hero)} className={`p-1.5 rounded-full transition-all ${p.is_hero ? "bg-blue-100 text-blue-600 ring-2 ring-blue-200 scale-110" : "text-gray-300 hover:bg-gray-100"}`}><Zap size={16} fill={p.is_hero ? "currentColor" : "none"}/></button>
                               </td>
                               <td className="p-4 text-center">
-                                 <button onClick={() => toggle(p.id, "is_opportunity", p.is_opportunity)} className={`p-1.5 rounded-full transition-all ${p.is_opportunity ? "bg-yellow-100 text-yellow-500 ring-2 ring-yellow-200 shadow-lg shadow-yellow-100 scale-110" : "text-gray-300 hover:bg-gray-100"}`}>
-                                    <Crown size={16} fill={p.is_opportunity ? "currentColor" : "none"}/>
-                                 </button>
+                                 <button onClick={() => toggle(p.id, "is_opportunity", p.is_opportunity)} className={`p-1.5 rounded-full transition-all ${p.is_opportunity ? "bg-yellow-100 text-yellow-500 ring-2 ring-yellow-200 shadow-lg shadow-yellow-100 scale-110" : "text-gray-300 hover:bg-gray-100"}`}><Crown size={16} fill={p.is_opportunity ? "currentColor" : "none"}/></button>
                               </td>
                               <td className="p-4 text-center">
-                                 <button onClick={() => toggle(p.id, "is_ayc_favorite", p.is_ayc_favorite)} className={`p-1.5 rounded-full transition-all ${p.is_ayc_favorite ? "bg-green-100 text-green-600 ring-2 ring-green-200 scale-110" : "text-gray-300 hover:bg-gray-100"}`}>
-                                    <Star size={16} fill={p.is_ayc_favorite ? "currentColor" : "none"}/>
-                                 </button>
+                                 <button onClick={() => toggle(p.id, "is_ayc_favorite", p.is_ayc_favorite)} className={`p-1.5 rounded-full transition-all ${p.is_ayc_favorite ? "bg-green-100 text-green-600 ring-2 ring-green-200 scale-110" : "text-gray-300 hover:bg-gray-100"}`}><Star size={16} fill={p.is_ayc_favorite ? "currentColor" : "none"}/></button>
                               </td>
-
-                              {/* Acciones */}
                               <td className="p-4 text-right flex justify-end gap-2">
                                  <button onClick={() => handleEdit(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors"><Edit size={16}/></button>
                                  <button onClick={() => handleDelete(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors"><Trash size={16}/></button>

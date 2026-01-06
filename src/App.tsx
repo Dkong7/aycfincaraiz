@@ -6,7 +6,8 @@ import Home from "./pages/Home";
 import Properties from "./pages/Properties";
 import PropertyDetail from "./pages/PropertyDetail";
 import DashboardInventario from "./pages/DashboardInventario";
-import DashboardBlog from "./pages/DashboardBlog"; // <--- IMPORTACIÓN NUEVA
+import DashboardBlog from "./pages/DashboardBlog"; 
+import DashboardTeam from "./pages/DashboardTeam"; // <--- ¡AQUÍ FALTABA ESTO!
 import Login from "./pages/Login";
 import About from "./pages/About"; 
 import Blog from "./pages/Blog";
@@ -36,7 +37,8 @@ const MainLayout = () => {
           
           {/* RUTAS PRIVADAS (DASHBOARD) */}
           <Route path="/dashboard/inventario" element={<DashboardInventario />} />
-          <Route path="/dashboard/blog" element={<DashboardBlog />} /> {/* <--- RUTA NUEVA */}
+          <Route path="/dashboard/blog" element={<DashboardBlog />} />
+          <Route path="/dashboard/equipo" element={<DashboardTeam />} /> {/* <--- AHORA FUNCIONARÁ */}
           
           {/* LOGINS */}
           <Route path="/claclacla" element={<Login />} />
