@@ -166,11 +166,18 @@ export default function DashboardBlog() {
   };
 
   // --- PASO 2: GUARDADO FINAL (Desde el Modal) ---
+// --- PASO 2: GUARDADO FINAL (Desde el Modal) ---
   const handleFinalConfirm = async () => {
     if (!pendingFormData) return;
     
     setLoading(true);
     try {
+        // === FIRMA DE SEGURIDAD (Permisos de Edición) ===
+        // Inyectamos el ID del usuario para que las reglas de PocketBase sepan de quién es el post
+        if (pb.authStore.model?.id) {
+            pendingFormData.append("agent", pb.authStore.model.id);
+        }
+
         if (currentPost?.id) {
             await pb.collection("posts").update(currentPost.id, pendingFormData);
         } else {

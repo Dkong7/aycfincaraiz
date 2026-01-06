@@ -3,7 +3,10 @@ import { useParams, Link } from "react-router-dom";
 import { pb } from "../api";
 import { 
   MapPin, Maximize, Bed, Bath, Car, ArrowLeft, Home, 
-  Mountain, Building2, Warehouse, Store, Briefcase, Layout
+  Mountain, Building2, Warehouse, Store, Briefcase, Layout,
+  Ruler, Layers, Calendar, Utensils, Receipt, Shield, Key, Droplet, 
+  Zap, AlignJustify, Eye, ArrowUpFromLine, FileText, Flame, Phone, 
+  TreePine, User, CheckCircle // <--- User AÑADIDO
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -11,6 +14,7 @@ import Footer from "../components/Footer";
 const PropertyDetail = () => {
   const { id } = useParams();
   const [prop, setProp] = useState<any>(null);
+  const [specs, setSpecs] = useState<any>({}); 
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
   const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
@@ -20,7 +24,6 @@ const PropertyDetail = () => {
       setLoading(true);
       try {
         let record;
-        // Detectar si buscamos por ID de PocketBase (15 chars) o código AYC
         if (id?.length === 15) {
            record = await pb.collection("properties").getOne(id);
         } else {
@@ -28,7 +31,16 @@ const PropertyDetail = () => {
            if (res.items.length > 0) record = res.items[0];
         }
         
-        if(record) setProp(record);
+        if(record) {
+            setProp(record);
+            try {
+                const parsed = typeof record.specs === 'string' ? JSON.parse(record.specs) : record.specs;
+                setSpecs(parsed || {});
+            } catch (e) {
+                console.error("Error parseando specs", e);
+                setSpecs({});
+            }
+        }
       } catch (e) {
         console.error("Error buscando inmueble:", e);
       } finally {
@@ -38,169 +50,171 @@ const PropertyDetail = () => {
     fetchProp();
   }, [id]);
 
-  if (loading) return <div className="min-h-screen bg-[#0A192F] flex items-center justify-center text-white font-bold">CARGANDO...</div>;
-  if (!prop) return <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center"><h2 className="text-2xl font-bold mb-4">Inmueble no encontrado</h2><Link to="/inmuebles" className="text-green-600 underline">Volver al listado</Link></div>;
+  if (loading) return <div className="min-h-screen bg-[#0A192F] flex items-center justify-center text-white font-bold tracking-widest">CARGANDO...</div>;
+  if (!prop) return <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center"><h2 className="text-2xl font-bold mb-4 text-gray-800">Inmueble no encontrado</h2><Link to="/inmuebles" className="text-green-600 underline font-bold">Volver al listado</Link></div>;
 
-  // Construir URLs de imágenes para PocketBase
   const images = prop.images?.map((img: string) => `${PB_URL}/api/files/${prop.collectionId}/${prop.id}/${img}`) || [];
-  
-  // Si no hay imágenes, usar placeholder
   const displayImages = images.length > 0 ? images : ["https://via.placeholder.com/1200x800?text=SIN+FOTO"];
 
-  // CONFIG VISUAL POR TIPO
   const typeConfig: any = {
-     "Casa": { icon: <Home/>, color: "bg-green-600" },
-     "Apartamento": { icon: <Building2/>, color: "bg-blue-600" },
-     "Bodega": { icon: <Warehouse/>, color: "bg-yellow-600" },
-     "CasaCampo": { icon: <Mountain/>, color: "bg-purple-600" },
-     "Lote": { icon: <Layout/>, color: "bg-gray-500" },
-     "Local": { icon: <Store/>, color: "bg-pink-600" },
-     "Oficina": { icon: <Briefcase/>, color: "bg-lime-600" }
+     "Casa": { icon: <Home/>, color: "bg-green-600", text: "text-green-600" },
+     "Apartamento": { icon: <Building2/>, color: "bg-blue-600", text: "text-blue-600" },
+     "Bodega": { icon: <Warehouse/>, color: "bg-yellow-600", text: "text-yellow-600" },
+     "Casa Campestre": { icon: <Mountain/>, color: "bg-purple-600", text: "text-purple-600" },
+     "Finca": { icon: <Mountain/>, color: "bg-purple-600", text: "text-purple-600" },
+     "Lote": { icon: <Layout/>, color: "bg-gray-500", text: "text-gray-600" },
+     "Local": { icon: <Store/>, color: "bg-pink-600", text: "text-pink-600" },
+     "Oficina": { icon: <Briefcase/>, color: "bg-emerald-600", text: "text-emerald-600" }
   };
-  // Fallback si el tipo no coincide exacto
   const theme = typeConfig[prop.property_type] || typeConfig["Casa"];
+
+  // --- DICCIONARIO UNIFICADO ---
+  const getLabel = (key: string) => {
+      const labels: any = {
+          has_rent: "Rentado", avaluo: "Avalúo", admin: "Administración", 
+          antiquity: "Antigüedad", stratum: "Estrato", levels_list: "Niveles", remodelado: "Remodelado", 
+          esquine: "Esquinero", maintenance_fee: "Cuota Admin", view_type: "Vista", 
+          view_direction: "Dir. Vista", has_balcony: "Balcón", balcony_area: "Área Balcón", 
+          floor_number: "Piso", total_floors: "Total Pisos", building_age: "Edad Edif.", 
+          building_features: "Amenidades", garage_type: "Tipo Garaje", gas_type: "Tipo Gas", 
+          building_name: "Edificio", unit_detail: "Int/Apto", kitchen_type: "Cocina", 
+          floor_material: "Pisos", study: "Estudio", garden: "Jardín", terrace: "Terraza",
+          industrial_gas: "Gas Ind.", three_phase: "Energía 3F", loading_zone: "Zona Carga", 
+          grease_trap: "Trampa Grasa", height: "Altura Libre", capacity_kVA: "KVA",
+          front: "Frente", depth: "Fondo", legal_status: "Estado Legal", admin_contact: "Contacto", 
+          water_source: "Fuente Agua", topography: "Topografía", crops: "Cultivos",
+          has_social: "Salón Social", has_gym: "Gimnasio", has_elevator: "Ascensor", 
+          has_surveillance: "Vigilancia", has_pool: "Piscina", has_bbq: "BBQ",
+          rooms: "Habitaciones", bathrooms: "Baños", garages: "Garajes", area_built: "Área Cons.", 
+          area_private: "Área Priv.", habs: "Habitaciones", baths: "Baños", area_total: "Área Total"
+      };
+      return labels[key] || key.replace(/_/g, " ");
+  };
+
+  const getValue = (val: any) => {
+      if (val === true) return "Sí";
+      if (val === false) return "No";
+      if (Array.isArray(val)) return val.length > 0 ? val.join(", ") : "Ninguna";
+      if (typeof val === 'object' && val !== null) {
+          const active = Object.entries(val).filter(([_, v]) => v === true).map(([k]) => getLabel(k));
+          return active.length > 0 ? active.join(", ") : "N/A";
+      }
+      return val || "-";
+  };
+
+  const getIconComponent = (key: string) => {
+      const icons: any = {
+          rooms: Bed, habs: Bed, bathrooms: Bath, baths: Bath, garages: Car, garage_type: Car,
+          area_built: Ruler, area_private: Maximize, area_lot: Maximize, balcony_area: Maximize, area_total: Maximize,
+          kitchen_type: Utensils, kitchen: Utensils, dining: Utensils,
+          admin: Receipt, maintenance_fee: Receipt, stratum: Layers, 
+          floor_number: ArrowUpFromLine, total_floors: Building2, levels_list: Layers,
+          antiquity: Calendar, building_age: Calendar,
+          has_surveillance: Shield, has_rent: Key, legal_status: FileText,
+          water: Droplet, energy: Zap, industrial_gas: Flame, gas_type: Flame,
+          view_type: Eye, view: Eye, building_name: Building2, unit_detail: MapPin, 
+          garden: TreePine, front: Maximize, depth: Maximize, height: ArrowUpFromLine
+      };
+      return icons[key] || AlignJustify;
+  };
 
   return (
     <div className="bg-[#F3F4F6] min-h-screen font-sans">
       <Navbar language="ES" toggleLanguage={() => {}} />
       
-      {/* HERO SECTION */}
-      <div className="relative h-[70vh] bg-gray-900 group">
-         <img src={displayImages[activeImg]} className="w-full h-full object-cover transition-opacity duration-500 opacity-90" />
-         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+      <div className="relative h-[60vh] md:h-[70vh] bg-gray-900 group">
+         <img src={displayImages[activeImg]} className="w-full h-full object-cover transition-opacity duration-500 opacity-80" />
+         <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-transparent to-transparent opacity-90"></div>
          
-         {/* INFO SOBRE IMAGEN */}
-         <div className="absolute bottom-0 left-0 w-full p-6 md:p-16 text-white max-w-7xl mx-auto pt-32">
-            <Link to="/inmuebles" className="inline-flex items-center text-gray-300 hover:text-white mb-4 text-sm font-bold uppercase tracking-wider"><ArrowLeft size={16} className="mr-2"/> Volver</Link>
-            
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded mb-4 text-xs font-black uppercase tracking-widest ${theme.color} text-white`}>
-               {theme.icon} {prop.property_type}
+         <div className="absolute bottom-0 left-0 w-full p-6 md:p-16 max-w-7xl mx-auto pt-32">
+            <Link to="/inmuebles" className="inline-flex items-center text-gray-300 hover:text-white mb-6 text-xs font-bold uppercase tracking-wider bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10 transition-all hover:bg-black/50"><ArrowLeft size={14} className="mr-2"/> Volver al inventario</Link>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded mb-4 text-xs font-black uppercase tracking-widest ${theme.color} text-white shadow-lg`}>{theme.icon} {prop.property_type}</div>
+            <h1 className="text-3xl md:text-6xl font-black uppercase leading-tight mb-4 text-white drop-shadow-2xl">{prop.title || "Inmueble Sin Título"}</h1>
+            <div className="flex flex-col md:flex-row md:items-center gap-4 text-lg font-medium mb-6 text-gray-200">
+               <span className="flex items-center gap-1"><MapPin size={20} className="text-green-400"/> {prop.municipality} {prop.neighborhood && `• ${prop.neighborhood}`}</span>
+               <span className="bg-white/10 px-3 py-1 rounded text-sm font-mono border border-white/20">{prop.ayc_id || "REF-XXX"}</span>
             </div>
-            
-            <h1 className="text-4xl md:text-7xl font-black uppercase leading-none mb-4 drop-shadow-xl">
-               {prop.title || "Inmueble Sin Título"}
-            </h1>
-            
-            <div className="flex flex-col md:flex-row md:items-center gap-4 text-xl font-medium mb-6">
-               <span className="flex items-center gap-1"><MapPin size={20} className="text-green-500"/> {prop.municipality} {prop.neighborhood && `- ${prop.neighborhood}`}</span>
-               <span className="bg-white/20 px-2 py-0.5 rounded text-sm font-mono border border-white/30 w-fit">{prop.ayc_id || "REF-XXX"}</span>
-            </div>
-            
-            <div className="text-5xl font-black text-green-500">
-               ${new Intl.NumberFormat("es-CO", { notation: "compact", maximumFractionDigits: 1 }).format(prop.price_cop)}
-            </div>
+            <div className="text-4xl md:text-5xl font-black text-green-400 drop-shadow-md">${new Intl.NumberFormat("es-CO").format(prop.price_cop)} <span className="text-lg font-bold text-gray-400">COP</span></div>
          </div>
       </div>
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-         
-         {/* COLUMNA IZQUIERDA (DETALLES) */}
-         <div className="lg:col-span-2 space-y-10">
-            
-            {/* ICONOS RESUMEN */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-4 gap-4 text-center">
-               {/* Área */}
-               {(prop.area_built || prop.area_lot) && (
-                  <div>
-                     <Maximize className="mx-auto text-gray-400 mb-1"/> 
-                     <span className="block font-black text-xl">{prop.area_built || prop.area_lot}</span> 
-                     <span className="text-[10px] uppercase font-bold text-gray-400">m²</span>
-                  </div>
-               )}
-               
-               {/* Habitaciones */}
-               {prop.habs > 0 && (
-                  <div>
-                     <Bed className="mx-auto text-gray-400 mb-1"/> 
-                     <span className="block font-black text-xl">{prop.habs}</span> 
-                     <span className="text-[10px] uppercase font-bold text-gray-400">Habs</span>
-                  </div>
-               )}
+      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12 -mt-10 relative z-10">
+         <div className="lg:col-span-2 space-y-8">
+            {/* ICONOS PRINCIPALES */}
+            <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+               {[
+                 { k: 'area_built', v: specs.area_built || specs.area_total, unit: 'm²' },
+                 { k: 'habs', v: specs.habs || specs.rooms },
+                 { k: 'baths', v: specs.baths || specs.bathrooms },
+                 { k: 'garages', v: specs.garages },
+                 { k: 'stratum', v: specs.stratum },
+                 { k: 'antiquity', v: specs.antiquity || specs.building_age, unit: 'años' },
+                 { k: 'height', v: specs.height, unit: 'm' }
+               ].map((item) => {
+                   if(!item.v) return null;
+                   const IconComp = getIconComponent(item.k);
+                   return (
+                       <div key={item.k} className="flex flex-col items-center justify-center p-2">
+                           <div className={`${theme.text} mb-2`}><IconComp size={32}/></div>
+                           <span className="block font-black text-2xl text-gray-800">{item.v}</span>
+                           <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">{getLabel(item.k)} {item.unit && `(${item.unit})`}</span>
+                       </div>
+                   )
+               })}
+            </div>
 
-               {/* Baños */}
-               {prop.baths > 0 && (
-                  <div>
-                     <Bath className="mx-auto text-gray-400 mb-1"/> 
-                     <span className="block font-black text-xl">{prop.baths}</span> 
-                     <span className="text-[10px] uppercase font-bold text-gray-400">Baños</span>
-                  </div>
-               )}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+               <h3 className="text-xl font-black uppercase text-[#0A192F] mb-6 flex items-center gap-2"><FileText size={24} className="text-gray-400"/> Descripción</h3>
+               <p className="text-gray-600 whitespace-pre-line leading-relaxed text-base">{prop.description || "Sin descripción."}</p>
+            </div>
 
-               {/* Garajes (Si existe el campo en tu DB) */}
-               <div>
-                  <Car className="mx-auto text-gray-400 mb-1"/> 
-                  <span className="block font-black text-xs uppercase pt-2 leading-tight">Consultar</span> 
-                  <span className="text-[10px] uppercase font-bold text-gray-400">Garaje</span>
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+               <h3 className="text-xl font-black uppercase text-[#0A192F] mb-8 flex items-center gap-2"><Layout size={24} className="text-gray-400"/> Detalles</h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                  {Object.entries(specs).map(([key, val]) => {
+                      if (!val || val === "false" || val === false || (Array.isArray(val) && val.length === 0)) return null;
+                      if (['rooms', 'habs', 'baths', 'bathrooms', 'garages', 'area_built', 'area_total', 'height', 'lat', 'lng'].includes(key)) return null;
+                      const IconComp = getIconComponent(key);
+                      return (
+                          <div key={key} className="flex justify-between items-center border-b border-gray-100 pb-2 px-2">
+                              <span className="text-sm font-medium text-gray-500 flex items-center gap-2 capitalize"><span className={`${theme.text} opacity-70`}><IconComp size={16}/></span>{getLabel(key)}</span>
+                              <span className="font-bold text-gray-800 text-sm text-right max-w-[50%]">{getValue(val)}</span>
+                          </div>
+                      );
+                  })}
                </div>
             </div>
 
-            {/* DESCRIPCIÓN */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm">
-               <h3 className="text-xl font-black uppercase text-[#0A192F] mb-4">Descripción</h3>
-               <p className="text-gray-600 whitespace-pre-line leading-relaxed">
-                  {prop.description || "Sin descripción detallada disponible."}
-               </p>
-            </div>
-
-            {/* FICHA TÉCNICA DINÁMICA */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm">
-               <h3 className="text-xl font-black uppercase text-[#0A192F] mb-6 flex items-center gap-2"><Layout size={20}/> Ficha Técnica</h3>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                  
-                  {/* COMUNES */}
-                  <div className="flex justify-between border-b border-gray-100 pb-2"><span>Estrato</span> <span className="font-bold text-gray-800">{prop.estrato || "N/A"}</span></div>
-                  <div className="flex justify-between border-b border-gray-100 pb-2"><span>Administración</span> <span className="font-bold text-gray-800">${prop.admin_price ? prop.admin_price.toLocaleString("es-CO") : "0"}</span></div>
-                  <div className="flex justify-between border-b border-gray-100 pb-2"><span>Dirección / Barrio</span> <span className="font-bold text-gray-800">{prop.address || prop.municipality}</span></div>
-
-                  {/* ESPECÍFICOS - BODEGA */}
-                  {prop.property_type === "Bodega" && (
-                     <>
-                        <div className="flex justify-between border-b border-gray-100 pb-2"><span>Altura</span> <span className="font-bold text-gray-800">{prop.height || "N/A"} m</span></div>
-                        <div className="flex justify-between border-b border-gray-100 pb-2"><span>Energía</span> <span className="font-bold text-gray-800">{prop.energy_kva || "N/A"} KVA</span></div>
-                     </>
-                  )}
-
-                  {/* ESPECÍFICOS - LOTE */}
-                  {prop.property_type === "Lote" && (
-                     <div className="flex justify-between border-b border-gray-100 pb-2"><span>Uso de Suelo</span> <span className="font-bold text-gray-800">{prop.soil_use || "Mixto"}</span></div>
-                  )}
-
-               </div>
-            </div>
-
-            {/* GALERÍA */}
             {displayImages.length > 1 && (
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {displayImages.map((img: string, i: number) => (
-                     <div key={i} onClick={() => { setActiveImg(i); window.scrollTo({top:0, behavior:"smooth"}); }} 
-                          className={`aspect-square rounded-xl overflow-hidden cursor-pointer transition-all border-2 ${activeImg === i ? "border-green-500 opacity-100" : "border-transparent opacity-70 hover:opacity-100"}`}>
-                        <img src={img} className="w-full h-full object-cover"/>
-                     </div>
-                  ))}
+               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                   <h3 className="text-sm font-black uppercase text-gray-400 mb-4 tracking-widest">Galería</h3>
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {displayImages.map((img: string, i: number) => (
+                         <div key={i} onClick={() => { setActiveImg(i); window.scrollTo({top:0, behavior:"smooth"}); }} 
+                              className={`aspect-square rounded-xl overflow-hidden cursor-pointer transition-all border-4 ${activeImg === i ? "border-green-500 shadow-lg scale-95" : "border-transparent opacity-80 hover:opacity-100 hover:scale-105"}`}>
+                            <img src={img} className="w-full h-full object-cover"/>
+                         </div>
+                      ))}
+                   </div>
                </div>
             )}
          </div>
 
-         {/* COLUMNA DERECHA (CONTACTO) */}
-         <div className="bg-[#0A192F] text-white p-8 rounded-2xl h-fit sticky top-24 shadow-2xl">
-            <h3 className="font-bold text-xl mb-4 text-center uppercase tracking-widest">¿Te Interesa?</h3>
-            <p className="text-center text-sm text-gray-400 mb-6">Referencia: <span className="font-mono text-white font-bold">{prop.ayc_id || "N/A"}</span></p>
-            
-            <a href={`https://wa.me/573134663832?text=Hola, estoy interesado en el inmueble ${prop.ayc_id}`} target="_blank" className="block w-full bg-[#25D366] text-white font-bold py-3 rounded-xl mb-3 text-center hover:brightness-110 transition-all shadow-lg flex items-center justify-center gap-2">
-               WhatsApp Agente
-            </a>
-            
-            <Link to="/contacto" className="block w-full bg-white text-[#0A192F] font-bold py-3 rounded-xl text-center hover:bg-gray-200 transition-all shadow-lg">
-               Agendar Visita
-            </Link>
-
-            <div className="mt-8 pt-6 border-t border-white/10 text-center">
-               <p className="text-xs text-gray-500">¿Necesitas ayuda con tu crédito?</p>
-               <Link to="/servicios" className="text-green-500 text-xs font-bold hover:underline">Consultar aliados financieros</Link>
-            </div>
+         <div className="lg:col-span-1">
+             <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 sticky top-24">
+                <div className="text-center mb-8">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-green-100"><User size={32} className="text-green-600"/></div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Agente Responsable</p>
+                    <h3 className="text-xl font-black text-gray-900">AyC Inmobiliaria</h3>
+                </div>
+                <div className="space-y-3">
+                    <a href={`https://wa.me/573134663832?text=Hola, me interesa el inmueble ${prop.ayc_id}`} target="_blank" className="block w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black py-4 rounded-xl text-center transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-3">
+                       CONTACTAR POR WHATSAPP
+                    </a>
+                    <button className="block w-full bg-[#0A192F] hover:bg-[#112] text-white font-bold py-4 rounded-xl text-center transition-all shadow-lg flex items-center justify-center gap-2"><Calendar size={18}/> AGENDAR VISITA</button>
+                </div>
+             </div>
          </div>
-
       </div>
       <Footer />
     </div>
