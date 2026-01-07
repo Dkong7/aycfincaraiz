@@ -1,7 +1,11 @@
 ﻿import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Bed, Bath, Car, Ruler, MapPin, Play } from "lucide-react"; 
+import { useLanguage } from "../context/LanguageContext"; 
 
 interface PropertyDB {
   id: string;
+  ayc_id?: string;
   collectionId: string;
   title: string;
   property_type: string;
@@ -12,7 +16,8 @@ interface PropertyDB {
   neighborhood?: string;
   address?: string;
   images: string[];
-  description?: string;
+  video_url?: string; 
+  specs?: any; 
 }
 
 interface HeroProps {
@@ -21,158 +26,197 @@ interface HeroProps {
   exchangeRate: number;
 }
 
+interface MediaItem {
+  type: 'video' | 'image';
+  src: string;
+  thumb?: string;
+}
+
 const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
+  // 1. OBTENER FUNCIONES DEL CONTEXTO
+  const context = useLanguage();
+  const { language, translateDynamic } = context || { language: "ES", translateDynamic: (t: string) => t };
+  
+  // 2. FUNCIÓN SEGURA DE TRADUCCIÓN
+  const safeTranslate = (text: string) => {
+      if (typeof translateDynamic === 'function') {
+          return translateDynamic(text);
+      }
+      return text;
+  };
+
   const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
   
-  // ÍNDICES
-  const [propIndex, setPropIndex] = useState(0); // Qué casa estamos viendo
-  const [imgIndex, setImgIndex] = useState(0);   // Qué foto de esa casa estamos viendo
+  const [propIndex, setPropIndex] = useState(0); 
+  const [mediaIndex, setMediaIndex] = useState(0); 
 
   const list = Array.isArray(properties) && properties.length > 0 ? properties : [];
   
-  // Propiedad Activa
   const activeProp = list[propIndex] || { 
     id: "", collectionId: "", title: "CARGANDO...", 
-    price_cop: 0, images: [], property_type: "...", listing_type: "..." 
+    price_cop: 0, images: [], property_type: "", listing_type: "", video_url: ""
   };
 
-  // Cuando cambiamos de propiedad, reiniciamos la foto a la primera (0)
+  // Resetear índice de media al cambiar de propiedad
+  useEffect(() => { setMediaIndex(0); }, [propIndex]);
+
+  const nextProperty = () => setPropIndex((prev) => (prev === list.length - 1 ? 0 : prev + 1));
+  const prevProperty = () => setPropIndex((prev) => (prev === 0 ? list.length - 1 : prev - 1));
+
+  // --- LÓGICA AUTO-PLAY (7 SEGUNDOS) ---
   useEffect(() => {
-    setImgIndex(0);
-  }, [propIndex]);
+    if (list.length <= 1) return; // No rotar si hay 0 o 1 propiedad
 
-  // --- NAVEGACIÓN ENTRE INMUEBLES (< >) ---
-  const nextProperty = () => {
-    setPropIndex((prev) => (prev === list.length - 1 ? 0 : prev + 1));
-  };
+    const interval = setInterval(() => {
+        nextProperty();
+    }, 7000); // 7000ms = 7 segundos
 
-  const prevProperty = () => {
-    setPropIndex((prev) => (prev === 0 ? list.length - 1 : prev - 1));
-  };
+    return () => clearInterval(interval); // Limpieza al desmontar
+  }, [list.length]); // Se reinicia si cambia la lista
 
-  // --- DATOS VISUALES ---
-  const title = activeProp.title;
-  const category = activeProp.property_type || activeProp.listing_type || "INMUEBLE"; 
+  let specs: any = {};
+  try { specs = typeof activeProp.specs === "string" ? JSON.parse(activeProp.specs) : activeProp.specs || {}; } catch(e) { specs = {}; }
+
+  // --- DATOS VISUALES (TRADUCIDOS) ---
+  const title = safeTranslate(activeProp.title || "");
+  const categoryType = safeTranslate(activeProp.property_type || "Inmueble");
+  const categoryListing = safeTranslate(activeProp.listing_type || "Venta");
   const price = activeProp.price_cop;
-  const location = activeProp.neighborhood || activeProp.municipality || activeProp.address || "Ubicación";
   
-  const displayPrice = currency === "USD" 
-     ? (activeProp.price_usd > 0 ? activeProp.price_usd : price / exchangeRate) 
-     : price;
+  // Traducción de ubicación
+  const rawLocation = activeProp.neighborhood || activeProp.municipality || "Ubicación";
+  const location = safeTranslate(rawLocation);
 
-  const getCategoryColor = (cat: string) => {
-    const n = cat?.toLowerCase() || "";
-    if (n.includes("venta")) return "bg-blue-600";
-    if (n.includes("arriendo")) return "bg-red-600";
-    if (n.includes("lote")) return "bg-yellow-600";
-    return "bg-green-600";
+  const usdPrice = activeProp.price_usd || 0;
+  const displayPrice = currency === "USD" ? (usdPrice > 0 ? usdPrice : price / exchangeRate) : price;
+
+  const getYoutubeId = (url: string) => {
+    if (!url) return null;
+    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+    return (match && match[2].length === 11) ? match[2] : null;
   };
-  const categoryColor = getCategoryColor(activeProp.listing_type || category);
+  const videoId = getYoutubeId(activeProp.video_url || "");
 
-  // La imagen de fondo depende del imgIndex actual
-  const currentImage = activeProp.images && activeProp.images.length > 0
-    ? `${PB_URL}/api/files/${activeProp.collectionId}/${activeProp.id}/${activeProp.images[imgIndex]}`
-    : null;
+  // --- LISTA UNIFICADA MEDIA ---
+  const mediaList: MediaItem[] = [
+      ...(videoId ? [{ type: 'video' as const, src: videoId, thumb: `https://img.youtube.com/vi/${videoId}/default.jpg` }] : []),
+      ...(activeProp.images?.map(img => ({ 
+          type: 'image' as const, 
+          src: `${PB_URL}/api/files/${activeProp.collectionId}/${activeProp.id}/${img}` 
+      })) || [])
+  ];
+
+  const currentMedia = mediaList[mediaIndex];
+
+  const getColors = (type: string) => {
+    const t = type?.toLowerCase() || "";
+    if (t.includes("casa")) return ["#EAB308", "bg-yellow-500 text-yellow-950 border-yellow-400"];
+    if (t.includes("apartamento")) return ["#2563EB", "bg-blue-600 text-white border-blue-500"];
+    if (t.includes("bodega")) return ["#92400E", "bg-amber-800 text-amber-100 border-amber-700"];
+    if (t.includes("lote") || t.includes("terreno")) return ["#16A34A", "bg-green-600 text-white border-green-500"];
+    if (t.includes("local")) return ["#EC4899", "bg-pink-500 text-white border-pink-400"];
+    return ["#059669", "bg-gray-800 text-white"]; 
+  };
+  const [waveColor, tagColorClass] = getColors(activeProp.property_type);
 
   return (
     <div className="relative w-full h-[95vh] bg-gray-900 overflow-hidden font-sans group select-none">
       
-      {/* 1. IMAGEN DE FONDO (CAMBIA SEGÚN MINIATURA) */}
-      <div key={`${activeProp.id}-${imgIndex}`} className="absolute inset-0 z-0 animate-fadeIn">
-        {currentImage ? (
-           <img 
-             src={currentImage} 
-             alt={title} 
-             className="w-full h-full object-cover opacity-60 transition-transform duration-[2000ms] hover:scale-105"
-           />
+      {/* 1. FONDO */}
+      <div key={`${activeProp.id}-${mediaIndex}`} className="absolute inset-0 z-0 animate-fadeIn">
+        {currentMedia?.type === 'video' ? (
+            <div className="w-full h-full pointer-events-none scale-150 relative">
+                <iframe 
+                    className="w-full h-full opacity-80" 
+                    src={`https://www.youtube.com/embed/${currentMedia.src}?autoplay=1&mute=1&controls=0&loop=1&playlist=${currentMedia.src}&showinfo=0&rel=0&iv_load_policy=3&disablekb=1`}
+                    title="Hero Video"
+                    allow="autoplay; encrypted-media"
+                    style={{ pointerEvents: 'none' }}
+                ></iframe>
+                <div className="absolute inset-0 z-10"></div>
+            </div>
+        ) : currentMedia?.type === 'image' ? (
+           <img src={currentMedia.src} alt={title} className="w-full h-full object-cover opacity-80 transition-transform duration-[7000ms] ease-linear hover:scale-105"/> 
         ) : (
-           <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-              <span className="text-gray-500 font-mono tracking-widest">SIN IMAGEN</span>
-           </div>
+           <div className="w-full h-full bg-gray-800 flex items-center justify-center"><span className="text-gray-500 font-mono tracking-widest">SIN IMAGEN</span></div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-black/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-black/40 z-20"></div>
       </div>
 
-      {/* 2. BOTONES GIGANTES DE NAVEGACIÓN (CAMBIAN DE INMUEBLE) */}
+      {/* 2. FLECHAS */}
       {list.length > 1 && (
         <>
-          <button 
-            onClick={prevProperty}
-            className="absolute left-0 top-0 bottom-0 z-40 w-24 flex items-center justify-center text-white/30 hover:text-white hover:bg-gradient-to-r hover:from-black/50 hover:to-transparent transition-all duration-300 group/nav"
-          >
-            <svg className="w-20 h-20 transform group-hover/nav:-translate-x-2 transition-transform drop-shadow-2xl" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>
+          <button onClick={prevProperty} className="absolute left-0 top-0 bottom-0 z-40 w-16 md:w-24 flex items-center justify-center text-white/30 hover:text-white hover:bg-gradient-to-r hover:from-black/50 hover:to-transparent transition-all">
+            <svg className="w-12 h-12 md:w-20 md:h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>
           </button>
-
-          <button 
-            onClick={nextProperty}
-            className="absolute right-0 top-0 bottom-0 z-40 w-24 flex items-center justify-center text-white/30 hover:text-white hover:bg-gradient-to-l hover:from-black/50 hover:to-transparent transition-all duration-300 group/nav"
-          >
-            <svg className="w-20 h-20 transform group-hover/nav:translate-x-2 transition-transform drop-shadow-2xl" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" /></svg>
+          <button onClick={nextProperty} className="absolute right-0 top-0 bottom-0 z-40 w-16 md:w-24 flex items-center justify-center text-white/30 hover:text-white hover:bg-gradient-to-l hover:from-black/50 hover:to-transparent transition-all">
+            <svg className="w-12 h-12 md:w-20 md:h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" /></svg>
           </button>
         </>
       )}
 
-      {/* 3. CURVA SVG */}
-      <div className="absolute bottom-0 left-0 w-full h-[65%] z-10 pointer-events-none">
+      {/* 3. ONDA DINÁMICA */}
+      <div className="absolute bottom-0 left-0 w-full h-[33%] z-10 pointer-events-none transition-colors duration-1000">
         <svg viewBox="0 0 1440 320" className="w-full h-full" preserveAspectRatio="none">
-          <path fill="#059669" fillOpacity="0.9" d="M0,64L48,80C96,96,192,128,288,160C384,192,480,224,576,213.3C672,203,768,149,864,138.7C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          <path fill={waveColor} fillOpacity="0.3" d="M0,64L48,80C96,96,192,128,288,160C384,192,480,224,576,213.3C672,203,768,149,864,138.7C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
         </svg>
       </div>
 
-      {/* 4. CONTENIDO CENTRAL */}
-      <div className="relative z-20 container mx-auto px-6 h-full flex flex-col justify-center mt-10">
-        
-        <span className={`${categoryColor} text-white text-xs font-bold px-4 py-1 rounded uppercase tracking-wider w-fit mb-4 shadow-lg backdrop-blur-sm`}>
-          {category}
-        </span>
+      {/* 4. CONTENIDO */}
+      <div className="relative z-30 container mx-auto px-6 h-full flex flex-col justify-center md:justify-start md:pt-40 pb-20">
+        <div className="flex flex-wrap gap-2 mb-4 animate-fadeIn">
+            <span className={`${tagColorClass} text-[10px] md:text-xs font-bold px-3 py-1 rounded border uppercase tracking-wider shadow-lg backdrop-blur-sm`}>{categoryType}</span>
+            <span className="bg-white/20 text-white border border-white/30 text-[10px] md:text-xs font-bold px-3 py-1 rounded uppercase tracking-wider shadow-lg backdrop-blur-sm">{categoryListing}</span>
+        </div>
 
-        <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] uppercase max-w-5xl mb-6 drop-shadow-2xl">
-          {title}
-        </h1>
+        <h1 className="text-3xl md:text-6xl font-black text-white leading-[0.9] uppercase max-w-3xl mb-4 drop-shadow-2xl line-clamp-2 text-left animate-slideUp">{title}</h1>
 
-        <div className="mb-8">
-          <h2 className="text-5xl md:text-6xl font-bold text-white drop-shadow-lg flex items-baseline">
-            {currency === "USD" ? "$" : "$ "}
-            {displayPrice?.toLocaleString(currency === "USD" ? "en-US" : "es-CO", { maximumFractionDigits: 0 })}
-            <span className="text-2xl ml-3 font-normal text-green-400">{currency}</span>
+        <div className="mb-6 animate-slideUp" style={{animationDelay: '100ms'}}>
+          <h2 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg flex flex-wrap items-baseline gap-2 text-left">
+            <span>{currency === "USD" ? "$" : "$ "}</span>
+            <span>{displayPrice?.toLocaleString(currency === "USD" ? "en-US" : "es-CO", { maximumFractionDigits: 0 })}</span>
+            <span className="text-lg md:text-xl font-normal text-green-400">{currency}</span>
           </h2>
-          {currency === "USD" && (
-             <div className="inline-block mt-2 bg-black/40 px-3 py-1 rounded border border-white/10">
-                <p className="text-gray-300 text-sm font-mono">
-                  TRM: ${exchangeRate.toLocaleString("es-CO")}
-                </p>
-             </div>
-          )}
         </div>
 
-        <div className="flex items-center text-gray-200 mb-10 text-xl font-medium tracking-wide">
-          <svg className="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          <span className="uppercase">{location}</span>
+        <div className="flex items-center text-gray-100 mb-6 text-base md:text-lg font-medium tracking-wide text-left animate-slideUp" style={{animationDelay: '200ms'}}>
+          <MapPin className="w-5 h-5 mr-2 text-green-500" /> <span className="uppercase">{location}</span>
         </div>
 
-        <div className="flex flex-col md:flex-row items-start gap-8">
-          <button className="bg-white text-green-900 font-black py-4 px-10 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all flex items-center z-30">
-            VER DETALLES <span className="ml-2 text-xl">→</span>
-          </button>
+        <div className="flex flex-wrap gap-3 mb-8 text-white/90 text-sm animate-slideUp" style={{animationDelay: '300ms'}}>
+             {(specs.habs || specs.rooms) && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Bed size={16} className="text-green-400"/> <span className="font-bold">{specs.habs || specs.rooms}</span></div>}
+             {(specs.baths || specs.bathrooms) && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Bath size={16} className="text-green-400"/> <span className="font-bold">{specs.baths || specs.bathrooms}</span></div>}
+             {specs.garages && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Car size={16} className="text-green-400"/> <span className="font-bold">{specs.garages}</span></div>}
+             {(specs.area_built || specs.area_total) && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Ruler size={16} className="text-green-400"/> <span className="font-bold">{specs.area_built || specs.area_total} m²</span></div>}
+        </div>
+
+        <div className="flex flex-col items-start gap-6 w-full max-w-4xl animate-slideUp" style={{animationDelay: '400ms'}}>
+          <Link to={`/inmuebles/${activeProp.id}`} className="bg-white text-green-900 font-black py-3 px-8 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all flex items-center z-30 uppercase text-xs md:text-sm">
+             {safeTranslate("Ver Detalles")} <span className="ml-2 text-lg">→</span>
+          </Link>
           
-          {/* 5. MINIATURAS (FOTOS DE LA MISMA CASA) */}
-          {activeProp.images && activeProp.images.length > 0 && (
-            <div className="flex gap-3 bg-black/40 p-2 rounded-2xl backdrop-blur-md border border-white/10 z-30 overflow-x-auto max-w-full">
-               {activeProp.images.map((img, index) => (
-                 <button 
-                   key={index} 
-                   onClick={() => setImgIndex(index)} 
-                   className={`relative w-20 h-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${index === imgIndex ? "border-green-400 scale-110 shadow-lg ring-2 ring-green-500/50" : "border-transparent opacity-60 hover:opacity-100 grayscale hover:grayscale-0"}`}
-                 >
-                    <img 
-                      src={`${PB_URL}/api/files/${activeProp.collectionId}/${activeProp.id}/${img}`} 
-                      className="w-full h-full object-cover"
-                      alt={`foto-${index}`}
-                    />
-                 </button>
-               ))}
-            </div>
-          )}
+          {/* MINIATURAS (VIDEO PRIMERO) */}
+          <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
+              <div className="flex gap-3">
+                   {mediaList.map((media, index) => (
+                       <button 
+                           key={index} 
+                           onClick={() => setMediaIndex(index)} 
+                           className={`relative w-28 h-20 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${mediaIndex === index ? "border-green-400 scale-105 shadow-xl ring-2 ring-green-400/50" : "border-white/20 opacity-70 hover:opacity-100"}`}
+                       >
+                           {media.type === 'video' ? (
+                               <>
+                                 <img src={media.thumb} className="w-full h-full object-cover" alt="Video"/>
+                                 <div className="absolute inset-0 flex items-center justify-center bg-black/40"><Play size={24} className="text-white fill-white"/></div>
+                                 <div className="absolute bottom-0 w-full bg-red-600 text-white text-[8px] font-bold text-center py-0.5">VIDEO</div>
+                               </>
+                           ) : (
+                               <img src={media.src} className="w-full h-full object-cover" alt={`Thumb ${index}`}/>
+                           )}
+                       </button>
+                   ))}
+              </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,24 +1,38 @@
-﻿const Services = () => {
+﻿import React from 'react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+
+// --- CORRECCIÓN DE RUTAS DE IMPORTACIÓN ---
+// Ahora apuntan a 'components/sections/services/...'
+import { AppraisalSection } from '../components/sections/services/AppraisalSection';
+import { LegalSection } from '../components/sections/services/LegalSection';
+import { CinemaSection } from '../components/sections/services/CinemaSection';
+
+const Services = () => {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-primary mb-6">Nuestros Servicios</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Card 1 */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <h3 className="text-xl font-bold text-secondary mb-2">Ventas</h3>
-          <p className="text-gray-600">Gestionamos la venta de tu inmueble con la mejor estrategia comercial.</p>
-        </div>
-        {/* Card 2 */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <h3 className="text-xl font-bold text-secondary mb-2">Arriendos</h3>
-          <p className="text-gray-600">Encontramos el inquilino ideal con estudio de asegurabilidad.</p>
-        </div>
-        {/* Card 3 */}
-        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <h3 className="text-xl font-bold text-secondary mb-2">Avalúos</h3>
-          <p className="text-gray-600">Conoce el valor real de tu propiedad con peritos certificados.</p>
-        </div>
+    <div className="bg-white min-h-screen font-sans">
+      <Navbar />
+      
+      {/* Header General */}
+      <div className="bg-[#0B1120] text-white pt-40 pb-20 px-6 text-center">
+          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight mb-4">
+              Nuestros Servicios
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+              Soluciones integrales para potenciar, proteger y vender tu patrimonio inmobiliario.
+          </p>
       </div>
+
+      {/* 1. SECCIÓN AVALÚOS */}
+      <AppraisalSection />
+
+      {/* 2. SECCIÓN JURÍDICA */}
+      <LegalSection />
+
+      {/* 3. SECCIÓN AUDIOVISUAL */}
+      <CinemaSection />
+
+      <Footer />
     </div>
   );
 };

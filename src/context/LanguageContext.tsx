@@ -1,5 +1,6 @@
 ﻿import React, { createContext, useContext, useState } from "react";
 
+// 1. DICCIONARIO ESTÁTICO (UI Fija)
 const translations = {
   ES: {
     nav: { home: "Inicio", properties: "Inmuebles", services: "Servicios", blog: "Blog", about: "Nosotros", contact: "Contacto" },
@@ -7,39 +8,72 @@ const translations = {
     properties: { details: "Ver Detalles", search: "Buscar Propiedades", filters: "Filtros", noResults: "No encontramos inmuebles.", viewAll: "Ver todos" },
     services: { 
       subtitle: "Nuestros Servicios", title: "Soluciones Integrales", 
-      legal: "Asesoría Jurídica", btnLegal: "Consultar",
-      media: "Producción Audiovisual", btnMedia: "Ver Portafolio",
-      appraisal: "Avalúos Comerciales", btnAppraisal: "Cotizar",
-      legalTitle: "Blindaje Inmobiliario", legalDesc: "Tu patrimonio es sagrado. No firmes promesas sin revisión.",
-      appraisalTitle: "Avalúos Certificados", appraisalDesc: "Norma NIIF y RAA. Informes válidos para bancos."
+      
+      // --- CLAVES PARA NAVBAR (Faltaban estas) ---
+      appraisal: "Avalúos",
+      legal: "Jurídico",
+      media: "Audiovisual",
+
+      // --- CLAVES AVALÚOS (ES) ---
+      appraisalBadge: "Certificación R.A.A.",
+      appraisalTitlePart1: "El valor real de",
+      appraisalTitlePart2: "tu patrimonio.",
+      appraisalDesc: "No dejes dinero sobre la mesa. Realizamos avalúos comerciales bajo norma NIIF y estándares del Registro Abierto de Avaluadores (RAA). Informes técnicos válidos para bancos, aseguradoras y procesos judiciales en Bogotá y La Sabana.",
+      appraisalItems: [
+        "Avalúos Comerciales (Venta/Arriendo)",
+        "Avalúos Hipotecarios",
+        "Avalúos Corporativos (NIIF)",
+        "Peritaje Judicial"
+      ],
+      appraisalBtn: "Cotizar Avalúo",
+      appraisalCard1Label: "Valorización",
+      appraisalCard1Value: "Anual",
+      appraisalCard2Label: "Certificado",
+      appraisalCard2Value: "A.N.A. Vigente",
+
+      // --- CLAVES LEGAL (ES - NUEVAS) ---
+      legalBadge: "Seguridad Jurídica",
+      legalTitlePart1: "Blindaje Inmobiliario",
+      legalTitlePart2: "Total.",
+      legalDesc: "Tu patrimonio es sagrado. No firmes promesas de compraventa ni contratos sin la revisión de nuestro equipo jurídico experto en derecho inmobiliario y urbanístico.",
+      legalCard1Title: "Estudio de Títulos",
+      legalCard1Desc: "Análisis de 20 años de tradición para descartar embargos, falsas tradiciones o problemas sucesorales.",
+      legalCard2Title: "Saneamiento Predial",
+      legalCard2Desc: "Corregimos áreas, linderos y cabidas. Resolvemos problemas de falsa tradición y sucesiones complejas.",
+      legalCard3Title: "Contratos Seguros",
+      legalCard3Desc: "Redacción y revisión de promesas de compraventa y contratos de arrendamiento con cláusulas de protección.",
+      legalBtn: "Consultar Caso",
+
+      // --- CLAVES CINEMA / MEDIA (ES - NUEVAS) ---
+      mediaBadge: "Marketing Inmobiliario",
+      mediaTitlePart1: "El valor entra",
+      mediaTitlePart2: "por los ojos.",
+      mediaDesc: "No grabamos recorridos; producimos narrativa de ventas. Elevamos el estatus de su activo ante inversores internacionales con calidad 4K cinematográfica.",
+      mediaItem1: "Drones 4K FPV",
+      mediaItem2: "VR 360 Tours",
+      mediaBtn: "Solicitar Producción",
+
+      // --- CLAVES GENERALES (LEGACY) ---
+      // (Mantenemos estas por si acaso se usan en otro lado, pero las de arriba son las principales)
+      btnLegal: "Consultar",
+      btnMedia: "Ver Portafolio",
+      legalTitle: "Blindaje Inmobiliario", 
+      appraisalTitle: "Avalúos Certificados", appraisalDescLegacy: "Norma NIIF y RAA. Informes válidos para bancos."
     },
     blog: { title: "Blog A&C", subtitle: "Análisis, tendencias y noticias del sector inmobiliario.", readMore: "Leer Artículo" },
     contact: { 
-      title: "Contáctanos", 
-      subtitle: "Estamos listos para asesorarte.",
-      call: "Llámanos", 
-      write: "Escríbenos", 
-      name: "Nombre Completo", 
-      phone: "Teléfono", 
-      email: "Correo Electrónico", 
-      msg: "Mensaje", 
-      send: "Enviar Mensaje" 
+      title: "Contáctanos", subtitle: "Estamos listos para asesorarte.",
+      call: "Llámanos", write: "Escríbenos", name: "Nombre Completo", 
+      phone: "Teléfono", email: "Correo Electrónico", msg: "Mensaje", send: "Enviar Mensaje" 
     },
     footer: { contact: "Contáctanos", rights: "Todos los derechos reservados.", testimonials: "Testimonios" },
     about: { 
-      story: "Nuestra Historia", 
-      mission: "Más que intermediarios, somos tus aliados patrimoniales.", 
-      founderRole1: "Cofundadora & Gerente Comercial", 
-      founderRole2: "Cofundador & Gerente Administrativo" 
+      story: "Nuestra Historia", mission: "Más que intermediarios, somos tus aliados patrimoniales.", 
+      founderRole1: "Cofundadora & Gerente Comercial", founderRole2: "Cofundador & Gerente Administrativo" 
     },
     dashboard: {
-      new: "Nuevo Inmueble",
-      inventory: "Inventario",
-      private: "Datos Privados",
-      financial: "Financiero",
-      publish: "Publicar Inmueble",
-      saving: "Guardando...",
-      upload: "Cargar Fotos"
+      new: "Nuevo Inmueble", inventory: "Inventario", private: "Datos Privados",
+      financial: "Financiero", publish: "Publicar Inmueble", saving: "Guardando...", upload: "Cargar Fotos"
     }
   },
   EN: {
@@ -48,54 +82,206 @@ const translations = {
     properties: { details: "View Details", search: "Search Properties", filters: "Filters", noResults: "No properties found.", viewAll: "View all" },
     services: { 
       subtitle: "Our Services", title: "Integral Solutions", 
-      legal: "Legal Advice", btnLegal: "Consult",
-      media: "Media Production", btnMedia: "View Portfolio",
-      appraisal: "Commercial Appraisals", btnAppraisal: "Get Quote",
-      legalTitle: "Real Estate Shielding", legalDesc: "Your assets are sacred. Do not sign without review.",
-      appraisalTitle: "Certified Appraisals", appraisalDesc: "IFRS and RAA Standards. Valid for banks."
+      
+      // --- CLAVES PARA NAVBAR (EN) ---
+      appraisal: "Appraisals",
+      legal: "Legal",
+      media: "Media",
+
+      // --- CLAVES AVALÚOS (EN) ---
+      appraisalBadge: "R.A.A. Certification",
+      appraisalTitlePart1: "The real value of",
+      appraisalTitlePart2: "your assets.",
+      appraisalDesc: "Don't leave money on the table. We perform commercial appraisals under IFRS standards and the Open Appraisers Registry (RAA). Technical reports valid for banks, insurers, and legal proceedings in Bogotá and La Sabana.",
+      appraisalItems: [
+        "Commercial Appraisals (Sale/Rent)",
+        "Mortgage Appraisals",
+        "Corporate Appraisals (IFRS)",
+        "Judicial Expertise"
+      ],
+      appraisalBtn: "Get Appraisal Quote",
+      appraisalCard1Label: "Appreciation",
+      appraisalCard1Value: "Yearly",
+      appraisalCard2Label: "Certified",
+      appraisalCard2Value: "Current A.N.A.",
+
+      // --- CLAVES LEGAL (EN - NUEVAS) ---
+      legalBadge: "Legal Security",
+      legalTitlePart1: "Real Estate",
+      legalTitlePart2: "Shielding.",
+      legalDesc: "Your assets are sacred. Do not sign promissory sale agreements or contracts without the review of our legal team expert in real estate and urban law.",
+      legalCard1Title: "Title Study",
+      legalCard1Desc: "Analysis of 20 years of history to rule out liens, false traditions, or inheritance issues.",
+      legalCard2Title: "Property Rectification",
+      legalCard2Desc: "We correct areas, boundaries, and capacities. We resolve title defects and complex successions.",
+      legalCard3Title: "Secure Contracts",
+      legalCard3Desc: "Drafting and review of promissory sale agreements and lease contracts with protection clauses.",
+      legalBtn: "Consult Case",
+
+      // --- CLAVES CINEMA / MEDIA (EN - NUEVAS) ---
+      mediaBadge: "Real Estate Marketing",
+      mediaTitlePart1: "Value enters",
+      mediaTitlePart2: "through the eyes.",
+      mediaDesc: "We don't just record tours; we produce sales narratives. We elevate your asset's status to international investors with 4K cinematic quality.",
+      mediaItem1: "4K FPV Drones",
+      mediaItem2: "VR 360 Tours",
+      mediaBtn: "Request Production",
+
+      // --- CLAVES GENERALES (LEGACY) ---
+      btnLegal: "Consult",
+      btnMedia: "View Portfolio",
+      legalTitle: "Real Estate Shielding", 
+      appraisalTitle: "Certified Appraisals", appraisalDescLegacy: "IFRS and RAA Standards. Valid for banks."
     },
     blog: { title: "A&C Blog", subtitle: "Analysis, trends, and real estate news.", readMore: "Read Article" },
     contact: { 
-      title: "Contact Us", 
-      subtitle: "We are ready to assist you.",
-      call: "Call Us", 
-      write: "Email Us", 
-      name: "Full Name", 
-      phone: "Phone", 
-      email: "Email Address", 
-      msg: "Message", 
-      send: "Send Message" 
+      title: "Contact Us", subtitle: "We are ready to assist you.",
+      call: "Call Us", write: "Email Us", name: "Full Name", 
+      phone: "Phone", email: "Email Address", msg: "Message", send: "Send Message" 
     },
     footer: { contact: "Contact Us", rights: "All rights reserved.", testimonials: "Testimonials" },
     about: { 
-      story: "Our Story", 
-      mission: "More than intermediaries, we are your equity allies.", 
-      founderRole1: "Co-Founder & Sales Manager", 
-      founderRole2: "Co-Founder & Admin Manager" 
+      story: "Our Story", mission: "More than intermediaries, we are your equity allies.", 
+      founderRole1: "Co-Founder & Sales Manager", founderRole2: "Co-Founder & Admin Manager" 
     },
     dashboard: {
-      new: "New Property",
-      inventory: "Inventory",
-      private: "Private Data",
-      financial: "Financials",
-      publish: "Publish Property",
-      saving: "Saving...",
-      upload: "Upload Photos"
+      new: "New Property", inventory: "Inventory", private: "Private Data",
+      financial: "Financials", publish: "Publish Property", saving: "Saving...", upload: "Upload Photos"
     }
   }
 };
 
-const LanguageContext = createContext<any>(null);
+// 2. DICCIONARIO DINÁMICO (Frases Exactas y Palabras Clave para DB)
+const dynamicKeywords: Record<string, string> = {
+    // --- FRASES COMPLETAS (Prioridad Alta) ---
+    "Oportunidad Dorada": "Golden Opportunity",
+    "Por qué la elegimos:": "Why we chose it:",
+    "Precio por debajo del mercado.": "Price below market value.",
+    "Ubicación de alta valorización.": "High appreciation location.",
+    "Espacios únicos y acabados premium.": "Unique spaces and premium finishes.",
+    "Precio de Venta": "Sale Price",
+    "VER EXCLUSIVA": "VIEW EXCLUSIVE",
+    "Favoritos AYC": "AYC Favorites", 
+    "Ver más": "View more",
+    "Ver Detalles": "View Details",
+
+    // --- Servicios (Cinema, Avalúos, Jurídico) ---
+    "Marketing Inmobiliario": "Real Estate Marketing",
+    "El valor entra": "Value enters",
+    "por los ojos.": "through the eyes.",
+    "No grabamos recorridos; producimos narrativa de ventas. Elevamos el estatus de su activo ante inversores internacionales con calidad 4K cinematográfica.": "We don't just record tours; we produce sales narratives. We elevate your asset's status to international investors with 4K cinematic quality.",
+    "Drones 4K FPV": "4K FPV Drones",
+    "VR 360 Tours": "VR 360 Tours",
+    "Solicitar Producción": "Request Production",
+    "Certificación R.A.A.": "R.A.A. Certification", 
+    "El valor real de": "The real value of", 
+    "tu patrimonio.": "your assets.",
+    "No dejes dinero sobre la mesa. Realizamos avalúos comerciales bajo norma": "Don't leave money on the table. We perform commercial appraisals under",
+    "y estándares del": "and standards of the", 
+    "Registro Abierto de Avaluadores (RAA)": "Open Appraisers Registry (RAA)",
+    "Informes técnicos válidos para bancos, aseguradoras y procesos judiciales en Bogotá y La Sabana.": "Technical reports valid for banks, insurers, and legal proceedings in Bogotá and La Sabana.",
+    "Avalúos Comerciales (Venta/Arriendo)": "Commercial Appraisals (Sale/Rent)",
+    "Avalúos Comerciales": "Commercial Appraisals", 
+    "Avalúos Hipotecarios": "Mortgage Appraisals",
+    "Avalúos Corporativos (NIIF)": "Corporate Appraisals (IFRS)", 
+    "Peritaje Judicial": "Judicial Expertise", 
+    "Cotizar Avalúo": "Quote Appraisal",
+    "Valorización": "Appreciation", 
+    "Anual": "Yearly",
+    "Certificado": "Certified", 
+    "A.N.A. Vigente": "Current A.N.A.",
+    "Seguridad Jurídica": "Legal Security", 
+    "Blindaje Inmobiliario": "Real Estate Shielding", 
+    "Total.": "Total.",
+    "Tu patrimonio es sagrado. No firmes promesas de compraventa ni contratos sin la revisión de nuestro equipo jurídico experto en derecho inmobiliario.": "Your assets are sacred. Do not sign promissory sale agreements or contracts without the review of our legal team expert in real estate law.",
+    "Estudio de Títulos": "Title Study", 
+    "Análisis de 20 años de tradición para descartar embargos y falsas tradiciones.": "Analysis of 20 years of tradition to rule out liens and false traditions.",
+    "Saneamiento Predial": "Property Sanitation", 
+    "Corregimos áreas, linderos y cabidas. Resolvemos problemas sucesorales.": "We correct areas, boundaries, and capacities. We resolve inheritance issues.",
+    "Consultar Caso": "Consult Case", 
+    "Contratos Seguros": "Secure Contracts",
+    "Redacción y revisión de promesas de compraventa con cláusulas de protección.": "Drafting and review of promissory sale agreements with protection clauses.",
+
+    // --- PALABRAS SUELTAS (Prioridad Baja) ---
+    "Bonita": "Beautiful", "Bonito": "Beautiful",
+    "Hermosa": "Beautiful", "Hermoso": "Beautiful",
+    "Increible": "Incredible", "Increíble": "Incredible",
+    "Espectacular": "Spectacular", 
+    "Gran": "Great", "Grande": "Big",
+    "Lindo": "Nice", "Linda": "Nice",
+    "Moderno": "Modern", "Moderna": "Modern",
+    "Iluminado": "Bright", "Iluminada": "Bright",
+    "Amplio": "Spacious", "Amplia": "Spacious",
+    "Remodelado": "Remodeled", "Remodelada": "Remodeled",
+    "Casa": "House", "Apartamento": "Apartment", "Bodega": "Warehouse", "Oficina": "Office",
+    "Local": "Retail Store", "Lote": "Lot", "Terreno": "Land", "Finca": "Farm", "Rural": "Rural",
+    "Venta": "Sale", "Arriendo": "Rent",
+    "Ubicado": "Located", "Ubicada": "Located", "En": "In", "Con": "With",
+    "El": "The", "La": "The", "Los": "The", "Las": "The", "Un": "A", "Una": "A",
+    "Para": "For", "Por": "By",
+    "Excelente": "Excellent", "Oportunidad": "Opportunity", "Inversión": "Investment",
+    "Sector": "Sector", "Cerca": "Near", "Centro Comercial": "Mall", "Parque": "Park",
+    "Vista": "View", "Exterior": "Exterior", "Interior": "Interior",
+    "Estrenar": "Brand New",
+    "Habitaciones": "Bedrooms", "Baños": "Bathrooms", "Garajes": "Parking",
+    "Cocina": "Kitchen", "Integral": "Integral", "Zona": "Zone", "Lavandería": "Laundry",
+    "Estudio": "Study", "Terraza": "Terrace", "Balcón": "Balcony",
+    "Conjunto": "Complex", "Cerrado": "Gated", "Vigilancia": "Security", "Administración": "HOA Fee", "Precio": "Price"
+};
+
+type LanguageType = "ES" | "EN";
+interface LanguageContextType {
+  language: LanguageType;
+  toggleLanguage: () => void;
+  t: typeof translations["ES"];
+  translateDynamic: (text: string) => string;
+}
+
+const LanguageContext = createContext<LanguageContextType | null>(null);
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [language, setLanguage] = useState<"ES" | "EN">("ES");
-  const toggleLanguage = () => setLanguage(prev => prev === "ES" ? "EN" : "ES");
+  const [language, setLanguage] = useState<LanguageType>("ES");
+
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === "ES" ? "EN" : "ES");
+  };
+
+  // Lógica de traducción para DB
+  const translateDynamic = (text: string) => {
+    if (!text) return "";
+    if (language === "ES") return text; 
+
+    let translatedText = text;
+    // Ordenar frases largas primero
+    const sortedKeywords = Object.entries(dynamicKeywords).sort((a, b) => b[0].length - a[0].length);
+
+    sortedKeywords.forEach(([es, en]) => {
+        const escapedEs = es.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Usar regex estricto para palabras cortas y flexible para frases
+        const isPhrase = es.trim().includes(" ");
+        const regexPattern = isPhrase ? escapedEs : `\\b${escapedEs}\\b`;
+        const regex = new RegExp(regexPattern, 'gi');
+
+        translatedText = translatedText.replace(regex, (match) => {
+            if (match[0] === match[0].toUpperCase() && en[0]) {
+                return en.charAt(0).toUpperCase() + en.slice(1);
+            }
+            return en.toLowerCase();
+        });
+    });
+
+    return translatedText;
+  };
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t: translations[language] }}>
+    <LanguageContext.Provider value={{ language, toggleLanguage, t: translations[language], translateDynamic }}>
       {children}
     </LanguageContext.Provider>
   );
 };
 
-export const useLanguage = () => useContext(LanguageContext);
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) throw new Error("useLanguage debe usarse dentro de un LanguageProvider");
+  return context;
+};
