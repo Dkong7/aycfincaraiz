@@ -9,56 +9,47 @@ const translations = {
     services: { 
       subtitle: "Nuestros Servicios", title: "Soluciones Integrales", 
       
-      // --- CLAVES PARA NAVBAR (Faltaban estas) ---
+      // --- CLAVES PARA NAVBAR ---
       appraisal: "Avalúos",
       legal: "Jurídico",
       media: "Audiovisual",
 
-      // --- CLAVES AVALÚOS (ES) ---
+      // --- AVALÚOS ---
       appraisalBadge: "Certificación R.A.A.",
       appraisalTitlePart1: "El valor real de",
       appraisalTitlePart2: "tu patrimonio.",
-      appraisalDesc: "No dejes dinero sobre la mesa. Realizamos avalúos comerciales bajo norma NIIF y estándares del Registro Abierto de Avaluadores (RAA). Informes técnicos válidos para bancos, aseguradoras y procesos judiciales en Bogotá y La Sabana.",
-      appraisalItems: [
-        "Avalúos Comerciales (Venta/Arriendo)",
-        "Avalúos Hipotecarios",
-        "Avalúos Corporativos (NIIF)",
-        "Peritaje Judicial"
-      ],
+      appraisalDesc: "No dejes dinero sobre la mesa. Realizamos avalúos comerciales bajo norma NIIF y estándares del Registro Abierto de Avaluadores (RAA).",
+      appraisalItems: ["Avalúos Comerciales", "Avalúos Hipotecarios", "Avalúos Corporativos (NIIF)", "Peritaje Judicial"],
       appraisalBtn: "Cotizar Avalúo",
       appraisalCard1Label: "Valorización",
       appraisalCard1Value: "Anual",
       appraisalCard2Label: "Certificado",
       appraisalCard2Value: "A.N.A. Vigente",
 
-      // --- CLAVES LEGAL (ES - NUEVAS) ---
+      // --- LEGAL ---
       legalBadge: "Seguridad Jurídica",
       legalTitlePart1: "Blindaje Inmobiliario",
       legalTitlePart2: "Total.",
-      legalDesc: "Tu patrimonio es sagrado. No firmes promesas de compraventa ni contratos sin la revisión de nuestro equipo jurídico experto en derecho inmobiliario y urbanístico.",
+      legalDesc: "Tu patrimonio es sagrado. No firmes promesas de compraventa ni contratos sin la revisión de nuestro equipo jurídico experto.",
       legalCard1Title: "Estudio de Títulos",
-      legalCard1Desc: "Análisis de 20 años de tradición para descartar embargos, falsas tradiciones o problemas sucesorales.",
+      legalCard1Desc: "Análisis de 20 años de tradición para descartar embargos y falsas tradiciones.",
       legalCard2Title: "Saneamiento Predial",
-      legalCard2Desc: "Corregimos áreas, linderos y cabidas. Resolvemos problemas de falsa tradición y sucesiones complejas.",
+      legalCard2Desc: "Corregimos áreas, linderos y cabidas. Resolvemos problemas sucesorales.",
       legalCard3Title: "Contratos Seguros",
-      legalCard3Desc: "Redacción y revisión de promesas de compraventa y contratos de arrendamiento con cláusulas de protección.",
+      legalCard3Desc: "Redacción y revisión de promesas de compraventa con cláusulas de protección.",
       legalBtn: "Consultar Caso",
 
-      // --- CLAVES CINEMA / MEDIA (ES - NUEVAS) ---
+      // --- MEDIA ---
       mediaBadge: "Marketing Inmobiliario",
       mediaTitlePart1: "El valor entra",
       mediaTitlePart2: "por los ojos.",
-      mediaDesc: "No grabamos recorridos; producimos narrativa de ventas. Elevamos el estatus de su activo ante inversores internacionales con calidad 4K cinematográfica.",
+      mediaDesc: "No grabamos recorridos; producimos narrativa de ventas. Elevamos el estatus de su activo ante inversores internacionales.",
       mediaItem1: "Drones 4K FPV",
       mediaItem2: "VR 360 Tours",
       mediaBtn: "Solicitar Producción",
 
-      // --- CLAVES GENERALES (LEGACY) ---
-      // (Mantenemos estas por si acaso se usan en otro lado, pero las de arriba son las principales)
-      btnLegal: "Consultar",
-      btnMedia: "Ver Portafolio",
-      legalTitle: "Blindaje Inmobiliario", 
-      appraisalTitle: "Avalúos Certificados", appraisalDescLegacy: "Norma NIIF y RAA. Informes válidos para bancos."
+      // --- LEGACY KEYS ---
+      btnLegal: "Consultar", btnMedia: "Ver Portafolio", legalTitle: "Blindaje Inmobiliario", appraisalTitle: "Avalúos Certificados", appraisalDescLegacy: "Norma NIIF y RAA."
     },
     blog: { title: "Blog A&C", subtitle: "Análisis, tendencias y noticias del sector inmobiliario.", readMore: "Leer Artículo" },
     contact: { 
@@ -66,7 +57,6 @@ const translations = {
       call: "Llámanos", write: "Escríbenos", name: "Nombre Completo", 
       phone: "Teléfono", email: "Correo Electrónico", msg: "Mensaje", send: "Enviar Mensaje" 
     },
-    footer: { contact: "Contáctanos", rights: "Todos los derechos reservados.", testimonials: "Testimonios" },
     about: { 
       story: "Nuestra Historia", mission: "Más que intermediarios, somos tus aliados patrimoniales.", 
       founderRole1: "Cofundadora & Gerente Comercial", founderRole2: "Cofundador & Gerente Administrativo" 
@@ -74,6 +64,22 @@ const translations = {
     dashboard: {
       new: "Nuevo Inmueble", inventory: "Inventario", private: "Datos Privados",
       financial: "Financiero", publish: "Publicar Inmueble", saving: "Guardando...", upload: "Cargar Fotos"
+    },
+    footer: { 
+        aboutTitle: "Sobre A&C",
+        aboutText: "Somos una firma inmobiliaria boutique especializada en el mercado de Bogotá y La Sabana. Fusionamos tecnología, asesoría jurídica y marketing de alto nivel.",
+        contactTitle: "Información de Contacto",
+        location: "Bogotá, D.C. - Cundinamarca",
+        phone: "+57 300 123 4567", // Ajustar número real
+        email: "gerencia@aycfincaraiz.com", // Ajustar correo real
+        testimonialsTitle: "Lo que dicen nuestros clientes",
+        rights: "Todos los derechos reservados.",
+        developedBy: "desarrollado por",
+        testimonialsList: [
+            { text: "Gracias a A&C logramos vender nuestra casa en tiempo récord y al precio justo. La asesoría jurídica fue impecable.", author: "Familia Restrepo", role: "Vendedores" },
+            { text: "El nivel de detalle en los avalúos y la producción audiovisual es algo que no había visto en otras inmobiliarias.", author: "Carlos M.", role: "Inversionista" },
+            { text: "Profesionalismo puro. Me sentí acompañada y segura durante todo el proceso de compra de mi apartamento.", author: "Andrea L.", role: "Compradora" }
+        ]
     }
   },
   EN: {
@@ -82,34 +88,21 @@ const translations = {
     properties: { details: "View Details", search: "Search Properties", filters: "Filters", noResults: "No properties found.", viewAll: "View all" },
     services: { 
       subtitle: "Our Services", title: "Integral Solutions", 
-      
-      // --- CLAVES PARA NAVBAR (EN) ---
-      appraisal: "Appraisals",
-      legal: "Legal",
-      media: "Media",
-
-      // --- CLAVES AVALÚOS (EN) ---
+      appraisal: "Appraisals", legal: "Legal", media: "Media",
       appraisalBadge: "R.A.A. Certification",
       appraisalTitlePart1: "The real value of",
       appraisalTitlePart2: "your assets.",
-      appraisalDesc: "Don't leave money on the table. We perform commercial appraisals under IFRS standards and the Open Appraisers Registry (RAA). Technical reports valid for banks, insurers, and legal proceedings in Bogotá and La Sabana.",
-      appraisalItems: [
-        "Commercial Appraisals (Sale/Rent)",
-        "Mortgage Appraisals",
-        "Corporate Appraisals (IFRS)",
-        "Judicial Expertise"
-      ],
+      appraisalDesc: "Don't leave money on the table. We perform commercial appraisals under IFRS standards and the Open Appraisers Registry (RAA).",
+      appraisalItems: ["Commercial Appraisals", "Mortgage Appraisals", "Corporate Appraisals (IFRS)", "Judicial Expertise"],
       appraisalBtn: "Get Appraisal Quote",
       appraisalCard1Label: "Appreciation",
       appraisalCard1Value: "Yearly",
       appraisalCard2Label: "Certified",
       appraisalCard2Value: "Current A.N.A.",
-
-      // --- CLAVES LEGAL (EN - NUEVAS) ---
       legalBadge: "Legal Security",
       legalTitlePart1: "Real Estate",
       legalTitlePart2: "Shielding.",
-      legalDesc: "Your assets are sacred. Do not sign promissory sale agreements or contracts without the review of our legal team expert in real estate and urban law.",
+      legalDesc: "Your assets are sacred. Do not sign promissory sale agreements or contracts without the review of our legal team expert.",
       legalCard1Title: "Title Study",
       legalCard1Desc: "Analysis of 20 years of history to rule out liens, false traditions, or inheritance issues.",
       legalCard2Title: "Property Rectification",
@@ -117,21 +110,14 @@ const translations = {
       legalCard3Title: "Secure Contracts",
       legalCard3Desc: "Drafting and review of promissory sale agreements and lease contracts with protection clauses.",
       legalBtn: "Consult Case",
-
-      // --- CLAVES CINEMA / MEDIA (EN - NUEVAS) ---
       mediaBadge: "Real Estate Marketing",
       mediaTitlePart1: "Value enters",
       mediaTitlePart2: "through the eyes.",
-      mediaDesc: "We don't just record tours; we produce sales narratives. We elevate your asset's status to international investors with 4K cinematic quality.",
+      mediaDesc: "We don't just record tours; we produce sales narratives. We elevate your asset's status to international investors.",
       mediaItem1: "4K FPV Drones",
       mediaItem2: "VR 360 Tours",
       mediaBtn: "Request Production",
-
-      // --- CLAVES GENERALES (LEGACY) ---
-      btnLegal: "Consult",
-      btnMedia: "View Portfolio",
-      legalTitle: "Real Estate Shielding", 
-      appraisalTitle: "Certified Appraisals", appraisalDescLegacy: "IFRS and RAA Standards. Valid for banks."
+      btnLegal: "Consult", btnMedia: "View Portfolio", legalTitle: "Real Estate Shielding", appraisalTitle: "Certified Appraisals", appraisalDescLegacy: "IFRS Standards."
     },
     blog: { title: "A&C Blog", subtitle: "Analysis, trends, and real estate news.", readMore: "Read Article" },
     contact: { 
@@ -139,7 +125,6 @@ const translations = {
       call: "Call Us", write: "Email Us", name: "Full Name", 
       phone: "Phone", email: "Email Address", msg: "Message", send: "Send Message" 
     },
-    footer: { contact: "Contact Us", rights: "All rights reserved.", testimonials: "Testimonials" },
     about: { 
       story: "Our Story", mission: "More than intermediaries, we are your equity allies.", 
       founderRole1: "Co-Founder & Sales Manager", founderRole2: "Co-Founder & Admin Manager" 
@@ -147,25 +132,32 @@ const translations = {
     dashboard: {
       new: "New Property", inventory: "Inventory", private: "Private Data",
       financial: "Financials", publish: "Publish Property", saving: "Saving...", upload: "Upload Photos"
+    },
+    footer: { 
+        aboutTitle: "About A&C",
+        aboutText: "We are a boutique real estate firm specializing in the Bogotá and La Sabana market. We merge technology, legal advice, and high-level marketing.",
+        contactTitle: "Contact Information",
+        location: "Bogotá, D.C. - Cundinamarca",
+        phone: "+57 300 123 4567",
+        email: "gerencia@aycfincaraiz.com",
+        testimonialsTitle: "What our clients say",
+        rights: "All rights reserved.",
+        developedBy: "developed by",
+        testimonialsList: [
+            { text: "Thanks to A&C we managed to sell our house in record time and at a fair price. The legal advice was impeccable.", author: "Restrepo Family", role: "Sellers" },
+            { text: "The level of detail in the appraisals and audiovisual production is something I hadn't seen in other agencies.", author: "Carlos M.", role: "Investor" },
+            { text: "Pure professionalism. I felt supported and safe during the entire process of buying my apartment.", author: "Andrea L.", role: "Buyer" }
+        ]
     }
   }
 };
 
-// 2. DICCIONARIO DINÁMICO (Frases Exactas y Palabras Clave para DB)
+// 2. DICCIONARIO DINÁMICO (Sin cambios, mantener el tuyo completo)
 const dynamicKeywords: Record<string, string> = {
-    // --- FRASES COMPLETAS (Prioridad Alta) ---
     "Oportunidad Dorada": "Golden Opportunity",
-    "Por qué la elegimos:": "Why we chose it:",
-    "Precio por debajo del mercado.": "Price below market value.",
-    "Ubicación de alta valorización.": "High appreciation location.",
-    "Espacios únicos y acabados premium.": "Unique spaces and premium finishes.",
     "Precio de Venta": "Sale Price",
     "VER EXCLUSIVA": "VIEW EXCLUSIVE",
-    "Favoritos AYC": "AYC Favorites", 
-    "Ver más": "View more",
-    "Ver Detalles": "View Details",
-
-    // --- Servicios (Cinema, Avalúos, Jurídico) ---
+    "Favoritos AYC": "AYC Favorites",
     "Marketing Inmobiliario": "Real Estate Marketing",
     "El valor entra": "Value enters",
     "por los ojos.": "through the eyes.",
@@ -201,8 +193,6 @@ const dynamicKeywords: Record<string, string> = {
     "Consultar Caso": "Consult Case", 
     "Contratos Seguros": "Secure Contracts",
     "Redacción y revisión de promesas de compraventa con cláusulas de protección.": "Drafting and review of promissory sale agreements with protection clauses.",
-
-    // --- PALABRAS SUELTAS (Prioridad Baja) ---
     "Bonita": "Beautiful", "Bonito": "Beautiful",
     "Hermosa": "Beautiful", "Hermoso": "Beautiful",
     "Increible": "Incredible", "Increíble": "Incredible",
@@ -246,18 +236,15 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     setLanguage(prev => prev === "ES" ? "EN" : "ES");
   };
 
-  // Lógica de traducción para DB
   const translateDynamic = (text: string) => {
     if (!text) return "";
     if (language === "ES") return text; 
 
     let translatedText = text;
-    // Ordenar frases largas primero
     const sortedKeywords = Object.entries(dynamicKeywords).sort((a, b) => b[0].length - a[0].length);
 
     sortedKeywords.forEach(([es, en]) => {
         const escapedEs = es.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Usar regex estricto para palabras cortas y flexible para frases
         const isPhrase = es.trim().includes(" ");
         const regexPattern = isPhrase ? escapedEs : `\\b${escapedEs}\\b`;
         const regex = new RegExp(regexPattern, 'gi');

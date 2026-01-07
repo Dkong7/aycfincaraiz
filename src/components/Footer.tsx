@@ -1,78 +1,126 @@
-﻿import React, { useState } from "react";
-import { Facebook, Instagram, Youtube, Phone, Mail, ChevronLeft, ChevronRight } from "lucide-react";
+﻿import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { MapPin, Phone, Mail, Star, Quote } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 
-const Footer = () => {
-  const { t } = useLanguage();
-  const [testimonyIdx, setTestimonyIdx] = useState(0);
+export default function Footer() {
+  const { t, language } = useLanguage();
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
-  const testimonials = [
-    { name: "Carlos Ruiz", role: "Inversionista", text: "La asesoría legal de A&C me ahorró millones en un trámite complejo. Excelencia total.", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200" },
-    { name: "Maria Fernanda", role: "Propietaria", text: "Vendieron mi casa en Rosales en tiempo récord gracias a sus videos tipo cine.", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200" },
-    { name: "Juan David", role: "Comprador", text: "Su transparencia y ética me dieron la confianza para invertir mi patrimonio.", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200" }
-  ];
+  // Logo: Muestra el logo correspondiente al idioma ACTUAL
+  const logoSrc = language === "ES" ? "/ayclogo.svg" : "/ayclogoen.svg";
 
-  const nextTestimony = () => setTestimonyIdx((prev) => (prev + 1) % testimonials.length);
-  const prevTestimony = () => setTestimonyIdx((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  // Rotación automática de testimonios (7 segundos)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % t.footer.testimonialsList.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [t.footer.testimonialsList.length]);
 
   return (
-    <footer className="bg-[#0A192F] text-white pt-20 pb-10 border-t border-gray-800 font-sans">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
-           
-           {/* COL 1: CONTACTO */}
-           <div>
-              <div className="mb-6 flex items-center gap-2">
-                 <img src="/ayclogo.svg" className="h-12 brightness-0 invert" alt="A&C" />
-                 <span className="font-black text-xl">AYC</span>
-              </div>
-              <p className="text-gray-400 mb-6 text-sm leading-relaxed">
-                 Bogotá & Cundinamarca<br/>
-                 Calle 123 # 45-67, Of. 301<br/>
-                 Edificio Torre Central
-              </p>
-              <div className="flex gap-4">
-                 <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-green-600 transition-colors"><Instagram size={20}/></a>
-                 <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-green-600 transition-colors"><Facebook size={20}/></a>
-                 <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-green-600 transition-colors"><Youtube size={20}/></a>
-              </div>
-           </div>
+    <footer className="bg-[#0A192F] text-slate-300 pt-20 pb-8 font-sans border-t border-slate-800">
+      <div className="container mx-auto px-6">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
+          
+          {/* COLUMNA 1: INFO & LOGO */}
+          <div className="space-y-6">
+            <Link to="/" className="block">
+               {/* Se eliminan filtros para que se vea el color original */}
+               <img 
+                 src={logoSrc} 
+                 alt="AYC Logo" 
+                 className="h-20 w-auto object-contain"
+               />
+            </Link>
+            <h3 className="text-white font-black uppercase tracking-wider text-sm border-b border-green-600 pb-2 inline-block">
+                {t.footer.aboutTitle}
+            </h3>
+            <p className="text-sm leading-relaxed text-slate-400 max-w-sm">
+                {t.footer.aboutText}
+            </p>
+            <div className="flex gap-4 pt-4">
+                {/* Redes Sociales (Iconos Genéricos) */}
+                <a href="#" className="p-2 bg-slate-800 rounded-full hover:bg-green-600 text-white transition-colors"><span className="sr-only">Facebook</span>FB</a>
+                <a href="#" className="p-2 bg-slate-800 rounded-full hover:bg-green-600 text-white transition-colors"><span className="sr-only">Instagram</span>IG</a>
+                <a href="#" className="p-2 bg-slate-800 rounded-full hover:bg-green-600 text-white transition-colors"><span className="sr-only">LinkedIn</span>LI</a>
+            </div>
+          </div>
 
-           {/* COL 2: TESTIMONIOS */}
-           <div>
-              <h3 className="text-green-500 font-bold uppercase tracking-widest mb-6 text-sm">Testimonios</h3>
-              <div className="bg-white/5 p-6 rounded-2xl relative">
-                 <div className="flex items-center gap-4 mb-4">
-                    <img src={testimonials[testimonyIdx].img} className="w-12 h-12 rounded-full object-cover border-2 border-green-500" />
-                    <div>
-                       <p className="font-bold text-white">{testimonials[testimonyIdx].name}</p>
-                       <p className="text-xs text-gray-400 uppercase">{testimonials[testimonyIdx].role}</p>
+          {/* COLUMNA 2: CONTACTO */}
+          <div className="space-y-6">
+            <h3 className="text-white font-black uppercase tracking-wider text-sm border-b border-green-600 pb-2 inline-block">
+                {t.footer.contactTitle}
+            </h3>
+            <ul className="space-y-4 text-sm">
+                <li className="flex items-start gap-3">
+                    <MapPin className="text-green-500 shrink-0 mt-1" size={18} />
+                    <span>{t.footer.location}</span>
+                </li>
+                <li className="flex items-center gap-3">
+                    <Phone className="text-green-500 shrink-0" size={18} />
+                    <a href={`tel:${t.footer.phone}`} className="hover:text-white transition-colors">{t.footer.phone}</a>
+                </li>
+                <li className="flex items-center gap-3">
+                    <Mail className="text-green-500 shrink-0" size={18} />
+                    <a href={`mailto:${t.footer.email}`} className="hover:text-white transition-colors">{t.footer.email}</a>
+                </li>
+            </ul>
+          </div>
+
+          {/* COLUMNA 3: TESTIMONIOS ROTATIVOS */}
+          <div className="space-y-6">
+             <h3 className="text-white font-black uppercase tracking-wider text-sm border-b border-green-600 pb-2 inline-block">
+                {t.footer.testimonialsTitle}
+             </h3>
+             <div className="relative h-48">
+                {t.footer.testimonialsList.map((testim: any, index: number) => (
+                    <div 
+                        key={index}
+                        className={`absolute top-0 left-0 w-full transition-all duration-700 ease-in-out ${
+                            index === currentTestimonial ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10 pointer-events-none"
+                        }`}
+                    >
+                        <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 relative">
+                            <Quote className="absolute top-4 right-4 text-green-600/20" size={40} />
+                            <div className="flex gap-1 text-yellow-500 mb-3">
+                                {[1,2,3,4,5].map(s => <Star key={s} size={12} fill="currentColor" />)}
+                            </div>
+                            <p className="text-slate-300 text-sm italic mb-4">"{testim.text}"</p>
+                            <div>
+                                <p className="text-green-500 font-bold text-xs uppercase">{testim.author}</p>
+                                <p className="text-slate-500 text-[10px] uppercase tracking-widest">{testim.role}</p>
+                            </div>
+                        </div>
                     </div>
-                 </div>
-                 <p className="text-gray-300 text-sm italic">"{testimonials[testimonyIdx].text}"</p>
-                 
-                 <div className="absolute top-4 right-4 flex gap-1">
-                    <button onClick={prevTestimony} className="p-1 hover:text-green-500"><ChevronLeft size={16}/></button>
-                    <button onClick={nextTestimony} className="p-1 hover:text-green-500"><ChevronRight size={16}/></button>
-                 </div>
-              </div>
-           </div>
+                ))}
+             </div>
+             {/* Indicadores de testimonio */}
+             <div className="flex gap-2 justify-center lg:justify-start pt-2">
+                {t.footer.testimonialsList.map((_: any, i: number) => (
+                    <button 
+                        key={i} 
+                        onClick={() => setCurrentTestimonial(i)}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${i === currentTestimonial ? "w-6 bg-green-500" : "w-1.5 bg-slate-700 hover:bg-slate-600"}`}
+                        aria-label={`Ver testimonio ${i + 1}`}
+                    />
+                ))}
+             </div>
+          </div>
 
-           {/* COL 3: LEGAL */}
-           <div>
-              <h3 className="text-green-500 font-bold uppercase tracking-widest mb-6 text-sm">{t.footer.contact}</h3>
-              <div className="space-y-4 text-gray-400 text-sm">
-                 <p className="flex items-center gap-3"><Phone size={16} className="text-green-500"/> +57 313 466 3832</p>
-                 <p className="flex items-center gap-3"><Mail size={16} className="text-green-500"/> info@aycfincaraiz.com</p>
-              </div>
-           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 text-center text-xs text-gray-500">
-           <p>&copy; {new Date().getFullYear()} A&C Finca Raíz. {t.footer.rights}</p>
+        {/* BOTTOM BAR - COPYRIGHT */}
+        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <p>
+                &copy; 2026 <strong className="text-slate-300">A&C Finca Raíz</strong>. {t.footer.rights}
+            </p>
+            <p className="flex items-center gap-1">
+                {t.footer.developedBy} <a href="https://www.thisiswillowtree.com" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-400 font-bold transition-colors">Willow Tree Media</a>
+            </p>
         </div>
       </div>
     </footer>
   );
-};
-export default Footer;
+}

@@ -49,7 +49,9 @@ export const FeaturedProperties = () => {
 
         {opportunity && (
             <div className="flex flex-col lg:flex-row gap-10 items-stretch relative">
-                <div className="w-full lg:w-[30%] flex flex-col justify-center space-y-6 z-20 order-2 lg:order-1">
+                
+                {/* BLOQUE DE TEXTO: Se sube en mobile con order-1 */}
+                <div className="w-full lg:w-[30%] flex flex-col justify-center space-y-6 z-20 order-1 lg:order-1">
                     <div className="animate-in fade-in slide-in-from-bottom-5 duration-700">
                         <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-yellow-300 mb-4 shadow-sm"><Crown size={16} fill="currentColor" className="text-yellow-600"/> {safeTranslate("Oportunidad Dorada")}</span>
                         <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-[1.1]">{safeTranslate(opportunity.title)}</h2>
@@ -72,8 +74,12 @@ export const FeaturedProperties = () => {
                         </Link>
                     </div>
                 </div>
-                <div className="w-full lg:w-[70%] relative group order-1 lg:order-2 min-h-[500px]">
-                    <div className="absolute -inset-3 bg-gradient-to-r from-yellow-400 via-orange-300 to-yellow-500 rounded-[2.5rem] blur-2xl opacity-60 group-hover:opacity-80 transition duration-1000 animate-pulse z-0"></div>
+                
+                {/* BLOQUE DE IMAGEN: Se baja en mobile con order-2 y se ajusta altura mínima */}
+                <div className="w-full lg:w-[70%] relative group order-2 lg:order-2 min-h-[269px] lg:min-h-[500px]">
+                    {/* DEGRADADO: Altura fija 269px en mobile, auto en desktop */}
+                    <div className="absolute top-0 left-0 right-0 h-[269px] lg:h-auto lg:-inset-3 bg-gradient-to-r from-yellow-400 via-orange-300 to-yellow-500 rounded-[2.5rem] blur-2xl opacity-60 group-hover:opacity-80 transition duration-1000 animate-pulse z-0"></div>
+                    
                     <div className="relative h-full w-full rounded-[2rem] overflow-hidden shadow-[0_0_60px_rgba(234,179,8,0.3)] border-[6px] border-white z-10 bg-white">
                         <img src={`${PB_URL}/api/files/${opportunity.collectionId}/${opportunity.id}/${opportunity.images?.[0]}`} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-[2000ms]" alt={opportunity.title} />
                         <div className="absolute top-8 left-8"><div className="bg-yellow-500 text-white px-5 py-2 rounded-lg font-black uppercase text-xs tracking-widest shadow-lg">{safeTranslate(opportunity.property_type)}</div></div>
@@ -131,7 +137,7 @@ export const FeaturedProperties = () => {
 // 2. NUEVA SECCIÓN DE SERVICIOS INTEGRADOS
 // ==========================================
 export const ServicesIntro = () => {
-  const { t } = useLanguage(); // Lógica de traducción integrada
+  const { t } = useLanguage(); 
 
   return (
     <div className="bg-gray-50">
