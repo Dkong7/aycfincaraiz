@@ -24,3 +24,24 @@ dist-ssr
 *.sw?
 
 .env
+
+# Dependencias
+node_modules/
+
+# Build
+dist/
+build/
+
+# Variables de entorno
+.env
+.env.local
+
+# PocketBase (Bloquear ejecutables y base de datos)
+**/pb_data/
+**/pocketbase.exe
+**/pocketbase
+AyC_Backend/pocketbase.exe
+AyC_Backend/pb_data/
+
+# Logs
+*.log
