@@ -3,7 +3,7 @@ import { Calendar, User, ArrowRight, X } from "lucide-react";
 import { pb } from "../api";
 import { useLanguage } from "../context/LanguageContext";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+// Footer eliminado para evitar duplicidad
 import type { RecordModel } from "pocketbase";
 
 const Blog = () => {
@@ -34,7 +34,7 @@ const Blog = () => {
 
   return (
     <div className="bg-white min-h-screen font-sans">
-       <Navbar language="ES" toggleLanguage={() => {}} />
+       <Navbar />
        
        <div className="bg-[#0A192F] text-white pt-32 pb-20 px-6 text-center relative">
           <h1 className="text-5xl font-black uppercase mb-4 tracking-tight">{t.blog.title}</h1>
@@ -112,7 +112,7 @@ const Blog = () => {
          </div>
        )}
 
-       <Footer />
+       {/* Footer eliminado */}
     </div>
   );
 };

@@ -1,14 +1,32 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { pb } from "../api";
-import { Search, Filter, MapPin, Home, Bed, Bath, ArrowRight, LayoutGrid } from "lucide-react";
+import { Search, Filter, MapPin, Home, Bed, Bath, ArrowRight, LayoutGrid, Star, Crown, ArrowUp, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Property } from "../types/property";
 
+const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+
+// 1. HELPERS DE COLOR Y FORMATO
+const getTypeColor = (type: string) => {
+  const t = type?.toLowerCase() || "";
+  if (t.includes("casa")) return "border-yellow-400 bg-yellow-50 text-yellow-800";
+  if (t.includes("apartamento") || t.includes("apto")) return "border-blue-600 bg-blue-50 text-blue-800";
+  if (t.includes("bodega")) return "border-amber-800 bg-amber-50 text-amber-900";
+  if (t.includes("lote") || t.includes("terreno")) return "border-green-500 bg-green-50 text-green-800";
+  if (t.includes("local")) return "border-pink-500 bg-pink-50 text-pink-800";
+  if (t.includes("oficina")) return "border-sky-300 bg-sky-50 text-sky-800";
+  return "border-gray-200 bg-gray-50 text-gray-600"; 
+};
+
 const Properties = () => {
+  // ESTADOS PRINCIPALES
+  const [queen, setQueen] = useState<Property | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
-  
+  const [loading, setLoading] = useState(false);
+  // Eliminamos 'page' state porque ya no paginamos realmente, sino que loopeamos
+  const [hasMore, setHasMore] = useState(true);
+  const [showTopBtn, setShowTopBtn] = useState(false);
+
   // FILTROS
   const [filters, setFilters] = useState({
     keyword: "",
@@ -17,56 +35,192 @@ const Properties = () => {
     maxPrice: "",
   });
 
-  // CARGA DE DATOS (CON FILTROS POCKETBASE)
-  const fetchProperties = async () => {
+  const observerTarget = useRef(null);
+
+  // 1. CARGAR LA REINA (Solo una vez al inicio)
+  useEffect(() => {
+    const fetchQueen = async () => {
+      try {
+        const res = await pb.collection("properties").getList(1, 1, {
+          filter: "is_opportunity=true",
+          sort: "-created",
+        });
+        if (res.items.length > 0) setQueen(res.items[0] as unknown as Property);
+      } catch (e) { console.error("Error Reina:", e); }
+    };
+    fetchQueen();
+  }, []);
+
+  // 2. CARGAR PROPIEDADES (Timeline Verdaderamente Infinito)
+  // isAppend: true si estamos scrolleando, false si es un filtro nuevo
+  const fetchProperties = async (isAppend = false) => {
+    if (loading) return;
     setLoading(true);
+    
     try {
-      // Construir filtro de PocketBase
-      let filterString = "";
-      const conditions = [];
-
-      // 1. Palabra Clave (Título, Municipio o ID)
-      if (filters.keyword) {
-         // PocketBase usa "~" para "contiene"
-         conditions.push(`(title ~ "${filters.keyword}" || municipality ~ "${filters.keyword}" || ayc_id ~ "${filters.keyword}")`);
-      }
-
-      // 2. Tipo
-      if (filters.type) {
-         conditions.push(`property_type = "${filters.type}"`);
-      }
-
-      // 3. Precio
+      // Construir filtro
+      const conditions = ["is_opportunity=false"]; // Excluir reina del timeline
+      if (filters.keyword) conditions.push(`(title ~ "${filters.keyword}" || municipality ~ "${filters.keyword}" || ayc_id ~ "${filters.keyword}" || neighborhood ~ "${filters.keyword}")`);
+      if (filters.type) conditions.push(`property_type = "${filters.type}"`);
       if (filters.minPrice) conditions.push(`price_cop >= ${filters.minPrice}`);
       if (filters.maxPrice) conditions.push(`price_cop <= ${filters.maxPrice}`);
 
-      // Unir todo
-      filterString = conditions.join(" && ");
+      const filterString = conditions.join(" && ");
 
-      const result = await pb.collection("properties").getList(1, 50, {
+      // --- CAMBIO CLAVE PARA INFINITO ---
+      // Siempre pedimos 6 items aleatorios. No usamos paginación real (page 1, 2, 3...).
+      // Al pedir siempre random, si hay pocos items, se repetirán en distinto orden, creando el loop.
+      const result = await pb.collection("properties").getList(1, 6, {
         filter: filterString,
-        sort: "-created",
+        sort: "@random",
+        // Añadimos un parámetro para evitar cacheo agresivo si es necesario
+        '$autoCancel': false 
       });
 
-      setProperties(result.items as unknown as Property[]);
+      const newItems = result.items as unknown as Property[];
+
+      if (!isAppend) {
+        // Filtro nuevo: Reemplazar lista
+        setProperties(newItems);
+        // Si el total de items que coinciden con el filtro es > 0, hay más para mostrar en bucle
+        setHasMore(result.totalItems > 0);
+      } else {
+        // Scroll: Añadir al final solo si llegaron items
+        if (newItems.length > 0) {
+            setProperties(prev => [...prev, ...newItems]);
+        }
+        // Mantenemos el loop activo mientras el filtro devuelva algo
+        setHasMore(result.totalItems > 0);
+      }
+
     } catch (error) {
       console.error("Error cargando inmuebles:", error);
+      setHasMore(false); // Evitar bucles de error
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchProperties(); }, []);
+  // Efecto: Resetear al cambiar filtros
+  useEffect(() => {
+    fetchProperties(false); // isAppend = false
+  }, [filters.keyword, filters.type, filters.minPrice, filters.maxPrice]);
 
-  // MANEJO DE CAMBIOS
+  // Efecto: Scroll Infinito (Observer)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Disparar solo si intersecta, hay más, no está cargando Y ya hay propiedades mostradas
+        if (entries[0].isIntersecting && hasMore && !loading && properties.length > 0) {
+             fetchProperties(true); // isAppend = true
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading, properties.length]);
+
+  // Efecto: Botón Top
+  useEffect(() => {
+    const handleScroll = () => setShowTopBtn(window.scrollY > 400);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // MANEJADORES
   const handleFilterChange = (e: any) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSearch = (e: any) => {
-    e.preventDefault();
-    fetchProperties();
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  // RENDER CARD (Helper interno)
+  const PropertyCard = ({ data, isQueen = false }: { data: any, isQueen?: boolean }) => {
+      const colorClass = getTypeColor(data.property_type);
+      const isFav = data.is_ayc_favorite;
+      
+      // --- CORRECCIÓN BORDE REINA ---
+      let borderStyle = "";
+      if (isQueen) {
+          borderStyle = "border-0"; // La reina NO lleva borde interno, solo el glow exterior
+      } else if (isFav) {
+          borderStyle = "border-green-500 border-4 shadow-green-100"; // Favorito normal
+      } else {
+          borderStyle = `${colorClass.split(" ")[0]} border-2`; // Normal por tipo
+      }
+
+      return (
+        <Link to={`/inmuebles/${data.id}`} className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-2 relative">
+            {/* Contenedor Borde Color */}
+            <div className={`absolute inset-0 rounded-2xl pointer-events-none ${borderStyle} z-20`}></div>
+
+            {/* IMAGEN */}
+            <div className="h-64 relative overflow-hidden bg-gray-200">
+                {data.images && data.images.length > 0 ? (
+                    <img src={`${PB_URL}/api/files/${data.collectionId}/${data.id}/${data.images[0]}`} alt={data.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">SIN FOTO</div>
+                )}
+                
+                {/* Badges Superiores */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2 z-30">
+                    {isQueen && <span className="bg-yellow-400 text-black font-black px-3 py-1 rounded-full text-[10px] uppercase flex items-center gap-1 shadow-md"><Crown size={12}/> Reina</span>}
+                    {/* Mostrar badge de Favorito solo si NO es la Reina */}
+                    {!isQueen && isFav && <span className="bg-green-600 text-white font-bold px-3 py-1 rounded-full text-[10px] uppercase flex items-center gap-1 shadow-md animate-pulse"><Star size={12} fill="currentColor"/> Favorito</span>}
+                </div>
+
+                {/* Badge Tipo (Color) */}
+                <div className="absolute bottom-4 right-4 z-30">
+                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase shadow-sm ${colorClass}`}>
+                        {data.property_type}
+                    </span>
+                </div>
+            </div>
+
+            {/* INFO */}
+            <div className="p-6 flex-1 flex flex-col justify-between relative z-10">
+                <div>
+                    <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">{data.ayc_id}</span>
+                        <div className="flex items-center gap-1 text-gray-500 text-xs uppercase font-bold">
+                            <MapPin size={12} className="text-green-600"/> {data.municipality}
+                        </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-[#0A192F] line-clamp-2 mb-4 leading-tight">{data.title}</h3>
+                    
+                    {/* Specs Rápidas */}
+                    <div className="flex gap-4 border-t border-gray-100 pt-4 mb-4 text-xs font-bold text-gray-500">
+                        {data.specs && (() => {
+                            try {
+                                const s = typeof data.specs === 'string' ? JSON.parse(data.specs) : data.specs;
+                                return (
+                                    <>
+                                        {(s.area_total || s.area_built) && <div className="flex items-center gap-1"><LayoutGrid size={14} className="text-gray-400"/> {s.area_total || s.area_built}m²</div>}
+                                        {(s.rooms || s.habs) && <div className="flex items-center gap-1"><Bed size={14} className="text-gray-400"/> {s.rooms || s.habs}</div>}
+                                        {(s.baths || s.bathrooms) && <div className="flex items-center gap-1"><Bath size={14} className="text-gray-400"/> {s.baths || s.bathrooms}</div>}
+                                    </>
+                                )
+                            } catch { return null; }
+                        })()}
+                    </div>
+                </div>
+
+                <div className="mt-auto pt-4 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] uppercase text-gray-400 font-bold mb-0.5">Precio</p>
+                        <p className="text-green-700 font-black text-xl leading-none">
+                            ${new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(data.price_cop)}
+                        </p>
+                    </div>
+                    <div className="h-8 w-8 rounded-full bg-gray-100 group-hover:bg-green-600 group-hover:text-white flex items-center justify-center transition-all">
+                        <ArrowRight size={14}/>
+                    </div>
+                </div>
+            </div>
+        </Link>
+      );
   };
 
   return (
@@ -81,13 +235,13 @@ const Properties = () => {
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-4 gap-8">
          
          {/* SIDEBAR BUSCADOR (IZQUIERDA) */}
-         <div className="lg:col-span-1 h-fit bg-white p-6 rounded-2xl shadow-xl border-t-4 border-green-600 sticky top-28">
+         <div className="lg:col-span-1 h-fit bg-white p-6 rounded-2xl shadow-xl border-t-4 border-green-600 sticky top-28 z-40">
             <div className="flex items-center gap-2 mb-6 text-[#0A192F]">
                <Filter size={20} className="text-green-600"/>
                <h3 className="font-bold uppercase text-lg">Filtros</h3>
             </div>
 
-            <form onSubmit={handleSearch} className="space-y-5">
+            <div className="space-y-5">
                {/* BUSCADOR INTELIGENTE */}
                <div>
                   <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Código AYC / Ubicación</label>
@@ -106,12 +260,14 @@ const Properties = () => {
                {/* TIPO INMUEBLE */}
                <div>
                   <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Tipo de Inmueble</label>
-                  <select name="type" onChange={handleFilterChange} className="w-full bg-gray-100 rounded-xl py-3 px-4 text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-green-600">
+                  <select name="type" value={filters.type} onChange={handleFilterChange} className="w-full bg-gray-100 rounded-xl py-3 px-4 text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-green-600">
                      <option value="">Todos</option>
                      <option value="Casa">Casa</option>
                      <option value="Apartamento">Apartamento</option>
                      <option value="Bodega">Bodega</option>
                      <option value="Lote">Lote</option>
+                     <option value="Local">Local</option>
+                     <option value="Oficina">Oficina</option>
                      <option value="Finca">Finca</option>
                   </select>
                </div>
@@ -120,98 +276,87 @@ const Properties = () => {
                <div className="grid grid-cols-2 gap-3">
                   <div>
                      <label className="text-[10px] font-bold text-gray-400 uppercase">Min Precio</label>
-                     <input type="number" name="minPrice" onChange={handleFilterChange} placeholder="$ 0" className="w-full bg-gray-100 rounded-lg p-2 text-xs"/>
+                     <input type="number" name="minPrice" value={filters.minPrice} onChange={handleFilterChange} placeholder="$ 0" className="w-full bg-gray-100 rounded-lg p-2 text-xs"/>
                   </div>
                   <div>
                      <label className="text-[10px] font-bold text-gray-400 uppercase">Max Precio</label>
-                     <input type="number" name="maxPrice" onChange={handleFilterChange} placeholder="$ Sin límite" className="w-full bg-gray-100 rounded-lg p-2 text-xs"/>
+                     <input type="number" name="maxPrice" value={filters.maxPrice} onChange={handleFilterChange} placeholder="$ Sin límite" className="w-full bg-gray-100 rounded-lg p-2 text-xs"/>
                   </div>
                </div>
 
-               <button type="submit" className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest shadow-lg transition-all flex items-center justify-center gap-2">
-                  <Search size={16}/> Buscar Propiedades
-               </button>
-            </form>
+               {/* BOTÓN RESET */}
+               {(filters.keyword || filters.type || filters.minPrice || filters.maxPrice) && (
+                   <button 
+                     onClick={() => setFilters({keyword: "", type: "", minPrice: "", maxPrice: ""})}
+                     className="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                   >
+                     <X size={14}/> Limpiar Filtros
+                   </button>
+               )}
+            </div>
          </div>
 
-         {/* GRID DE RESULTADOS (DERECHA) */}
+         {/* GRID DE RESULTADOS (DERECHA - TIMELINE INFINITO) */}
          <div className="lg:col-span-3">
             
             {/* HEADER RESULTADOS */}
             <div className="flex justify-between items-center mb-6">
                <h2 className="text-xl font-bold text-[#0A192F] flex items-center gap-2">
-                  <LayoutGrid size={20} className="text-green-600"/> Resultados ({properties.length})
+                  <LayoutGrid size={20} className="text-green-600"/> 
+                  {/* Mostramos un + para indicar que es infinito */}
+                  Resultados ({properties.length > 0 ? `${properties.length}+` : (queen ? 1 : 0)})
                </h2>
-               <div className="hidden md:block text-xs text-gray-400 font-medium">Mostrando más recientes primero</div>
             </div>
 
-            {loading ? (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
-                  {[1,2,3,4].map(i => <div key={i} className="h-80 bg-gray-200 rounded-2xl"></div>)}
-               </div>
-            ) : properties.length === 0 ? (
-               <div className="bg-white p-12 rounded-2xl text-center shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               {/* 1. LA REINA (Siempre arriba, ocupa 2 columnas si no hay filtros activos) */}
+               {queen && !filters.keyword && !filters.type && !filters.minPrice && !filters.maxPrice && (
+                   <div className="md:col-span-2 relative group z-0">
+                       {/* Glow dorado exterior */}
+                       <div className="absolute -inset-1 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-[2rem] blur opacity-40 group-hover:opacity-75 transition duration-1000 z-0"></div>
+                       <PropertyCard data={queen} isQueen={true} />
+                   </div>
+               )}
+
+               {/* 2. TIMELINE MIXTO (LOOP INFINITO) */}
+               {properties.map((p, index) => (
+                   // Usamos index en la key porque al loopear los IDs se repetirán
+                   <PropertyCard key={`${p.id}-${index}`} data={p} />
+               ))}
+
+               {/* SKELETON LOADER (Solo si está cargando y no hay reina ni propiedades) */}
+               {loading && properties.length === 0 && !queen && [1,2].map(i => <div key={i} className="h-96 bg-gray-200 rounded-3xl animate-pulse"></div>)}
+            </div>
+
+            {/* MENSAJE DE VACÍO REAOL (Solo si no está cargando y de verdad no hay nada en la DB para el filtro) */}
+            {!loading && properties.length === 0 && !queen && !hasMore && (
+               <div className="bg-white p-12 rounded-2xl text-center shadow-sm border border-gray-100 mt-8">
                   <Home size={48} className="mx-auto text-gray-300 mb-4"/>
                   <h3 className="text-xl font-bold text-gray-500">No encontramos inmuebles con esos filtros.</h3>
-                  <button onClick={() => {setFilters({keyword:"", type:"", minPrice:"", maxPrice:""}); fetchProperties();}} className="mt-4 text-green-600 font-bold underline">Ver todos</button>
-               </div>
-            ) : (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {properties.map(p => (
-                     <Link to={`/inmuebles/${p.id}`} key={p.id} className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col">
-                        
-                        {/* IMAGEN CARD */}
-                        <div className="h-64 relative overflow-hidden bg-gray-200">
-                           {p.images && p.images.length > 0 ? (
-                              <img src={`${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.images[0]}`} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
-                           ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">SIN FOTO</div>
-                           )}
-                           
-                           {/* TAG TIPO */}
-                           <div className="absolute top-4 left-4 px-3 py-1 bg-black/50 backdrop-blur rounded text-[10px] font-black uppercase text-white shadow-md border border-white/20">
-                              {p.property_type}
-                           </div>
-
-                           {/* PRECIO TAG */}
-                           <div className="absolute bottom-4 right-4 bg-[#0A192F]/90 backdrop-blur text-white px-4 py-2 rounded-lg font-black text-lg shadow-lg border border-white/10">
-                              ${p.price_cop.toLocaleString("es-CO")}
-                           </div>
-                        </div>
-
-                        {/* INFO CARD */}
-                        <div className="p-6 flex-1 flex flex-col justify-between">
-                           <div>
-                              <div className="flex justify-between items-start mb-2">
-                                 <h3 className="text-lg font-bold text-[#0A192F] line-clamp-1">{p.title}</h3>
-                                 <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">{p.ayc_id}</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-gray-500 text-xs mb-4 uppercase font-bold">
-                                 <MapPin size={12} className="text-green-600"/> {p.municipality} {p.neighborhood ? `- ${p.neighborhood}` : ""}
-                              </div>
-                              
-                              {/* SPECS (SI EXISTEN EN DESCRIPCIÓN O DATOS FUTUROS) */}
-                              <div className="flex gap-4 border-t border-gray-100 pt-4 mb-4">
-                                 <div className="flex items-center gap-1 text-xs font-bold text-gray-600">
-                                       <Bed size={14} className="text-gray-400"/> Consultar
-                                 </div>
-                                 <div className="flex items-center gap-1 text-xs font-bold text-gray-600">
-                                       <Bath size={14} className="text-gray-400"/> Consultar
-                                 </div>
-                              </div>
-                           </div>
-
-                           <div className="w-full py-3 rounded-lg bg-gray-50 group-hover:bg-green-600 group-hover:text-white text-gray-500 font-bold text-xs uppercase text-center transition-colors flex items-center justify-center gap-2">
-                              Ver Detalles <ArrowRight size={14}/>
-                           </div>
-                        </div>
-                     </Link>
-                  ))}
+                  <button onClick={() => setFilters({keyword:"", type:"", minPrice:"", maxPrice:""})} className="mt-4 text-green-600 font-bold underline">Ver todos</button>
                </div>
             )}
+
+            {/* TRIGGER SCROLL INFINITO Y LOADER INFERIOR */}
+            <div ref={observerTarget} className="h-20 w-full mt-10 flex items-center justify-center">
+                 {loading && properties.length > 0 && (
+                    <div className="flex items-center gap-2 text-gray-400 font-bold uppercase text-xs tracking-widest animate-pulse">
+                        Cargando más propiedades...
+                    </div>
+                 )}
+            </div>
          </div>
       </div>
+
+      {/* BOTÓN BACK TO TOP */}
+      <button 
+        onClick={scrollToTop}
+        className={`fixed bottom-8 right-8 bg-slate-900 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition-all duration-500 z-50 ${showTopBtn ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+      >
+        <ArrowUp size={24} strokeWidth={3} />
+      </button>
     </div>
   );
 };
+
 export default Properties;

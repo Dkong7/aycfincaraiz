@@ -1,11 +1,22 @@
 ﻿import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // <--- Import useLocation
 import { MapPin, Phone, Mail, Star, Quote } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 
 export default function Footer() {
   const { t, language } = useLanguage();
+  const location = useLocation(); // <--- Hook
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  // --- LÓGICA PARA OCULTAR EN CPANEL/LOGIN ---
+  if (
+    location.pathname.startsWith("/dashboard") || 
+    location.pathname === "/agentes" || 
+    location.pathname === "/claclacla" || 
+    location.pathname === "/alfalfalf"
+  ) {
+    return null;
+  }
 
   // Logo: Muestra el logo correspondiente al idioma ACTUAL
   const logoSrc = language === "ES" ? "/ayclogo.svg" : "/ayclogoen.svg";

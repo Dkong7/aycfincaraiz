@@ -1,16 +1,28 @@
 ﻿import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // <--- 1. Importar useLocation
 import { BadgeCheck, Scale, Video, ChevronDown, Menu, X } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext"; 
 
 export default function Navbar() {
   const { t, language, toggleLanguage } = useLanguage(); 
+  const location = useLocation(); // <--- 2. Hook de ubicación
   
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const timeoutRef = useRef<any>(null); 
   
+  // --- LÓGICA PARA OCULTAR EN CPANEL/LOGIN ---
+  // Si la ruta empieza por /dashboard o es una ruta de login, no renderizamos nada.
+  if (
+    location.pathname.startsWith("/dashboard") || 
+    location.pathname === "/agentes" || 
+    location.pathname === "/claclacla" || 
+    location.pathname === "/alfalfalf"
+  ) {
+    return null;
+  }
+
   // LOGO: Muestra el logo correspondiente al idioma ACTUAL
   const logoSrc = language === "ES" ? "/ayclogo.svg" : "/ayclogoen.svg";
 

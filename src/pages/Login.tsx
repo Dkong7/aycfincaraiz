@@ -32,7 +32,7 @@ export default function Login() {
        textLabel: "text-pink-400",
        input: "bg-white border-pink-200 focus:border-pink-500 text-pink-700 placeholder-pink-300",
        btn: "bg-pink-500 hover:bg-pink-600 text-white shadow-pink-300",
-       title: "BIENVENIDA MAESTRA",
+       title: "HOLA MA'", // CAMBIO SOLICITADO
        ghostUser: "claudia@ayc.com",
        punishUrl: "https://www.marilynmanson.com",
        icon: "🌸"
@@ -48,7 +48,7 @@ export default function Login() {
        textLabel: "text-amber-700",
        input: "bg-black border-amber-900/50 focus:border-amber-500 text-amber-500 placeholder-amber-900",
        btn: "bg-amber-700 hover:bg-amber-600 text-white shadow-amber-900/50",
-       title: "SISTEMA CENTRAL",
+       title: "HOLA PA'", // CAMBIO SOLICITADO
        ghostUser: "alfonso@ayc.com",
        punishUrl: "https://www.pixar.com",
        icon: "🦁"
@@ -156,7 +156,7 @@ export default function Login() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center font-sans transition-colors duration-700 ${config.bg} relative overflow-hidden`}>
+    <div className={`min-h-screen flex items-center justify-center font-sans transition-colors duration-700 ${config.bg} relative overflow-hidden px-4 md:px-0`}>
        
        {/* FONDO ANIMADO SUTIL PARA AGENTES */}
        {config.theme === "agent" && (
@@ -178,11 +178,11 @@ export default function Login() {
                        <motion.div 
                          animate={{ scale: [1, 1.5, 1], rotate: [0, 10, -10, 0] }} 
                          transition={{ duration: 0.3, repeat: Infinity }}
-                         className="text-9xl mb-4 drop-shadow-[0_0_50px_rgba(255,0,0,0.8)]"
+                         className="text-7xl md:text-9xl mb-4 drop-shadow-[0_0_50px_rgba(255,0,0,0.8)]"
                        >
                            👹
                        </motion.div>
-                       <h2 className="text-6xl font-black text-red-600 uppercase tracking-widest glitch-text">
+                       <h2 className="text-4xl md:text-6xl font-black text-red-600 uppercase tracking-widest glitch-text">
                           {modalMsg}
                        </h2>
                    </div>
@@ -190,9 +190,9 @@ export default function Login() {
 
                {/* MODAL CORPORATIVO (Agentes) */}
                {config.theme === "agent" && (
-                   <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border-t-8 border-red-600">
-                       <XCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
-                       <h3 className="text-xl font-bold text-[#0A192F] mb-2 uppercase">Error de Autenticación</h3>
+                   <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border-t-8 border-red-600">
+                       <XCircle className="w-12 h-12 md:w-16 md:h-16 text-red-600 mx-auto mb-4" />
+                       <h3 className="text-lg md:text-xl font-bold text-[#0A192F] mb-2 uppercase">Error de Autenticación</h3>
                        <p className="text-gray-500 text-sm mb-6">{modalMsg}</p>
                        <button onClick={() => setModalMsg("")} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg text-sm uppercase">Cerrar</button>
                    </div>
@@ -200,11 +200,11 @@ export default function Login() {
 
                {/* MODAL ADVERTENCIA (Rutas Secretas Fallos 1-3) */}
                {config.mode === "secret" && modalType !== "demon" && (
-                   <div className="text-center">
-                       <div className="text-8xl mb-6 animate-bounce">
+                   <div className="text-center px-4">
+                       <div className="text-6xl md:text-8xl mb-6 animate-bounce">
                            {attempts === 3 ? "👿" : attempts === 2 ? "😠" : "🤨"}
                        </div>
-                       <h2 className={`text-4xl font-black uppercase text-center ${config.theme === "claudia" ? "text-pink-400" : "text-amber-500"}`}>
+                       <h2 className={`text-2xl md:text-4xl font-black uppercase text-center ${config.theme === "claudia" ? "text-pink-400" : "text-amber-500"}`}>
                           {modalMsg}
                        </h2>
                    </div>
@@ -217,12 +217,12 @@ export default function Login() {
        <motion.div 
          initial={{ y: 20, opacity: 0 }}
          animate={{ y: 0, opacity: 1 }}
-         className={`w-full max-w-md p-10 rounded-3xl border shadow-2xl relative overflow-hidden z-10 ${config.container} ${shake ? "translate-x-2 ring-2 ring-red-500" : ""}`}
+         className={`w-full max-w-md p-6 md:p-10 rounded-3xl border shadow-2xl relative overflow-hidden z-10 ${config.container} ${shake ? "translate-x-2 ring-2 ring-red-500" : ""}`}
        >
           {/* HEADER TARJETA */}
-          <div className="text-center mb-8">
-             <div className="text-6xl mb-4 animate-bounce-slow drop-shadow-md">{config.icon}</div>
-             <h1 className={`text-2xl font-black uppercase tracking-widest ${config.textTitle}`}>
+          <div className="text-center mb-6 md:mb-8">
+             <div className="text-5xl md:text-6xl mb-4 animate-bounce-slow drop-shadow-md">{config.icon}</div>
+             <h1 className={`text-xl md:text-2xl font-black uppercase tracking-widest ${config.textTitle}`}>
                 {config.title}
              </h1>
              <p className="text-[10px] mt-2 uppercase tracking-[0.3em] font-bold opacity-60">
@@ -230,7 +230,7 @@ export default function Login() {
              </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5 md:space-y-6">
              
              {/* CAMPO USUARIO (Solo Agentes) */}
              {config.mode === "standard" && (
@@ -292,7 +292,7 @@ export default function Login() {
 
           {/* FOOTER TARJETA (Solo Agentes) */}
           {config.mode === "standard" && (
-             <div className="mt-8 text-center border-t border-gray-100 pt-6">
+             <div className="mt-6 md:mt-8 text-center border-t border-gray-100 pt-6">
                 <p className="text-xs text-gray-400">¿Olvidaste tu contraseña?</p>
                 <a href="#" className="text-[#009B4D] font-bold text-xs hover:underline">Solicitar soporte técnico</a>
              </div>
