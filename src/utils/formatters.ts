@@ -1,4 +1,40 @@
-export const getUserTheme = (email) => {
+// src/utils/formatters.ts
+
+// --- SECCIÓN 1: FORMATEADORES DE DATOS ---
+
+export const formatCurrency = (value: string | number) => {
+  const clean = Number(String(value || "0").replace(/\./g, ""));
+  return new Intl.NumberFormat("es-CO").format(clean);
+};
+
+export const formatBoolean = (val: any) => {
+  if (val === true) return "Sí";
+  if (val === false) return "No";
+  if (!val) return "-";
+  return val;
+};
+
+export const formatValue = (val: any) => {
+  if (val === true || val === false) return formatBoolean(val);
+  if (Array.isArray(val)) return val.length > 0 ? val.join(", ") : "Ninguna";
+  return val || "-";
+};
+
+// --- SECCIÓN 2: TEMA DE USUARIO (User Theme Logic) ---
+
+interface UserTheme {
+  role: string;
+  classes: {
+    bg: string;
+    text: string;
+    border: string;
+    badge: string;
+  };
+  avatarConcept: string;
+  iconColor: string;
+}
+
+export const getUserTheme = (email?: string): UserTheme => {
   const safeEmail = email ? email.toLowerCase() : '';
 
   // CASO 1: CLAUDIA (Maestra / Marilyn / Pastel)
@@ -21,7 +57,7 @@ export const getUserTheme = (email) => {
   if (safeEmail.includes('alf') || safeEmail.includes('dkong')) {
     return {
       role: 'MAESTRO',
-      // Paleta Matrix/Tech: Fondo Oscuro, Texto Verde Ne�n
+      // Paleta Matrix/Tech: Fondo Oscuro, Texto Verde Neón
       classes: {
         bg: 'bg-gray-950', 
         text: 'text-[#39FF14]',
@@ -36,7 +72,7 @@ export const getUserTheme = (email) => {
   // CASO 3: AGENTES (Radioacktiva / Rock / Naranja)
   return {
     role: 'AGENTE',
-    // Paleta Radioacktiva: Fondo Negro, Texto Naranja Energ�a
+    // Paleta Radioacktiva: Fondo Negro, Texto Naranja Energía
     classes: {
       bg: 'bg-black', 
       text: 'text-[#FFA500]',

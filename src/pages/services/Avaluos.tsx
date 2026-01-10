@@ -1,44 +1,46 @@
 ﻿import React from "react";
-import { BadgeCheck, FileText, TrendingUp, CheckCircle2, ChevronRight, Scale, Calculator, FileSignature } from "lucide-react";
-// ELIMINADOS Navbar y Footer para evitar duplicidad
-import { useLanguage } from "../../context/LanguageContext";
+import { BadgeCheck, CheckCircle2, ChevronRight, Scale, Calculator, FileSignature, TrendingUp, FileText } from "lucide-react";
+import { useApp } from "../../context/AppContext"; // 1. CAMBIO: NUEVO CONTEXTO
 import { Link } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 
 const Avaluos = () => {
-  const { t } = useLanguage();
+  // 2. USAR EL NUEVO HOOK
+  const { t } = useApp();
 
   return (
     <div className="bg-white min-h-screen font-sans selection:bg-green-100 selection:text-green-900">
+       <Navbar /> 
        
-       {/* 1. HERO SECTION - Diseño Asimétrico con Imagen */}
+       {/* 1. HERO SECTION */}
        <div className="relative bg-[#0A192F] text-white pt-40 pb-24 overflow-hidden">
-          {/* Elementos Decorativos de Fondo */}
+          {/* Elementos Decorativos */}
           <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-green-900/20 to-transparent pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col lg:flex-row items-center gap-12">
              <div className="lg:w-1/2 space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-900/30 border border-green-500/30 text-green-400 text-xs font-black uppercase tracking-widest animate-fade-in-up">
-                   <BadgeCheck size={16} /> {t.services.appraisalBadge}
+                   <BadgeCheck size={16} /> {t('appraisal_badge') || "Certificado RAA"}
                 </div>
                 <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tight">
-                   {t.services.appraisalTitlePart1} <br />
+                   {t('appraisal_title_1') || "Avalúos"} <br />
                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-200">
-                      {t.services.appraisalTitlePart2}
+                      {t('appraisal_title_2') || "Comerciales"}
                    </span>
                 </h1>
                 <p className="text-xl text-slate-300 max-w-lg leading-relaxed">
-                   {t.services.appraisalDesc}
+                   {t('appraisal_desc') || "Determinamos el valor real de su inmueble con precisión técnica, respaldo legal y certificación ante la Lonja de Propiedad Raíz."}
                 </p>
                 
                 <div className="pt-4 flex flex-wrap gap-4">
                    <Link to="/contacto" className="inline-flex items-center justify-center px-8 py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-900/50 hover:-translate-y-1">
-                      {t.services.appraisalBtn}
+                      {t('appraisal_btn') || "Solicitar Cotización"}
                    </Link>
                 </div>
              </div>
 
-             {/* Imagen / Visual Abstracto */}
+             {/* Imagen */}
              <div className="lg:w-1/2 relative">
                 <div className="relative z-10 bg-slate-800 p-2 rounded-3xl shadow-2xl border border-slate-700 transform rotate-2 hover:rotate-0 transition-all duration-700">
                    <img 
@@ -56,19 +58,19 @@ const Avaluos = () => {
           </div>
        </div>
 
-       {/* 2. CARDS DE BENEFICIO (Why Us) */}
+       {/* 2. CARDS DE BENEFICIO */}
        <div className="py-24 bg-slate-50">
           <div className="max-w-7xl mx-auto px-6">
              <div className="text-center mb-16">
-                <h2 className="text-3xl font-black text-[#0A192F] uppercase mb-4">{t.services.appraisalWhyTitle}</h2>
+                <h2 className="text-3xl font-black text-[#0A192F] uppercase mb-4">{t('appraisal_why_title') || "¿Por qué con nosotros?"}</h2>
                 <div className="h-1 w-24 bg-green-600 mx-auto rounded-full"></div>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                   { icon: <Scale size={40}/>, t: t.services.appraisalWhy1T, d: t.services.appraisalWhy1D },
-                   { icon: <FileText size={40}/>, t: t.services.appraisalWhy2T, d: t.services.appraisalWhy2D },
-                   { icon: <TrendingUp size={40}/>, t: t.services.appraisalWhy3T, d: t.services.appraisalWhy3D }
+                   { icon: <Scale size={40}/>, t: t('why_1_t') || "Precisión Técnica", d: t('why_1_d') || "Metodologías valuatorias actualizadas según la normativa NIIF y ONAC." },
+                   { icon: <FileText size={40}/>, t: t('why_2_t') || "Validez Legal", d: t('why_2_d') || "Documento idóneo para trámites notariales, bancarios o judiciales." },
+                   { icon: <TrendingUp size={40}/>, t: t('why_3_t') || "Visión de Mercado", d: t('why_3_d') || "Análisis comparativo real para no perder dinero en la venta." }
                 ].map((item, i) => (
                    <div key={i} className="group bg-white p-10 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 hover:border-green-100">
                       <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-[#0A192F] group-hover:bg-green-600 group-hover:text-white transition-colors duration-300 mb-6">
@@ -82,19 +84,19 @@ const Avaluos = () => {
           </div>
        </div>
 
-       {/* 3. PROCESO (Timeline Vertical / Steps) */}
+       {/* 3. PROCESO */}
        <div className="py-24 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-6">
              <div className="flex flex-col lg:flex-row gap-16 items-center">
                 <div className="lg:w-1/2">
                    <span className="text-green-600 font-bold uppercase tracking-widest text-sm mb-2 block">Paso a Paso</span>
-                   <h2 className="text-4xl font-black text-[#0A192F] mb-8">{t.services.appraisalProcessTitle}</h2>
+                   <h2 className="text-4xl font-black text-[#0A192F] mb-8">{t('process_title') || "Nuestro Proceso"}</h2>
                    
                    <div className="space-y-8">
                       {[
-                         { step: "01", title: t.services.appraisalStep1, desc: t.services.appraisalStep1Desc, icon: <CheckCircle2 /> },
-                         { step: "02", title: t.services.appraisalStep2, desc: t.services.appraisalStep2Desc, icon: <Calculator /> },
-                         { step: "03", title: t.services.appraisalStep3, desc: t.services.appraisalStep3Desc, icon: <FileSignature /> }
+                         { step: "01", title: t('step_1_t') || "Visita Técnica", desc: t('step_1_d') || "Inspección física detallada del inmueble y su entorno.", icon: <CheckCircle2 /> },
+                         { step: "02", title: t('step_2_t') || "Estudio de Mercado", desc: t('step_2_d') || "Investigación de ofertas y transacciones reales en la zona.", icon: <Calculator /> },
+                         { step: "03", title: t('step_3_t') || "Entrega de Informe", desc: t('step_3_d') || "Informe detallado con firma de perito avaluador RAA.", icon: <FileSignature /> }
                       ].map((s, i) => (
                          <div key={i} className="flex gap-6 group">
                             <div className="flex flex-col items-center">
@@ -114,7 +116,7 @@ const Avaluos = () => {
                    </div>
                 </div>
                 
-                {/* Imagen Contextual del Proceso */}
+                {/* Imagen Contextual */}
                 <div className="lg:w-1/2 relative">
                    <div className="aspect-square bg-slate-100 rounded-[3rem] overflow-hidden relative shadow-inner">
                       <img 
@@ -134,15 +136,15 @@ const Avaluos = () => {
           </div>
        </div>
 
-       {/* 4. CTA FINAL (Elegante y Discreto) */}
+       {/* 4. CTA FINAL */}
        <div className="bg-[#0A192F] border-t border-white/10 py-20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-green-900/10 blur-3xl"></div>
           <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
              <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 font-serif italic">
-                "{t.services.appraisalFinalCTA}"
+                "{t('appraisal_final_cta') || "Conocer el valor real es el primer paso para un negocio exitoso."}"
              </h2>
              <Link to="/contacto" className="group inline-flex items-center gap-3 px-8 py-4 bg-transparent border border-white/30 hover:border-green-500 hover:bg-green-500/10 text-white rounded-full transition-all duration-300">
-                <span className="font-bold uppercase tracking-widest text-sm">{t.services.appraisalFinalBtn}</span>
+                <span className="font-bold uppercase tracking-widest text-sm">{t('appraisal_final_btn') || "Agendar Avalúo"}</span>
                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform"/>
              </Link>
           </div>

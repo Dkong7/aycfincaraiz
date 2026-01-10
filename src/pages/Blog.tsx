@@ -1,13 +1,14 @@
 ﻿import React, { useEffect, useState } from "react";
 import { Calendar, User, ArrowRight, X } from "lucide-react";
 import { pb } from "../api";
-import { useLanguage } from "../context/LanguageContext";
+import { useApp } from "../context/AppContext"; // 1. CAMBIO: NUEVO CONTEXTO
 import Navbar from "../components/Navbar";
 // Footer eliminado para evitar duplicidad
 import type { RecordModel } from "pocketbase";
 
 const Blog = () => {
-  const { t } = useLanguage();
+  // 2. USAR EL NUEVO HOOK
+  const { t } = useApp();
   const [posts, setPosts] = useState<RecordModel[]>([]);
   const [selectedPost, setSelectedPost] = useState<RecordModel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +38,12 @@ const Blog = () => {
        <Navbar />
        
        <div className="bg-[#0A192F] text-white pt-32 pb-20 px-6 text-center relative">
-          <h1 className="text-5xl font-black uppercase mb-4 tracking-tight">{t.blog.title}</h1>
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg font-light">{t.blog.subtitle}</p>
+          <h1 className="text-5xl font-black uppercase mb-4 tracking-tight">
+              {t('blog_title') || "BLOG & NOTICIAS"}
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg font-light">
+              {t('blog_subtitle') || "Actualidad inmobiliaria, tendencias y consejos expertos."}
+          </p>
        </div>
 
        <div className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -66,7 +71,7 @@ const Blog = () => {
                   </p>
                   <div className="mt-auto">
                      <span className="text-[#0A192F] font-black text-xs border-b-2 border-green-500 pb-1 uppercase flex items-center gap-2 w-max group-hover:text-green-700 transition-colors">
-                        {t.blog.readMore} <ArrowRight size={14}/>
+                        {t('read_more') || "Leer más"} <ArrowRight size={14}/>
                      </span>
                   </div>
                </article>

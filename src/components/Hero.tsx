@@ -1,8 +1,9 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Bed, Bath, Car, Ruler, MapPin, Play } from "lucide-react"; 
-import { useLanguage } from "../context/LanguageContext"; 
+import { Bed, Bath, Car, Ruler, MapPin, Play } from "lucide-react";
+import { useApp } from "../context/AppContext"; // 1. CAMBIO: CONTEXTO NUEVO
 
+// Interfaces
 interface PropertyDB {
   id: string;
   ayc_id?: string;
@@ -16,12 +17,12 @@ interface PropertyDB {
   neighborhood?: string;
   address?: string;
   images: string[];
-  video_url?: string; 
-  specs?: any; 
+  video_url?: string;
+  specs?: any;
 }
 
 interface HeroProps {
-  properties: PropertyDB[]; 
+  properties: PropertyDB[];
   currency: "COP" | "USD";
   exchangeRate: number;
 }
@@ -33,17 +34,9 @@ interface MediaItem {
 }
 
 const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
-  // 1. OBTENER FUNCIONES DEL CONTEXTO
-  const context = useLanguage();
-  const { language, translateDynamic } = context || { language: "ES", translateDynamic: (t: string) => t };
-  
-  // 2. FUNCIÓN SEGURA DE TRADUCCIÓN
-  const safeTranslate = (text: string) => {
-      if (typeof translateDynamic === 'function') {
-          return translateDynamic(text);
-      }
-      return text;
-  };
+  // 2. USAR EL NUEVO CONTEXTO
+  // En lugar de translateDynamic, usamos 't' que ya viene conectado
+  const { t } = useApp(); 
 
   const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
   
@@ -65,27 +58,24 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
 
   // --- LÓGICA AUTO-PLAY (7 SEGUNDOS) ---
   useEffect(() => {
-    if (list.length <= 1) return; // No rotar si hay 0 o 1 propiedad
-
-    const interval = setInterval(() => {
-        nextProperty();
-    }, 7000); // 7000ms = 7 segundos
-
-    return () => clearInterval(interval); // Limpieza al desmontar
-  }, [list.length]); // Se reinicia si cambia la lista
+    if (list.length <= 1) return;
+    const interval = setInterval(() => { nextProperty(); }, 7000); 
+    return () => clearInterval(interval); 
+  }, [list.length]);
 
   let specs: any = {};
   try { specs = typeof activeProp.specs === "string" ? JSON.parse(activeProp.specs) : activeProp.specs || {}; } catch(e) { specs = {}; }
 
-  // --- DATOS VISUALES (TRADUCIDOS) ---
-  const title = safeTranslate(activeProp.title || "");
-  const categoryType = safeTranslate(activeProp.property_type || "Inmueble");
-  const categoryListing = safeTranslate(activeProp.listing_type || "Venta");
+  // --- DATOS VISUALES (TRADUCIDOS CON 't') ---
+  // Nota: Si el título viene de DB, se muestra directo. Si es una key fija, usamos t()
+  // Para datos dinámicos como 'property_type', usamos t() si queremos traducirlo (ej: Casa -> House)
+  const title = activeProp.title || "";
+  const categoryType = t(activeProp.property_type) || activeProp.property_type; 
+  const categoryListing = activeProp.listing_type || "Venta"; // Esto podría necesitar traducción t() si tienes las keys
   const price = activeProp.price_cop;
   
-  // Traducción de ubicación
   const rawLocation = activeProp.neighborhood || activeProp.municipality || "Ubicación";
-  const location = safeTranslate(rawLocation);
+  const location = rawLocation; // Nombres propios no se suelen traducir
 
   const usdPrice = activeProp.price_usd || 0;
   const displayPrice = currency === "USD" ? (usdPrice > 0 ? usdPrice : price / exchangeRate) : price;
@@ -192,7 +182,7 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
 
         <div className="flex flex-col items-start gap-6 w-full max-w-4xl animate-slideUp" style={{animationDelay: '400ms'}}>
           <Link to={`/inmuebles/${activeProp.id}`} className="bg-white text-green-900 font-black py-3 px-8 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all flex items-center z-30 uppercase text-xs md:text-sm">
-             {safeTranslate("Ver Detalles")} <span className="ml-2 text-lg">→</span>
+             {t('hero_btn')} <span className="ml-2 text-lg">→</span>
           </Link>
           
           {/* MINIATURAS (VIDEO PRIMERO) */}
