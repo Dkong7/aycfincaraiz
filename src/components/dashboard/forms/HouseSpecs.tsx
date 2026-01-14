@@ -2,7 +2,9 @@ import React from "react";
 import { useFieldArray } from "react-hook-form";
 import { 
   Maximize, Grid, Ruler, Bed, Bath, Car, Flame, Utensils, Layers, 
-  Flower2, Briefcase, Store, DollarSign, ShieldCheck, Coffee, Dumbbell, Waves, Trophy, Trees, Zap, Heater, Tv, Dog
+  ChefHat, Briefcase, Store, DollarSign, ShieldCheck, Coffee, Dumbbell, 
+  Waves, Trophy, Trees, Zap, Heater, Tv, Dog, Wind, Sun, Flower2, 
+  BookOpen, Shirt, Box
 } from "lucide-react";
 
 // --- SUB-COMPONENTE INTERNO: SECCIÓN DE NIVELES ---
@@ -31,13 +33,24 @@ const LevelsSection = ({ control, register, s, labelColor }: any) => {
   );
 };
 
-// Listas de Opciones
+// Listas de Opciones con Iconos
 const AMENITIES_CLUB = [
    {label: "Vigilancia 24h", icon: ShieldCheck}, {label: "Salón Comunal", icon: Coffee}, {label: "Gimnasio", icon: Dumbbell}, 
    {label: "Piscina", icon: Waves}, {label: "Canchas Squash", icon: Trophy}, {label: "Canchas Tenis", icon: Trophy},
    {label: "Parque Niños", icon: Trees}, {label: "Terraza BBQ", icon: Flame}, {label: "Planta Eléctrica", icon: Zap},
    {label: "Caldera", icon: Heater}, {label: "Teatrino", icon: Tv}, {label: "Co-Working", icon: Briefcase},
    {label: "Sendero", icon: Trees}, {label: "Pet Friendly", icon: Dog}
+];
+
+const HOUSE_AMENITIES = [
+   { label: "Chimenea", icon: Flame },
+   { label: "Balcón", icon: Wind },
+   { label: "Terraza", icon: Sun },
+   { label: "Jardín", icon: Flower2 },
+   { label: "Patio", icon: Sun },
+   { label: "Estudio", icon: BookOpen },
+   { label: "CBS (Cuarto Servicio)", icon: Shirt },
+   { label: "Depósito", icon: Box }
 ];
 
 // Helpers UI locales
@@ -78,27 +91,34 @@ export default function HouseSpecs({ register, control, watch, s }: any) {
        </div>
 
        {/* 2. DISTRIBUCIÓN */}
-       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <InputIcon register={register} name="specs.habs" label="Habs" icon={Bed} s={s} type="number" />
           <InputIcon register={register} name="specs.baths" label="Baños" icon={Bath} s={s} type="number" />
-          <SelectIcon register={register} name="specs.garage_type" label="Garaje" icon={Car} s={s} options={["Cubierto", "Descubierto", "Doble Lineal", "Doble Paralelo", "Sencillo", "Servidumbre"]} />
+          
+          {/* CANTIDAD GARAJES */}
+          <InputIcon register={register} name="specs.garages" label="# Garajes" icon={Car} s={s} type="number" />
+          
+          <SelectIcon register={register} name="specs.garage_type" label="Tipo Garaje" icon={Car} s={s} options={["Cubierto", "Descubierto", "Doble Lineal", "Doble Paralelo", "Sencillo", "Servidumbre"]} />
           <SelectIcon register={register} name="specs.gas_type" label="Gas" icon={Flame} s={s} options={["Natural", "Propano", "Pipeta", "Red", "Ninguno"]} />
        </div>
 
        {/* 3. ACABADOS */}
        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <SelectIcon register={register} name="specs.kitchen" label="Cocina" icon={Utensils} s={s} options={["Integral", "Americana", "Isla", "Abierta", "Tradicional", "Cerrada", "Para Remodelar"]} />
+          <SelectIcon register={register} name="specs.kitchen" label="Cocina" icon={ChefHat} s={s} options={["Integral", "Americana", "Isla", "Abierta", "Tradicional", "Cerrada", "Para Remodelar"]} />
           <SelectIcon register={register} name="specs.dining" label="Comedor" icon={Utensils} s={s} options={["Independiente", "Un Ambiente", "Barra Americana", "Auxiliar", "Terraza"]} />
-          <SelectIcon register={register} name="specs.floors" label="Pisos" icon={Layers} s={s} options={["Madera Maciza", "Laminado", "Porcelanato", "Mármol", "Cerámica", "Alfombra", "Retal de Mármol"]} />
+          <SelectIcon register={register} name="specs.floors" label="Pisos" icon={Layers} s={s} options={["Madera Maciza", "Madera Laminada", "Madera Granadillo", "Laminado", "Porcelanato", "Mármol", "Cerámica", "Alfombra", "Retal de Mármol"]} />
        </div>
 
-       {/* 4. COMODIDADES (CHECKBOXES) */}
-       <div className="bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200">
-          <span className={`text-[10px] font-bold uppercase opacity-50 block mb-3 ${labelColor}`}>Comodidades</span>
-          <div className="flex flex-wrap gap-4">
-             {["Chimenea", "Balcón", "Terraza", "Jardín", "Patio", "Estudio", "CBS (Cuarto Servicio)", "Depósito"].map(opt => (
-                <label key={opt} className={`flex items-center gap-1.5 text-[10px] font-bold cursor-pointer hover:opacity-80 ${labelColor}`}>
-                   <input type="checkbox" value={opt} {...register("specs.features")} className="rounded focus:ring-0 w-3.5 h-3.5 border-gray-300 text-current"/> {opt}
+       {/* 4. COMODIDADES (CHECKBOXES CON ICONOS) */}
+       <div className="bg-yellow-50/30 p-4 rounded-xl border border-yellow-200">
+          <span className={`text-[10px] font-bold uppercase opacity-50 block mb-3 ${labelColor}`}>Comodidades Casa</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-2">
+             {HOUSE_AMENITIES.map((item) => (
+                <label key={item.label} className={`flex items-center gap-2 text-[10px] font-bold cursor-pointer hover:opacity-80 transition-opacity text-gray-700`}>
+                   <input type="checkbox" value={item.label} {...register("specs.features")} className="rounded focus:ring-0 w-3.5 h-3.5 border-gray-300 text-yellow-600"/> 
+                   <span className="flex items-center gap-1.5">
+                      <item.icon size={12} className="shrink-0 text-yellow-500"/> {item.label}
+                   </span>
                 </label>
              ))}
           </div>

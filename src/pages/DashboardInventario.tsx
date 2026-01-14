@@ -1,7 +1,6 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { pb } from "../api"; 
-// CORRECCIÓN AQUÍ: Agregada la 'X' a los imports
 import { LayoutGrid, PlusCircle, LogOut, Edit, Trash, Star, Crown, Zap, BookOpen, Users, Menu, X, AlertCircle, FilePlus } from "lucide-react";
 import CreatePropertyForm from "../components/dashboard/CreatePropertyForm";
 import SmartModal, { ModalConfig } from "../components/ui/SmartModal"; 
@@ -82,10 +81,7 @@ export default function DashboardInventario() {
            const isDraftA = a.status === 'borrador' || !a.title ? 1 : 0;
            const isDraftB = b.status === 'borrador' || !b.title ? 1 : 0;
            
-           // Si son de diferente estado, el borrador (1) va antes
            if (isDraftA !== isDraftB) return isDraftB - isDraftA;
-           
-           // Si son iguales, por fecha (el más nuevo primero)
            return new Date(b.created).getTime() - new Date(a.created).getTime();
        });
 
@@ -93,38 +89,11 @@ export default function DashboardInventario() {
     } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
 
-// --- EFECTO GMAIL: CREAR BORRADOR AUTOMÁTICO ---
-  const handleCreateDraft = async () => {
-      try {
-          setIsLoading(true);
-          
-          // GENERAR ID TEMPORAL PARA PASAR LA VALIDACIÓN "NONEMPTY"
-          const tempId = `DRAFT-${Math.floor(Math.random() * 10000)}`;
-
-          const draftData = {
-              ayc_id: tempId, // <--- ESTO FALTABA (Campo obligatorio en tu DB)
-              status: "borrador",
-              title: "Nuevo Borrador",
-              property_type: "Apartamento", 
-              price_cop: 0,
-              description: "..."
-          };
-
-          const draft = await pb.collection("properties").create(draftData);
-
-          // Recargar y abrir
-          await loadInventory();
-          setEditingProp(draft);
-          setView("NEW");
-          setIsMobileMenuOpen(false);
-
-      } catch (e: any) {
-          console.error("Error al crear:", e);
-          const serverMsg = e?.data?.message || e?.message || "Revisa que 'ayc_id' no esté duplicado.";
-          showModal({ type: 'error', title: "Error al Crear", msg: serverMsg });
-      } finally {
-          setIsLoading(false);
-      }
+  // --- CORRECCIÓN: YA NO CREA NADA EN DB, SOLO ABRE EL FORM ---
+  const handleOpenNewForm = () => {
+      setEditingProp(null); // Limpiamos para que sea un formulario nuevo
+      setView("NEW");
+      setIsMobileMenuOpen(false);
   };
 
   const handleEdit = (prop: any) => { 
@@ -145,9 +114,7 @@ export default function DashboardInventario() {
   const handleDelete = async (id: string) => {
       try {
           await pb.collection("properties").delete(id);
-          // Optimistic update
           setProperties(prev => prev.filter(p => p.id !== id));
-          // Si estábamos editando ese, volvemos al inventario
           if(editingProp?.id === id) {
               setEditingProp(null);
               setView("INVENTORY");
@@ -181,19 +148,21 @@ export default function DashboardInventario() {
 
   const handleNavClick = (viewName: string) => {
       if (viewName === "NEW") {
-          handleCreateDraft(); // Dispara la creación automática
+          handleOpenNewForm(); // Usamos la nueva función que NO crea borradores
       } else {
           setView(viewName);
           setEditingProp(null);
-          loadInventory(); // Refrescar al volver al inventario
+          loadInventory(); 
       }
       setIsMobileMenuOpen(false);
   };
 
   const handleSuccessSave = () => {
-      showModal({ type: 'success', title: "Guardado", msg: "Cambios aplicados al borrador/inmueble." });
-      // No cambiamos de vista forzosamente, el usuario puede seguir editando
-      loadInventory(); // Actualizamos la lista de fondo
+      showModal({ type: 'success', title: "Guardado", msg: "Propiedad publicada exitosamente." });
+      // Volvemos al inventario para ver el nuevo item creado
+      setView("INVENTORY");
+      setEditingProp(null);
+      loadInventory(); 
   };
 
   return (
@@ -232,11 +201,13 @@ export default function DashboardInventario() {
             <button onClick={() => handleNavClick("INVENTORY")} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "INVENTORY" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
                <LayoutGrid size={18}/> Inventario
             </button>
-            {/* BOTÓN "NUEVO" AHORA CREA BORRADOR */}
-            <button onClick={() => handleCreateDraft()} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "NEW" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
-               {isLoading ? <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full"/> : <PlusCircle size={18}/>} 
-               {editingProp ? "Editando..." : "Nuevo (Borrador)"}
+            
+            {/* BOTÓN NUEVO CORREGIDO */}
+            <button onClick={() => handleOpenNewForm()} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "NEW" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
+               <PlusCircle size={18}/> 
+               {editingProp ? "Editando..." : "Nuevo Inmueble"}
             </button>
+
             <button onClick={() => { navigate("/dashboard/blog"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}>
                <BookOpen size={18}/> Blog / Noticias
             </button>
@@ -288,8 +259,6 @@ export default function DashboardInventario() {
                             {properties.map((p) => {
                                const heroOrder = getHeroIndex(p.id); 
                                const themeConfig = PROPERTY_TYPES_THEME[p.property_type] || PROPERTY_TYPES_THEME["default"];
-                               
-                               // DETECCIÓN DE BORRADOR
                                const isDraft = p.status === "borrador" || !p.title;
 
                                return (
@@ -315,21 +284,19 @@ export default function DashboardInventario() {
                                      </span>
                                   </td>
                                   <td className="p-4 text-center">
-                                      {isDraft ? (
-                                          <span className="text-[10px] bg-yellow-200 border border-yellow-300 text-yellow-800 font-black px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1 animate-pulse">
-                                              <FilePlus size={10} /> Borrador
-                                          </span>
-                                      ) : (
-                                          <span className="text-[10px] bg-green-100 border border-green-200 text-green-700 font-bold px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1">
-                                              <Zap size={10} /> Publicado
-                                          </span>
-                                      )}
+                                     {isDraft ? (
+                                         <span className="text-[10px] bg-yellow-200 border border-yellow-300 text-yellow-800 font-black px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1 animate-pulse">
+                                             <FilePlus size={10} /> Borrador
+                                         </span>
+                                     ) : (
+                                         <span className="text-[10px] bg-green-100 border border-green-200 text-green-700 font-bold px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1">
+                                             <Zap size={10} /> Publicado
+                                         </span>
+                                     )}
                                   </td>
                                   <td className="p-4 text-center font-mono text-xs font-bold text-green-600">
                                      {p.price_cop ? formatCurrency(p.price_cop) : <span className="text-gray-400">--</span>}
                                   </td>
-                                  
-                                  {/* TOGGLES: Deshabilitados si es borrador */}
                                   <td className="p-4 text-center">
                                      <button onClick={() => toggle(p.id, "is_hero", p.is_hero)} disabled={isDraft} className={`relative flex items-center justify-center mx-auto w-10 h-10 rounded-full transition-all ${isDraft ? "opacity-20 cursor-not-allowed" : p.is_hero ? "bg-blue-100 ring-2 ring-blue-300 scale-110 shadow-sm" : "hover:bg-gray-100 text-gray-300"}`}>
                                         {p.is_hero ? <><Zap size={24} className="text-blue-300 absolute" fill="currentColor"/><span className="relative z-10 text-sm font-black text-blue-900">{heroOrder}</span></> : <Zap size={20}/>}
@@ -341,7 +308,6 @@ export default function DashboardInventario() {
                                   <td className="p-4 text-center">
                                      <button onClick={() => toggle(p.id, "is_ayc_favorite", p.is_ayc_favorite)} disabled={isDraft} className={`p-1.5 rounded-full transition-all ${isDraft ? "opacity-20 cursor-not-allowed" : p.is_ayc_favorite ? "bg-green-100 text-green-500 ring-2 ring-green-200 scale-110" : "text-gray-300 hover:bg-gray-100"}`}><Star size={16} fill={p.is_ayc_favorite ? "currentColor" : "none"}/></button>
                                   </td>
-                                  
                                   <td className="p-4 text-right flex justify-end gap-2">
                                      <button onClick={() => handleEdit(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors" title={isDraft ? "Completar Borrador" : "Editar"}><Edit size={16}/></button>
                                      <button onClick={() => confirmDelete(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors" title="Borrar para siempre"><Trash size={16}/></button>
@@ -355,21 +321,21 @@ export default function DashboardInventario() {
                   
                   {/* MOBILE CARDS */}
                   <div className="md:hidden space-y-4 pb-24">
-                     {properties.map(p => {
-                         const themeConfig = PROPERTY_TYPES_THEME[p.property_type] || PROPERTY_TYPES_THEME["default"];
-                         const isDraft = p.status === "borrador" || !p.title;
+                      {properties.map(p => {
+                          const themeConfig = PROPERTY_TYPES_THEME[p.property_type] || PROPERTY_TYPES_THEME["default"];
+                          const isDraft = p.status === "borrador" || !p.title;
 
-                         return (
+                          return (
                             <div key={p.id} className={`rounded-2xl p-4 shadow-sm border relative ${isDraft ? "bg-yellow-50 border-yellow-200" : "bg-white border-gray-100"}`}>
                                 <div className="flex gap-4">
                                    <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-gray-100">
                                       {p.images?.[0] && <img src={`${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.images[0]}`} className={`w-full h-full object-cover ${isDraft ? "grayscale opacity-50" : ""}`}/>}
                                    </div>
                                    <div>
-                                       {isDraft && <span className="mb-1 inline-block text-[8px] bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded font-black uppercase">Borrador</span>}
-                                       <span className={`block text-[10px] font-bold px-2 py-0.5 rounded w-fit ${themeConfig.bgLight} ${themeConfig.text}`}>{p.property_type || "N/A"}</span>
-                                       <h3 className={`font-bold text-sm mt-1 ${isDraft ? "text-gray-400 italic" : ""}`}>{p.title || "Sin Título"}</h3>
-                                       <p className="text-green-600 font-bold text-xs">{p.price_cop ? formatCurrency(p.price_cop) : "--"}</p>
+                                        {isDraft && <span className="mb-1 inline-block text-[8px] bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded font-black uppercase">Borrador</span>}
+                                        <span className={`block text-[10px] font-bold px-2 py-0.5 rounded w-fit ${themeConfig.bgLight} ${themeConfig.text}`}>{p.property_type || "N/A"}</span>
+                                        <h3 className={`font-bold text-sm mt-1 ${isDraft ? "text-gray-400 italic" : ""}`}>{p.title || "Sin Título"}</h3>
+                                        <p className="text-green-600 font-bold text-xs">{p.price_cop ? formatCurrency(p.price_cop) : "--"}</p>
                                    </div>
                                 </div>
                                 <div className="flex justify-end gap-2 mt-3 border-t pt-3">
@@ -377,8 +343,8 @@ export default function DashboardInventario() {
                                     <button onClick={() => confirmDelete(p.id)} className="text-xs font-bold text-red-600 flex items-center gap-1"><Trash size={14}/> BORRAR</button>
                                 </div>
                             </div>
-                         )
-                     })}
+                          )
+                      })}
                   </div>
 
                </div>

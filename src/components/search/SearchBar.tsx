@@ -8,7 +8,7 @@ export const SearchBar = () => {
   const { lang, currency, translateDynamic } = useApp();
   
   const txt = {
-    title: lang === 'ES' ? "¿Dónde quieres invertir?" : "Where do you want to invest?",
+    title: lang === 'ES' ? "¿Dónde quieres invertir? (v2)" : "Where do you want to invest?",
     placeholder: lang === 'ES' ? "Ej: Rosales, Apartamento, Chía..." : "Ex: Rosales, Apartment, Chía...",
     btn: lang === 'ES' ? "BUSCAR" : "SEARCH",
     results_title: lang === 'ES' ? "Resultados para:" : "Results for:",

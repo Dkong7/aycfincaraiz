@@ -1,5 +1,6 @@
 import React from "react";
-import { Lock, Briefcase, Map } from "lucide-react";
+// Importamos iconos específicos para cada campo (Estilo FontAwesome pero usando tu librería Lucide)
+import { Lock, User, Phone, Mail, MapPin, Building2, PhoneCall, Scale, FileText } from "lucide-react";
 
 // Helper UI local
 const InputIcon = ({ icon: Icon, label, register, name, placeholder, s }: any) => (
@@ -34,31 +35,51 @@ export default function PrivateInfo({ register, activeType, initialData }: any) 
 
        {/* DATOS PROPIETARIO */}
        <div className="space-y-3">
-          <InputIcon register={register} name="owner_name" placeholder="Nombre Propietario" icon={Briefcase} />
-          <InputIcon register={register} name="owner_phone" placeholder="Teléfono Contacto" icon={Briefcase} />
-          <InputIcon register={register} name="owner_email" placeholder="Correo Electrónico" icon={Briefcase} />
-          <InputIcon register={register} name="address_private" placeholder="Dirección Exacta (Placa)" icon={Map} />
+          {/* Iconos corregidos para representar mejor la data */}
+          <InputIcon register={register} name="owner_name" placeholder="Nombre Propietario" icon={User} />
+          <InputIcon register={register} name="owner_phone" placeholder="Teléfono Contacto" icon={Phone} />
+          <InputIcon register={register} name="owner_email" placeholder="Correo Electrónico" icon={Mail} />
+          <InputIcon register={register} name="address_private" placeholder="Dirección Exacta (Placa)" icon={MapPin} />
           
           {/* CAMPOS EXTRA SOLO PARA APARTAMENTO */}
           {activeType === 'Apartamento' && (
              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-red-100 mt-2">
-                <input {...register("specs.building_name")} placeholder="Nombre Edificio/Conjunto" className="col-span-2 w-full p-2 text-xs bg-white border border-red-100 rounded text-red-900 placeholder-red-300 outline-none focus:border-red-300" />
+                <div className="col-span-2 relative">
+                    <Building2 className="absolute left-3 top-2.5 text-red-300" size={14}/>
+                    <input {...register("specs.building_name")} placeholder="Nombre Edificio/Conjunto" className="w-full pl-9 p-2 text-xs bg-white border border-red-100 rounded text-red-900 placeholder-red-300 outline-none focus:border-red-300" />
+                </div>
                 <input {...register("specs.unit_detail")} placeholder="Apto / Int / Bloque" className="w-full p-2 text-xs bg-white border border-red-100 rounded text-red-900 placeholder-red-300 outline-none focus:border-red-300" />
-                <input {...register("specs.admin_contact")} placeholder="Tel Administración" className="w-full p-2 text-xs bg-white border border-red-100 rounded text-red-900 placeholder-red-300 outline-none focus:border-red-300" />
+                <div className="relative">
+                    <PhoneCall className="absolute left-2 top-2 text-red-300" size={12}/>
+                    <input {...register("specs.admin_contact")} placeholder="Tel Administración" className="w-full pl-7 p-2 text-xs bg-white border border-red-100 rounded text-red-900 placeholder-red-300 outline-none focus:border-red-300" />
+                </div>
              </div>
           )}
        </div>
 
-       {/* LEGAL */}
+       {/* LEGAL (Sin Afectación Familiar) */}
        <div className="pt-3 border-t border-red-100">
-          <span className="text-[9px] font-bold text-red-400 uppercase block mb-2">Estado Legal</span>
+          <span className="text-[9px] font-bold text-red-400 uppercase mb-2 flex items-center gap-1"><Scale size={10}/> Estado Legal</span>
           <div className="grid grid-cols-2 gap-2">
-             {["Hipoteca", "Afectación Familiar", "Patrimonio Familia", "Sucesión"].map(l => (
+             {["Hipoteca", "Patrimonio Familia", "Sucesión"].map(l => (
                 <label key={l} className="flex items-center gap-1.5 text-[10px] text-red-800 cursor-pointer font-bold hover:opacity-70">
                    <input type="checkbox" value={l} {...register("specs.legal_status")} className="rounded text-red-500 focus:ring-0 w-3 h-3 border-red-200"/> {l}
                 </label>
              ))}
           </div>
+       </div>
+
+       {/* COMENTARIOS EXTRAS */}
+       <div className="pt-3 border-t border-red-100">
+          <label className="text-[9px] font-bold text-red-400 uppercase mb-2 flex items-center gap-1">
+             <FileText size={10}/> Comentarios Extras (Privado)
+          </label>
+          <textarea 
+            {...register("specs.private_notes")} 
+            rows={3}
+            placeholder="Escribe aquí notas internas sobre la captación, llaves, horarios, etc."
+            className="w-full p-3 rounded-lg text-xs outline-none border border-red-100 bg-red-50/30 text-red-900 focus:border-red-300 transition-all placeholder-red-300 resize-none"
+          ></textarea>
        </div>
 
     </div>
