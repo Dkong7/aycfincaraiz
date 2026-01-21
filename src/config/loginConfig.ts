@@ -32,16 +32,22 @@ export const getLoginConfig = (pathname: string): LoginTheme => {
       icon: "🌸"
   };
 
-  // 2. ALFONSO
+  // 2. ALFONSO (PALETA TIERRA CORREGIDA)
   if (pathname === "/alfalfalf") return {
       mode: "secret",
       theme: "alfonso", 
-      bg: "bg-[#0a0a0a]", 
-      container: "bg-[#111] border-amber-900/30 shadow-amber-900/20",
-      textTitle: "text-amber-600", 
-      textLabel: "text-amber-700",
-      input: "bg-black border-amber-900/50 focus:border-amber-500 text-amber-500 placeholder-amber-900",
-      btn: "bg-amber-700 hover:bg-amber-600 text-white shadow-amber-900/50",
+      // Fondo claro tipo "Papel Antiguo/Lino" para legibilidad
+      bg: "bg-[#F4F1EA]", 
+      // Tarjeta blanca con borde Café suave
+      container: "bg-white border-[#3E2C20]/20 shadow-xl shadow-[#3E2C20]/10",
+      // Títulos en Café Profundo
+      textTitle: "text-[#3E2C20]", 
+      // Etiquetas en Verde Oliva Oscuro
+      textLabel: "text-[#556B2F]",
+      // Inputs crema muy suave con borde café y foco en Amarillo Quemado
+      input: "bg-[#FAF9F6] border-[#8B4513]/30 focus:border-[#D97706] text-[#3E2723] placeholder-[#8B4513]/40",
+      // Botón Amarillo Quemado (Amber) con hover a Café
+      btn: "bg-[#D97706] hover:bg-[#92400E] text-white shadow-md",
       title: "HOLA PA'",
       ghostUser: "alfonso@ayc.com",
       punishUrl: "https://www.pixar.com",

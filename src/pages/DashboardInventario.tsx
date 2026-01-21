@@ -1,7 +1,10 @@
 ﻿import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { pb } from "../api"; 
-import { LayoutGrid, PlusCircle, LogOut, Edit, Trash, Star, Crown, Zap, BookOpen, Users, Menu, X, AlertCircle, FilePlus } from "lucide-react";
+import { 
+  LayoutGrid, PlusCircle, LogOut, Edit, Trash, Star, Crown, Zap, 
+  BookOpen, Users, Menu, X, AlertCircle, FilePlus, Eye // <--- Importamos Eye
+} from "lucide-react";
 import CreatePropertyForm from "../components/dashboard/CreatePropertyForm";
 import SmartModal, { ModalConfig } from "../components/ui/SmartModal"; 
 
@@ -16,11 +19,9 @@ export default function DashboardInventario() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // DETECCIÓN DE TEMA
   const storedTheme = localStorage.getItem("ayc_theme") || "agent";
   const modalTheme = storedTheme.includes("claudia") ? "pink" : "blue";
 
-  // ESTADO MODAL
   const [modalState, setModalState] = useState<{ isOpen: boolean; config: ModalConfig }>({
     isOpen: false,
     config: { type: 'info', title: '', msg: '' }
@@ -31,7 +32,6 @@ export default function DashboardInventario() {
   const currentUser = pb.authStore.model;
   const isManager = ["Alfonso", "Claudia", "admin"].includes(currentUser?.role || "");
 
-  // HELPER MODAL
   const showModal = (config: ModalConfig) => {
       setModalState({
           isOpen: true,
@@ -62,7 +62,6 @@ export default function DashboardInventario() {
       fav: Math.max(0, 10 - counts.fav)
   };
 
-  // --- ESTILOS ---
   const s = ((t) => {
       if (t === "claudia") return { mainBg: "bg-[#FFF0F5]", sidebar: "bg-white border-pink-100", sidebarText: "text-pink-600", activeBtn: "bg-pink-100 text-pink-700", tableHeader: "bg-pink-50 text-pink-400" };
       if (t === "alfonso") return { mainBg: "bg-[#F4F1EA]", sidebar: "bg-[#1F1612] border-[#3E2C20]", sidebarText: "text-[#E8DCCA]", activeBtn: "bg-[#3E2C20] text-[#D97706] shadow-inner", tableHeader: "bg-[#261C16] text-[#E8DCCA]" };
@@ -76,11 +75,9 @@ export default function DashboardInventario() {
        setIsLoading(true);
        const res = await pb.collection("properties").getList(1, 100, { sort: "-created" });
        
-       // ORDENAMIENTO PERSONALIZADO: Borradores arriba
        const sorted = res.items.sort((a, b) => {
            const isDraftA = a.status === 'borrador' || !a.title ? 1 : 0;
            const isDraftB = b.status === 'borrador' || !b.title ? 1 : 0;
-           
            if (isDraftA !== isDraftB) return isDraftB - isDraftA;
            return new Date(b.created).getTime() - new Date(a.created).getTime();
        });
@@ -89,9 +86,8 @@ export default function DashboardInventario() {
     } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
 
-  // --- CORRECCIÓN: YA NO CREA NADA EN DB, SOLO ABRE EL FORM ---
   const handleOpenNewForm = () => {
-      setEditingProp(null); // Limpiamos para que sea un formulario nuevo
+      setEditingProp(null); 
       setView("NEW");
       setIsMobileMenuOpen(false);
   };
@@ -148,7 +144,7 @@ export default function DashboardInventario() {
 
   const handleNavClick = (viewName: string) => {
       if (viewName === "NEW") {
-          handleOpenNewForm(); // Usamos la nueva función que NO crea borradores
+          handleOpenNewForm(); 
       } else {
           setView(viewName);
           setEditingProp(null);
@@ -159,7 +155,6 @@ export default function DashboardInventario() {
 
   const handleSuccessSave = () => {
       showModal({ type: 'success', title: "Guardado", msg: "Propiedad publicada exitosamente." });
-      // Volvemos al inventario para ver el nuevo item creado
       setView("INVENTORY");
       setEditingProp(null);
       loadInventory(); 
@@ -201,13 +196,9 @@ export default function DashboardInventario() {
             <button onClick={() => handleNavClick("INVENTORY")} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "INVENTORY" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
                <LayoutGrid size={18}/> Inventario
             </button>
-            
-            {/* BOTÓN NUEVO CORREGIDO */}
             <button onClick={() => handleOpenNewForm()} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "NEW" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
-               <PlusCircle size={18}/> 
-               {editingProp ? "Editando..." : "Nuevo Inmueble"}
+               <PlusCircle size={18}/> {editingProp ? "Editando..." : "Nuevo Inmueble"}
             </button>
-
             <button onClick={() => { navigate("/dashboard/blog"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}>
                <BookOpen size={18}/> Blog / Noticias
             </button>
@@ -285,13 +276,13 @@ export default function DashboardInventario() {
                                   </td>
                                   <td className="p-4 text-center">
                                      {isDraft ? (
-                                         <span className="text-[10px] bg-yellow-200 border border-yellow-300 text-yellow-800 font-black px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1 animate-pulse">
+                                        <span className="text-[10px] bg-yellow-200 border border-yellow-300 text-yellow-800 font-black px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1 animate-pulse">
                                              <FilePlus size={10} /> Borrador
-                                         </span>
+                                        </span>
                                      ) : (
-                                         <span className="text-[10px] bg-green-100 border border-green-200 text-green-700 font-bold px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1">
+                                        <span className="text-[10px] bg-green-100 border border-green-200 text-green-700 font-bold px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1">
                                              <Zap size={10} /> Publicado
-                                         </span>
+                                        </span>
                                      )}
                                   </td>
                                   <td className="p-4 text-center font-mono text-xs font-bold text-green-600">
@@ -308,9 +299,22 @@ export default function DashboardInventario() {
                                   <td className="p-4 text-center">
                                      <button onClick={() => toggle(p.id, "is_ayc_favorite", p.is_ayc_favorite)} disabled={isDraft} className={`p-1.5 rounded-full transition-all ${isDraft ? "opacity-20 cursor-not-allowed" : p.is_ayc_favorite ? "bg-green-100 text-green-500 ring-2 ring-green-200 scale-110" : "text-gray-300 hover:bg-gray-100"}`}><Star size={16} fill={p.is_ayc_favorite ? "currentColor" : "none"}/></button>
                                   </td>
-                                  <td className="p-4 text-right flex justify-end gap-2">
-                                     <button onClick={() => handleEdit(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors" title={isDraft ? "Completar Borrador" : "Editar"}><Edit size={16}/></button>
-                                     <button onClick={() => confirmDelete(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors" title="Borrar para siempre"><Trash size={16}/></button>
+                                  <td className="p-4 text-right">
+                                     <div className="flex items-center justify-end gap-2">
+                                         {/* BOTÓN VER WEB */}
+                                         <Link 
+                                            to={`/inmuebles/${p.ayc_id || p.id}`} 
+                                            target="_blank"
+                                            className={`p-2 rounded transition-colors ${isDraft ? "text-gray-300 cursor-not-allowed" : "text-gray-500 hover:bg-gray-100 hover:text-black"}`}
+                                            title="Ver en Web"
+                                            onClick={(e) => isDraft && e.preventDefault()}
+                                         >
+                                            <Eye size={16}/> {/* <--- CAMBIO A OJO */}
+                                         </Link>
+
+                                         <button onClick={() => handleEdit(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors" title={isDraft ? "Completar Borrador" : "Editar"}><Edit size={16}/></button>
+                                         <button onClick={() => confirmDelete(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors" title="Borrar"><Trash size={16}/></button>
+                                     </div>
                                   </td>
                                </tr>
                                );
@@ -338,9 +342,20 @@ export default function DashboardInventario() {
                                         <p className="text-green-600 font-bold text-xs">{p.price_cop ? formatCurrency(p.price_cop) : "--"}</p>
                                    </div>
                                 </div>
-                                <div className="flex justify-end gap-2 mt-3 border-t pt-3">
-                                    <button onClick={() => handleEdit(p)} className="text-xs font-bold text-blue-600 flex items-center gap-1"><Edit size={14}/> {isDraft ? "COMPLETAR" : "EDITAR"}</button>
-                                    <button onClick={() => confirmDelete(p.id)} className="text-xs font-bold text-red-600 flex items-center gap-1"><Trash size={14}/> BORRAR</button>
+                                <div className="flex justify-between items-center gap-2 mt-4 border-t pt-3">
+                                    {/* BOTÓN VER WEB MOBILE */}
+                                    <Link 
+                                        to={`/inmuebles/${p.ayc_id || p.id}`} 
+                                        target="_blank"
+                                        className={`text-xs font-bold flex items-center gap-1 ${isDraft ? "text-gray-300 pointer-events-none" : "text-gray-600"}`}
+                                    >
+                                        <Eye size={14}/> VER WEB {/* <--- CAMBIO A OJO */}
+                                    </Link>
+
+                                    <div className="flex gap-3">
+                                        <button onClick={() => handleEdit(p)} className="text-xs font-bold text-blue-600 flex items-center gap-1"><Edit size={14}/> {isDraft ? "COMPLETAR" : "EDITAR"}</button>
+                                        <button onClick={() => confirmDelete(p.id)} className="text-xs font-bold text-red-600 flex items-center gap-1"><Trash size={14}/> BORRAR</button>
+                                    </div>
                                 </div>
                             </div>
                           )

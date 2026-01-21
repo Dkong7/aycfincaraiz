@@ -1,8 +1,6 @@
 import React from "react";
-// Importamos iconos específicos para cada campo (Estilo FontAwesome pero usando tu librería Lucide)
 import { Lock, User, Phone, Mail, MapPin, Building2, PhoneCall, Scale, FileText } from "lucide-react";
 
-// Helper UI local
 const InputIcon = ({ icon: Icon, label, register, name, placeholder, s }: any) => (
   <div className="w-full">
     {label && <label className="text-[10px] font-bold uppercase mb-1 block opacity-70 text-red-800">{label}</label>}
@@ -20,28 +18,31 @@ const InputIcon = ({ icon: Icon, label, register, name, placeholder, s }: any) =
 );
 
 export default function PrivateInfo({ register, activeType, initialData }: any) {
+  // Opciones Legales (Valores en inglés para DB, Etiquetas en español para UI)
+  const LEGAL_OPTIONS = [
+    { label: "Hipoteca", value: "mortgage" },
+    { label: "Sucesión", value: "succession" }
+    // Eliminado: Patrimonio Familia
+  ];
+
   return (
     <div className="animate-in fade-in space-y-4">
        
-       {/* HEADER PRIVADO */}
        <div className="flex justify-between items-center border-b border-red-100 pb-2 mb-4">
           <h3 className="text-red-500 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
              <Lock size={14}/> Datos Privados (Interno)
           </h3>
           <span className="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded font-mono font-bold">
-             {initialData?.ayc_id || "AYC-Generando..."}
+             {initialData?.ayc_id || "AYC-..."}
           </span>
        </div>
 
-       {/* DATOS PROPIETARIO */}
        <div className="space-y-3">
-          {/* Iconos corregidos para representar mejor la data */}
           <InputIcon register={register} name="owner_name" placeholder="Nombre Propietario" icon={User} />
           <InputIcon register={register} name="owner_phone" placeholder="Teléfono Contacto" icon={Phone} />
           <InputIcon register={register} name="owner_email" placeholder="Correo Electrónico" icon={Mail} />
           <InputIcon register={register} name="address_private" placeholder="Dirección Exacta (Placa)" icon={MapPin} />
           
-          {/* CAMPOS EXTRA SOLO PARA APARTAMENTO */}
           {activeType === 'Apartamento' && (
              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-red-100 mt-2">
                 <div className="col-span-2 relative">
@@ -57,19 +58,17 @@ export default function PrivateInfo({ register, activeType, initialData }: any) 
           )}
        </div>
 
-       {/* LEGAL (Sin Afectación Familiar) */}
        <div className="pt-3 border-t border-red-100">
           <span className="text-[9px] font-bold text-red-400 uppercase mb-2 flex items-center gap-1"><Scale size={10}/> Estado Legal</span>
           <div className="grid grid-cols-2 gap-2">
-             {["Hipoteca", "Patrimonio Familia", "Sucesión"].map(l => (
-                <label key={l} className="flex items-center gap-1.5 text-[10px] text-red-800 cursor-pointer font-bold hover:opacity-70">
-                   <input type="checkbox" value={l} {...register("specs.legal_status")} className="rounded text-red-500 focus:ring-0 w-3 h-3 border-red-200"/> {l}
+             {LEGAL_OPTIONS.map((opt) => (
+                <label key={opt.value} className="flex items-center gap-1.5 text-[10px] text-red-800 cursor-pointer font-bold hover:opacity-70">
+                   <input type="checkbox" value={opt.value} {...register("specs.legal_status")} className="rounded text-red-500 focus:ring-0 w-3 h-3 border-red-200"/> {opt.label}
                 </label>
              ))}
           </div>
        </div>
 
-       {/* COMENTARIOS EXTRAS */}
        <div className="pt-3 border-t border-red-100">
           <label className="text-[9px] font-bold text-red-400 uppercase mb-2 flex items-center gap-1">
              <FileText size={10}/> Comentarios Extras (Privado)
@@ -77,7 +76,7 @@ export default function PrivateInfo({ register, activeType, initialData }: any) 
           <textarea 
             {...register("specs.private_notes")} 
             rows={3}
-            placeholder="Escribe aquí notas internas sobre la captación, llaves, horarios, etc."
+            placeholder="Notas internas..."
             className="w-full p-3 rounded-lg text-xs outline-none border border-red-100 bg-red-50/30 text-red-900 focus:border-red-300 transition-all placeholder-red-300 resize-none"
           ></textarea>
        </div>

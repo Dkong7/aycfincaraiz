@@ -2,10 +2,10 @@ import React from "react";
 import { 
   Maximize, Ruler, Zap, ArrowUpFromLine, Layers, Warehouse, MapPin, 
   Truck, Briefcase, Store, DollarSign, ShieldAlert, Droplets, Flame, 
-  Container, Factory, Siren, Lock
+  Container, Factory, Siren, Calendar
 } from "lucide-react";
 
-// --- LISTAS DE OPCIONES ---
+// Lista de Amenidades de Seguridad (Para Checkboxes)
 const SECURITY_FEATURES = [
    {label: "Alarma Incendio", icon: Siren}, 
    {label: "Detectores Humo", icon: Flame}, 
@@ -17,7 +17,7 @@ const SECURITY_FEATURES = [
    {label: "Zona Franca", icon: Factory}
 ];
 
-// --- HELPERS UI (Reutilizados para consistencia) ---
+// --- HELPERS UI ---
 const InputIcon = ({ icon: Icon, label, register, name, s, type="text" }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
@@ -41,15 +41,15 @@ const CheckGroup = ({ options, register, name, s, colorClass }: any) => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-2">
      {options.map((item: any) => (
         <label key={item.label} className={`flex items-center gap-1.5 text-[10px] font-bold cursor-pointer hover:opacity-80 transition-opacity ${colorClass || s.label}`}>
-           <input type="checkbox" value={item.label} {...register(name)} className={`rounded focus:ring-0 w-3.5 h-3.5 border-gray-300 text-current`}/> 
+           <input type="checkbox" value={item.label} {...register(name)} className={`rounded focus:ring-0 w-3.5 h-3.5 border-gray-300 text-amber-500`}/> 
            <span className="flex items-center gap-1">{item.icon && <item.icon size={12}/>} {item.label}</span>
         </label>
      ))}
   </div>
 );
 
-export default function BodegaSpecs({ register, s }: any) {
-  const labelColor = "text-amber-700"; // Color Temático Bodega
+export default function BodegaForm({ register, s }: any) {
+  const labelColor = "text-amber-700"; 
   
   return (
     <div className="animate-in fade-in space-y-6">
@@ -60,11 +60,12 @@ export default function BodegaSpecs({ register, s }: any) {
        </div>
 
        {/* 1. DIMENSIONES & ÁREAS */}
-       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <InputIcon register={register} name="specs.area_total" label="Área Total m²" icon={Maximize} s={s} />
-          <InputIcon register={register} name="specs.area_free" label="Área Libre m²" icon={Maximize} s={s} />
-          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} />
-          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} />
+       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <InputIcon register={register} name="specs.area_total" label="Área Total m²" icon={Maximize} s={s} type="number" />
+          <InputIcon register={register} name="specs.area_free" label="Área Libre m²" icon={Maximize} s={s} type="number" />
+          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" />
+          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} type="number" />
+          <SelectIcon register={register} name="specs.antiquity" label="Edad Construcción" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 9 años", "10 a 20 años", "Más de 20 años", "Remodelado"]} />
        </div>
 
        {/* 2. CAPACIDAD INDUSTRIAL */}
@@ -92,7 +93,7 @@ export default function BodegaSpecs({ register, s }: any) {
           </div>
        </div>
 
-       {/* 4. RENTABILIDAD / LOCALES (Ref: Screenshot 205800) */}
+       {/* 4. RENTABILIDAD / LOCALES */}
        <div className="border border-amber-200 rounded-xl p-4 bg-white relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
           <span className="text-[10px] font-black uppercase text-amber-500 mb-3 block tracking-wider">Rentabilidad / Locales</span>
@@ -108,7 +109,8 @@ export default function BodegaSpecs({ register, s }: any) {
              <ShieldAlert size={16}/>
              <span className="text-xs font-black uppercase tracking-widest">Seguridad Industrial & Dotación</span>
           </div>
-          <CheckGroup options={SECURITY_FEATURES} register={register} name="specs.industrial_features" s={{label: "text-gray-400 hover:text-white"}} colorClass="text-amber-500"/>
+          {/* El CheckGroup está definido dentro del componente arriba */}
+          <CheckGroup options={SECURITY_FEATURES} register={register} name="specs.industrial_features" s={{label: "text-gray-400 hover:text-white"}} colorClass="text-gray-300 hover:text-white"/>
        </div>
 
     </div>

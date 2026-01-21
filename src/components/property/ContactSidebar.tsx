@@ -1,4 +1,3 @@
-// src/components/property/ContactSidebar.tsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { User, Calendar, CheckCircle } from "lucide-react";
@@ -22,7 +21,7 @@ export default function ContactSidebar({ prop }: any) {
             </a>
             
             <button className="block w-full bg-[#0A192F] hover:bg-[#112] text-white font-bold py-4 rounded-xl text-center transition-all shadow-lg flex items-center justify-center gap-2">
-                <Calendar size={18}/> {t('Agendar Visita')}
+                <Calendar size={18}/> {t('appraisal_final_btn') || "Agendar Visita"}
             </button>
         </div>
 

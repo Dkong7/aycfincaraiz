@@ -1,20 +1,20 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState } from 'react';
 import { X, ArrowRight, Search, MapPin, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { pb } from '../../api';
 
 export const SearchBar = () => {
-  const { lang, currency, translateDynamic } = useApp();
+  const { lang, translateDynamic } = useApp();
   
   const txt = {
-    title: lang === 'ES' ? "¿Dónde quieres invertir? (v2)" : "Where do you want to invest?",
+    title: lang === 'ES' ? "¿Dónde quieres invertir?" : "Where do you want to invest?",
     placeholder: lang === 'ES' ? "Ej: Rosales, Apartamento, Chía..." : "Ex: Rosales, Apartment, Chía...",
     btn: lang === 'ES' ? "BUSCAR" : "SEARCH",
     results_title: lang === 'ES' ? "Resultados para:" : "Results for:",
     latest_title: lang === 'ES' ? "Oportunidades Recientes" : "Recent Opportunities",
     loading: lang === 'ES' ? "Consultando portafolio..." : "Scanning portfolio...",
-    no_results_fallback: lang === 'ES' ? "No hay coincidencias exactas, mira estas opciones:" : "No exact matches, check these options:",
+    no_results_fallback: lang === 'ES' ? "Sin coincidencias exactas, mira estas oportunidades:" : "No exact matches, check these opportunities:",
     view_all: lang === 'ES' ? "Explorar todo el inventario" : "Explore full inventory"
   };
 
@@ -30,7 +30,7 @@ export const SearchBar = () => {
     if (!term.trim()) return;
     try {
       await pb.collection('search_terms').create({ term: term, lang: lang, source: 'home_searchbar' });
-    } catch (e) { /* Ignorar */ }
+    } catch (e) { /* Ignorar error */ }
   };
 
   // 2. Ejecutar Búsqueda
@@ -48,18 +48,14 @@ export const SearchBar = () => {
 
       // A. BÚSQUEDA ACTIVA
       if (query.trim()) {
-         const q = query.replace(/["\\]/g, ""); // Limpiar caracteres rotos
+         const q = query.replace(/["\\]/g, ""); 
+         // Filtro limpio: PocketBase se encarga de mostrar solo lo "publicado" según tu regla API
+         const searchFilter = `title ~ "${q}" || municipality ~ "${q}" || property_type ~ "${q}"`;
          
-         // FILTRO SIMPLIFICADO: Solo Título y Municipio para evitar error 400 en campos complejos
-         // Nota: Quitamos 'status = publicado' del código para evitar conflictos.
-         // Asegúrate de poner 'status = "publicado"' en las API Rules de PocketBase.
-         const searchFilter = `title ~ "${q}" || municipality ~ "${q}"`;
-         
-         console.log("Enviando filtro:", searchFilter); // DEBUG
-
          const result = await pb.collection('properties').getList(1, 20, {
             sort: '-created',
             filter: searchFilter,
+            requestKey: null 
          });
          resultItems = result.items;
       }
@@ -67,9 +63,10 @@ export const SearchBar = () => {
       // B. FALLBACK (Si está vacío o no hubo resultados)
       if (resultItems.length === 0) {
           setIsFallback(true);
-          // Traemos los últimos 6 sin ningún filtro (confiando en la API Rule)
-          const fallbackResult = await pb.collection('properties').getList(1, 6, {
-              sort: '-created'
+          // Traemos 4 items (La regla API filtrará los no publicados automáticamente)
+          const fallbackResult = await pb.collection('properties').getList(1, 4, {
+              sort: '-created',
+              requestKey: null
           });
           resultItems = fallbackResult.items;
       }
@@ -77,10 +74,10 @@ export const SearchBar = () => {
       setResults(resultItems);
       
     } catch (err) {
-      console.error("Error crítico en búsqueda:", err);
-      // Fallback de emergencia final: Intenta cargar TODO sin filtros
+      console.error("Error búsqueda:", err);
+      // Fallback de emergencia final
       try {
-          const rescue = await pb.collection('properties').getList(1, 6, { sort: '-created' });
+          const rescue = await pb.collection('properties').getList(1, 4, { sort: '-created', requestKey: null });
           setResults(rescue.items);
           setIsFallback(true);
       } catch (e) { setResults([]); }
@@ -142,7 +139,6 @@ export const SearchBar = () => {
                                 ? `${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.images[0]}`
                                 : null;
                                
-                               // Precio seguro
                                const rawPrice = p.price_cop || 0;
                                const displayPrice = new Intl.NumberFormat('es-CO', { 
                                    style: 'currency', currency: 'COP', maximumFractionDigits: 0 

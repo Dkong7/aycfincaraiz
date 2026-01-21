@@ -2,9 +2,9 @@ import React from "react";
 import { useFieldArray } from "react-hook-form";
 import { 
   Maximize, Grid, Ruler, Bed, Bath, Car, Flame, Utensils, Layers, 
-  ChefHat, Briefcase, Store, DollarSign, ShieldCheck, Coffee, Dumbbell, 
+  ChefHat, Store, DollarSign, ShieldCheck, Coffee, Dumbbell, 
   Waves, Trophy, Trees, Zap, Heater, Tv, Dog, Wind, Sun, Flower2, 
-  BookOpen, Shirt, Box
+  BookOpen, Shirt, Box, Calendar
 } from "lucide-react";
 
 // --- SUB-COMPONENTE INTERNO: SECCIÓN DE NIVELES ---
@@ -33,27 +33,20 @@ const LevelsSection = ({ control, register, s, labelColor }: any) => {
   );
 };
 
-// Listas de Opciones con Iconos
 const AMENITIES_CLUB = [
    {label: "Vigilancia 24h", icon: ShieldCheck}, {label: "Salón Comunal", icon: Coffee}, {label: "Gimnasio", icon: Dumbbell}, 
    {label: "Piscina", icon: Waves}, {label: "Canchas Squash", icon: Trophy}, {label: "Canchas Tenis", icon: Trophy},
    {label: "Parque Niños", icon: Trees}, {label: "Terraza BBQ", icon: Flame}, {label: "Planta Eléctrica", icon: Zap},
-   {label: "Caldera", icon: Heater}, {label: "Teatrino", icon: Tv}, {label: "Co-Working", icon: Briefcase},
+   {label: "Caldera", icon: Heater}, {label: "Teatrino", icon: Tv}, {label: "Co-Working", icon: BookOpen},
    {label: "Sendero", icon: Trees}, {label: "Pet Friendly", icon: Dog}
 ];
 
 const HOUSE_AMENITIES = [
-   { label: "Chimenea", icon: Flame },
-   { label: "Balcón", icon: Wind },
-   { label: "Terraza", icon: Sun },
-   { label: "Jardín", icon: Flower2 },
-   { label: "Patio", icon: Sun },
-   { label: "Estudio", icon: BookOpen },
-   { label: "CBS (Cuarto Servicio)", icon: Shirt },
-   { label: "Depósito", icon: Box }
+   { label: "Chimenea", icon: Flame }, { label: "Balcón", icon: Wind }, { label: "Terraza", icon: Sun },
+   { label: "Jardín", icon: Flower2 }, { label: "Patio", icon: Sun }, { label: "Estudio", icon: BookOpen },
+   { label: "CBS (Cuarto Servicio)", icon: Shirt }, { label: "Depósito", icon: Box }
 ];
 
-// Helpers UI locales
 const InputIcon = ({ icon: Icon, label, register, name, s, type="text" }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
@@ -73,31 +66,28 @@ const SelectIcon = ({ icon: Icon, label, register, name, options, s }: any) => (
   </div>
 );
 
-export default function HouseSpecs({ register, control, watch, s }: any) {
+export default function HouseForm({ register, control, watch, s }: any) {
   const hasRent = watch("specs.has_rent");
   const hasSocial = watch("specs.has_social");
-  const labelColor = "text-yellow-600"; // Color temático Casa
+  const labelColor = "text-yellow-600";
 
   return (
     <div className="animate-in fade-in space-y-6">
        
-       {/* 1. DIMENSIONES */}
+       {/* 1. DIMENSIONES Y EDAD */}
        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <InputIcon register={register} name="specs.area_lot" label="Lote m²" icon={Maximize} s={s} />
-          <InputIcon register={register} name="specs.area_built" label="Construida" icon={Grid} s={s} />
+          <InputIcon register={register} name="specs.area_built" label="Construida m²" icon={Grid} s={s} />
           <InputIcon register={register} name="specs.area_private" label="Privada" icon={Maximize} s={s} />
           <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} />
-          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} />
+          <SelectIcon register={register} name="specs.antiquity" label="Edad / Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 9 años", "10 a 20 años", "Más de 20 años", "Remodelado"]} />
        </div>
 
        {/* 2. DISTRIBUCIÓN */}
        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <InputIcon register={register} name="specs.habs" label="Habs" icon={Bed} s={s} type="number" />
           <InputIcon register={register} name="specs.baths" label="Baños" icon={Bath} s={s} type="number" />
-          
-          {/* CANTIDAD GARAJES */}
           <InputIcon register={register} name="specs.garages" label="# Garajes" icon={Car} s={s} type="number" />
-          
           <SelectIcon register={register} name="specs.garage_type" label="Tipo Garaje" icon={Car} s={s} options={["Cubierto", "Descubierto", "Doble Lineal", "Doble Paralelo", "Sencillo", "Servidumbre"]} />
           <SelectIcon register={register} name="specs.gas_type" label="Gas" icon={Flame} s={s} options={["Natural", "Propano", "Pipeta", "Red", "Ninguno"]} />
        </div>
@@ -109,25 +99,21 @@ export default function HouseSpecs({ register, control, watch, s }: any) {
           <SelectIcon register={register} name="specs.floors" label="Pisos" icon={Layers} s={s} options={["Madera Maciza", "Madera Laminada", "Madera Granadillo", "Laminado", "Porcelanato", "Mármol", "Cerámica", "Alfombra", "Retal de Mármol"]} />
        </div>
 
-       {/* 4. COMODIDADES (CHECKBOXES CON ICONOS) */}
+       {/* 4. COMODIDADES */}
        <div className="bg-yellow-50/30 p-4 rounded-xl border border-yellow-200">
           <span className={`text-[10px] font-bold uppercase opacity-50 block mb-3 ${labelColor}`}>Comodidades Casa</span>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-2">
              {HOUSE_AMENITIES.map((item) => (
                 <label key={item.label} className={`flex items-center gap-2 text-[10px] font-bold cursor-pointer hover:opacity-80 transition-opacity text-gray-700`}>
                    <input type="checkbox" value={item.label} {...register("specs.features")} className="rounded focus:ring-0 w-3.5 h-3.5 border-gray-300 text-yellow-600"/> 
-                   <span className="flex items-center gap-1.5">
-                      <item.icon size={12} className="shrink-0 text-yellow-500"/> {item.label}
-                   </span>
+                   <span className="flex items-center gap-1.5"><item.icon size={12} className="shrink-0 text-yellow-500"/> {item.label}</span>
                 </label>
              ))}
           </div>
        </div>
 
-       {/* 5. NIVELES */}
        <LevelsSection control={control} register={register} s={s} labelColor={labelColor} />
 
-       {/* 6. ZONAS SOCIALES (TOGGLE) */}
        <div className="pt-4 border-t border-gray-100">
           <label className={`flex items-center gap-2 cursor-pointer font-bold mb-4 ${labelColor}`}>
              <input type="checkbox" {...register("specs.has_social")} className="toggle toggle-sm toggle-success" /> ¿TIENE ZONAS SOCIALES? (Conjunto)
@@ -146,19 +132,16 @@ export default function HouseSpecs({ register, control, watch, s }: any) {
           )}
        </div>
 
-       {/* 7. RENTA (MÓDULO COMPLETO) */}
        <div className="border-t border-gray-200 pt-4">
           <label className={`flex items-center gap-2 cursor-pointer font-bold ${labelColor}`}>
              <input type="checkbox" {...register("specs.has_rent")} className="toggle toggle-sm toggle-success" /> ¿TIENE RENTA? (Apto/Local)
           </label>
-          
           {hasRent && (
              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl animate-in slide-in-from-top-2">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                    <SelectIcon register={register} name="specs.rent_type" label="Tipo de Renta" icon={Store} s={s} options={["Apartamento Independiente", "Local Comercial", "Oficina", "Paisa"]} />
                    <InputIcon register={register} name="specs.rent_value" label="Canon Estimado Mensual ($)" icon={DollarSign} s={s} type="number" />
                 </div>
-                
                 <div className="mb-4">
                    <span className="text-[9px] font-bold uppercase text-blue-400 block mb-2">Comodidades Renta</span>
                    <div className="flex flex-wrap gap-4">
@@ -169,12 +152,10 @@ export default function HouseSpecs({ register, control, watch, s }: any) {
                       ))}
                    </div>
                 </div>
-
                 <textarea {...register("specs.rent_desc")} placeholder="Descripción adicional de la renta..." className="w-full p-2 text-xs rounded border border-blue-200 bg-white h-16 resize-none outline-none text-blue-900 placeholder-blue-300"/>
              </div>
           )}
        </div>
-
     </div>
   );
 }

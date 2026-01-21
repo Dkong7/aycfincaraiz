@@ -5,7 +5,7 @@ import { getFieldIcon, getFieldKey } from "../../config/propertyConfig";
 import { formatValue, formatCurrency } from "../../utils/formatters";
 
 export default function SpecsSection({ specs, theme, description }: any) {
-  const { t } = useApp();
+  const { t, translateDynamic } = useApp();
 
   // Lista de campos para el resumen superior
   const summaryList = [
@@ -42,7 +42,7 @@ export default function SpecsSection({ specs, theme, description }: any) {
                 <FileText size={24} className="text-gray-400"/> {t('det_desc') || "Descripción"}
             </h3>
             <p className="text-gray-600 whitespace-pre-line leading-relaxed text-base">
-                {description || "Sin descripción detallada disponible."}
+                {translateDynamic(description) || "Sin descripción detallada disponible."}
             </p>
         </div>
 
@@ -53,18 +53,14 @@ export default function SpecsSection({ specs, theme, description }: any) {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
                 {Object.entries(specs).map(([key, val]) => {
-                    // 1. FILTROS BÁSICOS (Vacíos, falsos, arrays vacíos)
+                    // 1. FILTROS BÁSICOS
                     if (!val || val === "false" || val === false) return null;
                     if (Array.isArray(val) && val.length === 0) return null;
 
-                    // -----------------------------------------------------
-                    // 2. FIX CRÍTICO: BLOQUEAR OBJETOS ANIDADOS
-                    // Esto evita el error "Objects are not valid as a React child"
-                    // Si 'val' es un objeto {mezzanine: true...}, lo saltamos.
-                    // -----------------------------------------------------
+                    // 2. BLOQUEAR OBJETOS ANIDADOS
                     if (typeof val === 'object' && !Array.isArray(val)) return null; 
 
-                    // 3. FILTRO DE CAMPOS REPETIDOS (Ya mostrados arriba o técnicos)
+                    // 3. FILTRO DE CAMPOS REPETIDOS
                     if (['rooms', 'habs', 'baths', 'bathrooms', 'garages', 'area_built', 'area_total', 'height', 'lat', 'lng', 'gallery_order'].includes(key)) return null;
                     
                     return (
@@ -80,7 +76,7 @@ export default function SpecsSection({ specs, theme, description }: any) {
                     );
                 })}
                 
-                {/* Admin se muestra aparte si existe */}
+                {/* Admin */}
                 {specs.admin && (
                     <div className="flex justify-between items-center border-b border-gray-100 pb-2 px-2">
                         <span className="text-sm font-medium text-gray-500 flex items-center gap-2">

@@ -53,19 +53,19 @@ export const getUserTheme = (email?: string): UserTheme => {
     };
   }
 
-  // CASO 2: ALFONSO/DKONG (Maestro / Pixar / Neon Tech)
+  // CASO 2: ALFONSO/DKONG (Maestro / Pixar / Tierra)
   if (safeEmail.includes('alf') || safeEmail.includes('dkong')) {
     return {
       role: 'MAESTRO',
-      // Paleta Matrix/Tech: Fondo Oscuro, Texto Verde Neón
+      // Paleta Tierra: Fondo Hueso, Texto Café, Detalles Verde Oliva y Amarillo Quemado
       classes: {
-        bg: 'bg-gray-950', 
-        text: 'text-[#39FF14]',
-        border: 'border-[#39FF14]',
-        badge: 'bg-[#39FF14]/10 text-[#39FF14]'
+        bg: 'bg-[#F4F1EA]',       // Fondo Hueso/Lino (Claro y legible)
+        text: 'text-[#3E2723]',   // Texto Café Profundo
+        border: 'border-[#556B2F]', // Borde Verde Oliva
+        badge: 'bg-[#D97706]/20 text-[#D97706]' // Badge Amarillo Quemado
       },
       avatarConcept: 'Pixar 3D Character',
-      iconColor: '#39FF14'
+      iconColor: '#D97706' // Icono Amarillo Quemado
     };
   }
 

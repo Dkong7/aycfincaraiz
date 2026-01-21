@@ -45,3 +45,11 @@ AyC_Backend/pb_data/
 
 # Logs
 *.log
+# Archivos pesados (Bloqueo de seguridad)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.zip
+*.rar
+*.tar.gz

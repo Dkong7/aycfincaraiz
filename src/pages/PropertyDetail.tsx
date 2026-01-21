@@ -2,16 +2,25 @@
 import { useParams, Link } from "react-router-dom";
 import { pb } from "../api";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+// import Footer from "../components/Footer"; <--- ELIMINADO PARA EVITAR DUPLICIDAD
 
 // Configuración y Contexto
 import { PROPERTY_TYPES_THEME } from "../config/propertyConfig";
 
-// NUEVOS COMPONENTES SEGMENTADOS
+// COMPONENTES COMUNES
 import HeroSection from "../components/property/HeroSection";
-import SpecsSection from "../components/property/SpecsSection";
 import GallerySection from "../components/property/GallerySection";
 import ContactSidebar from "../components/property/ContactSidebar";
+import SpecsSection from "../components/property/SpecsSection"; // Fallback (Respaldo)
+
+// --- IMPORTACIÓN DE MÓDULOS ESPECÍFICOS (NUEVA ARQUITECTURA) ---
+import HouseDetailView from "../modules/house/HouseDetailView";
+import ApartmentDetailView from "../modules/apartment/ApartmentDetailView";
+import BodegaDetailView from "../modules/bodega/BodegaDetailView";
+import RuralDetailView from "../modules/rural/RuralDetailView";
+import LoteDetailView from "../modules/lote/LoteDetailView";
+import LocalDetailView from "../modules/local/LocalDetailView";
+import OficinaDetailView from "../modules/oficina/OficinaDetailView";
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -30,6 +39,7 @@ const PropertyDetail = () => {
       setLoading(true);
       try {
         let record;
+        // Busca por ID exacto o por ID amigable (AYC-...)
         if (id?.length === 15) {
            record = await pb.collection("properties").getOne(id);
         } else {
@@ -38,11 +48,11 @@ const PropertyDetail = () => {
         }
         
         if(record) {
-            setProp(record);
-            try {
-                const parsed = typeof record.specs === 'string' ? JSON.parse(record.specs) : record.specs;
-                setSpecs(parsed || {});
-            } catch (e) { setSpecs({}); }
+           setProp(record);
+           try {
+               const parsed = typeof record.specs === 'string' ? JSON.parse(record.specs) : record.specs;
+               setSpecs(parsed || {});
+           } catch (e) { setSpecs({}); }
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };
@@ -52,7 +62,7 @@ const PropertyDetail = () => {
   if (loading) return <div className="min-h-screen bg-[#0A192F] flex items-center justify-center text-white font-bold tracking-widest">CARGANDO...</div>;
   if (!prop) return <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center"><h2 className="text-2xl font-bold mb-4 text-gray-800">Inmueble no encontrado</h2><Link to="/inmuebles" className="text-green-600 underline font-bold">Volver al listado</Link></div>;
 
-  // Lógica de Media
+  // Lógica de Media (Video + Fotos)
   const getYoutubeId = (url: string) => {
     if (!url) return null;
     const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
@@ -65,13 +75,89 @@ const PropertyDetail = () => {
   ];
   if (mediaList.length === 0) mediaList.push({ type: 'image', src: "https://via.placeholder.com/1200x800?text=SIN+FOTO" });
 
-  // Tema Visual
-  const theme = PROPERTY_TYPES_THEME[prop.property_type] || PROPERTY_TYPES_THEME["Casa"];
+  // Tema Visual (Colores del Badge)
+  const theme = PROPERTY_TYPES_THEME[prop.property_type] || PROPERTY_TYPES_THEME["default"];
+
+  // --- RENDERIZADO DINÁMICO POR TIPO ---
+  const renderDetailView = () => {
+      switch (prop.property_type) {
+          case 'Casa': 
+              return <HouseDetailView 
+                        specs={specs} 
+                        description={prop.description} 
+                        adminFee={prop.admin_fee}
+                        priceCop={prop.price_cop}
+                        priceUsd={prop.price_usd}
+                     />;
+          
+          case 'Apartamento': 
+              return <ApartmentDetailView 
+                        specs={specs} 
+                        description={prop.description} 
+                        adminFee={prop.admin_fee} 
+                        priceCop={prop.price_cop}
+                        priceUsd={prop.price_usd}
+                     />;
+          
+          case 'Bodega': 
+              return <BodegaDetailView 
+                        specs={specs} 
+                        description={prop.description} 
+                        adminFee={prop.admin_fee} 
+                        priceCop={prop.price_cop}
+                        priceUsd={prop.price_usd}
+                     />;
+          
+          // CASO RURAL: Incluye 'CasaCampo' (nombre DB) y variantes legacy
+          case 'CasaCampo':
+          case 'Finca': 
+          case 'Rural': 
+          case 'Casa Campestre': 
+              return <RuralDetailView 
+                        specs={specs} 
+                        description={prop.description}
+                        priceCop={prop.price_cop}
+                        priceUsd={prop.price_usd} 
+                     />;
+          
+          case 'Lote': 
+          case 'Terreno': 
+              return <LoteDetailView 
+                        specs={specs} 
+                        description={prop.description} 
+                        adminFee={prop.admin_fee}
+                        priceCop={prop.price_cop}
+                        priceUsd={prop.price_usd} 
+                     />;
+          
+          case 'Local': 
+              return <LocalDetailView 
+                        specs={specs} 
+                        description={prop.description} 
+                        adminFee={prop.admin_fee}
+                        priceCop={prop.price_cop}
+                        priceUsd={prop.price_usd} 
+                     />;
+          
+          case 'Oficina': 
+              return <OficinaDetailView 
+                        specs={specs} 
+                        description={prop.description} 
+                        adminFee={prop.admin_fee}
+                        priceCop={prop.price_cop}
+                        priceUsd={prop.price_usd} 
+                     />;
+
+          default:
+              return <SpecsSection specs={specs} theme={theme} description={prop.description} />;
+      }
+  };
 
   return (
-    <div className="bg-[#F3F4F6] min-h-screen font-sans">
+    <div className="bg-[#F3F4F6] min-h-screen font-sans pb-12">
       <Navbar />
       
+      {/* HERO SECTION */}
       <HeroSection 
          prop={prop} 
          theme={theme} 
@@ -82,9 +168,9 @@ const PropertyDetail = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12 -mt-10 relative z-10">
          
+         {/* COLUMNA IZQUIERDA (2/3) */}
          <div className="lg:col-span-2 space-y-8">
-            <SpecsSection specs={specs} theme={theme} description={prop.description} />
-            
+            {renderDetailView()}
             <GallerySection 
                mediaList={mediaList} 
                activeImg={activeImg} 
@@ -94,12 +180,14 @@ const PropertyDetail = () => {
             />
          </div>
 
+         {/* COLUMNA DERECHA (1/3) */}
          <div className="lg:col-span-1">
              <ContactSidebar prop={prop} />
          </div>
 
       </div>
-      <Footer />
+      
+      {/* FOOTER ELIMINADO: Se asume que App.tsx ya lo renderiza globalmente */}
     </div>
   );
 };

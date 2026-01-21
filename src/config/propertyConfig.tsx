@@ -30,7 +30,14 @@ export const PROPERTY_TYPES_THEME: any = {
       border: "border-amber-600", 
       bgLight: "bg-amber-50" 
   },
-  "Casa Campestre": { // Morado
+  "CasaCampo": { // Morado (Valor de Base de Datos)
+      icon: <TreePine/>, 
+      color: "bg-purple-600", 
+      text: "text-purple-600", 
+      border: "border-purple-500", 
+      bgLight: "bg-purple-50" 
+  },
+  "Casa Campestre": { // Morado (Alias UI)
       icon: <TreePine/>, 
       color: "bg-purple-600", 
       text: "text-purple-600", 
@@ -44,7 +51,7 @@ export const PROPERTY_TYPES_THEME: any = {
       border: "border-purple-500", 
       bgLight: "bg-purple-50" 
   },
-  "Rural": { // Morado (Agregado por si acaso)
+  "Rural": { // Morado (Legacy)
       icon: <Mountain/>, 
       color: "bg-purple-600", 
       text: "text-purple-600", 
@@ -74,10 +81,10 @@ export const PROPERTY_TYPES_THEME: any = {
   },
   "Oficina": { // Azul Clarito (Cyan)
       icon: <Briefcase/>, 
-      color: "bg-cyan-500", 
-      text: "text-cyan-600", 
-      border: "border-cyan-400", 
-      bgLight: "bg-cyan-50" 
+      color: "bg-emerald-600", // Cambiado a Emerald para consistencia con el detalle
+      text: "text-emerald-700", 
+      border: "border-emerald-500", 
+      bgLight: "bg-emerald-50" 
   },
   // Default fallback
   "default": { 
@@ -89,7 +96,7 @@ export const PROPERTY_TYPES_THEME: any = {
   }
 };
 
-// 2. DICCIONARIO DE METADATA (Sin cambios, se mantiene tu estructura)
+// 2. DICCIONARIO DE METADATA
 export const FIELD_METADATA: any = {
   rooms: { labelKey: "det_rooms", icon: <Bed size={18}/> },
   habs: { labelKey: "det_rooms", icon: <Bed size={18}/> },
