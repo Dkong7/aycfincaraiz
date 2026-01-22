@@ -29,6 +29,12 @@ interface UserTheme {
     text: string;
     border: string;
     badge: string;
+    // --- AGREGADOS PARA QUE EL FORMULARIO FUNCIONE ---
+    input: string;
+    label: string;
+    btn: string;
+    borderDashed: string;
+    btnAdd: string;
   };
   avatarConcept: string;
   iconColor: string;
@@ -41,12 +47,17 @@ export const getUserTheme = (email?: string): UserTheme => {
   if (safeEmail.includes('cla')) {
     return {
       role: 'MAESTRA',
-      // Paleta Pastel: Fondo Rosa Suave, Texto Rosa Fuerte
       classes: {
         bg: 'bg-[#FFF0F5]', 
         text: 'text-[#D81B60]',
         border: 'border-[#F8BBD0]',
-        badge: 'bg-[#FCE4EC] text-[#D81B60]'
+        badge: 'bg-[#FCE4EC] text-[#D81B60]',
+        // Clases Formulario
+        input: "focus:ring-pink-500 border-pink-200 bg-white",
+        label: "text-pink-600",
+        btn: "bg-pink-600 hover:bg-pink-700",
+        borderDashed: "border-pink-300",
+        btnAdd: "bg-pink-100 text-pink-700 hover:bg-pink-200"
       },
       avatarConcept: 'Marilyn Monroe Style',
       iconColor: '#D81B60' 
@@ -57,29 +68,39 @@ export const getUserTheme = (email?: string): UserTheme => {
   if (safeEmail.includes('alf') || safeEmail.includes('dkong')) {
     return {
       role: 'MAESTRO',
-      // Paleta Tierra: Fondo Hueso, Texto Café, Detalles Verde Oliva y Amarillo Quemado
       classes: {
-        bg: 'bg-[#F4F1EA]',       // Fondo Hueso/Lino (Claro y legible)
+        bg: 'bg-[#F4F1EA]',       // Fondo Hueso/Lino
         text: 'text-[#3E2723]',   // Texto Café Profundo
         border: 'border-[#556B2F]', // Borde Verde Oliva
-        badge: 'bg-[#D97706]/20 text-[#D97706]' // Badge Amarillo Quemado
+        badge: 'bg-[#D97706]/20 text-[#D97706]',
+        // Clases Formulario
+        input: "focus:ring-[#8B5A2B] border-[#D9CBB8] bg-white",
+        label: "text-[#8B5A2B]",
+        btn: "bg-[#5C4033] hover:bg-[#3E2C20]",
+        borderDashed: "border-[#8B5A2B]/30",
+        btnAdd: "bg-[#E8DCCA] text-[#5C4033] hover:bg-[#D9CBB8]"
       },
       avatarConcept: 'Pixar 3D Character',
-      iconColor: '#D97706' // Icono Amarillo Quemado
+      iconColor: '#D97706'
     };
   }
 
   // CASO 3: AGENTES (Radioacktiva / Rock / Naranja)
   return {
     role: 'AGENTE',
-    // Paleta Radioacktiva: Fondo Negro, Texto Naranja Energía
     classes: {
-      bg: 'bg-black', 
-      text: 'text-[#FFA500]',
-      border: 'border-[#FFA500]',
-      badge: 'bg-[#FFA500]/20 text-[#FFA500]'
+      bg: 'bg-white', // CAMBIO SEGURO: Usamos blanco para el form para no romper inputs
+      text: 'text-gray-800',
+      border: 'border-gray-200',
+      badge: 'bg-blue-100 text-blue-700',
+      // Clases Formulario (Estilo Corporativo Blue)
+      input: "focus:ring-blue-500 border-gray-300 bg-white",
+      label: "text-gray-500",
+      btn: "bg-blue-600 hover:bg-blue-700",
+      borderDashed: "border-gray-300",
+      btnAdd: "bg-gray-100 text-gray-700 hover:bg-gray-200"
     },
-    avatarConcept: 'Radioacktiva Rock',
-    iconColor: '#FFA500'
+    avatarConcept: 'Agent Style',
+    iconColor: '#2563EB'
   };
 };

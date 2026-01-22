@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Upload, CheckCircle, Trash2, Youtube, Video, RotateCw } from "lucide-react";
 import { pb } from "../../../api";
 
-const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+// --- FIX CRÍTICO: URL FIJA AL SERVIDOR (NO LOCALHOST) ---
+const PB_URL = "http://209.126.77.41:8080";
 
 export default function GalleryUpload({ setImages, setDeletedImages, initialData, register, watch, onPreviewChange }: any) {
   const [previews, setPreviews] = useState<{url: string, rotate: number, file?: File, isExisting: boolean, id?: string}[]>([]);
@@ -23,14 +24,11 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
     }
   }, [initialData]);
 
-  // COMUNICACIÓN CON PADRE:
-  // 1. Files nuevos para upload
-  // 2. Lista visual para el Preview Modal
+  // COMUNICACIÓN CON PADRE
   useEffect(() => {
      const newFilesOnly = previews.filter(p => !p.isExisting && p.file).map(p => p.file as File);
      setImages(newFilesOnly);
      
-     // Aquí enviamos la lista ordenada al padre para que el modal sepa cuál es la portada
      if (onPreviewChange) {
          onPreviewChange(previews.map(p => p.url));
      }

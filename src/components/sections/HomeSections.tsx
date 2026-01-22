@@ -10,8 +10,7 @@ import { Link } from "react-router-dom";
 import { useApp } from "../../context/AppContext"; // 1. CONTEXTO NUEVO
 import { pb } from "../../api";
 
-const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
-
+const PB_URL = "http://209.126.77.41:8080";
 // ==========================================
 // 1. PROPIEDADES DESTACADAS (Reina + Grid)
 // ==========================================

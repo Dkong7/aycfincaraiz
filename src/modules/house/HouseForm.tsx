@@ -4,7 +4,7 @@ import {
   Maximize, Grid, Ruler, Bed, Bath, Car, Flame, Utensils, Layers, 
   ChefHat, Store, DollarSign, ShieldCheck, Coffee, Dumbbell, 
   Waves, Trophy, Trees, Zap, Heater, Tv, Dog, Wind, Sun, Flower2, 
-  BookOpen, Shirt, Box, Calendar
+  BookOpen, Shirt, Box, Calendar, ArrowUpDown
 } from "lucide-react";
 
 // --- SUB-COMPONENTE INTERNO: SECCIÓN DE NIVELES ---
@@ -74,13 +74,23 @@ export default function HouseForm({ register, control, watch, s }: any) {
   return (
     <div className="animate-in fade-in space-y-6">
        
-       {/* 1. DIMENSIONES Y EDAD */}
-       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+       {/* 1. DIMENSIONES Y EDAD (BUG #6 CORREGIDO) */}
+       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <InputIcon register={register} name="specs.area_lot" label="Lote m²" icon={Maximize} s={s} />
           <InputIcon register={register} name="specs.area_built" label="Construida m²" icon={Grid} s={s} />
-          <InputIcon register={register} name="specs.area_private" label="Privada" icon={Maximize} s={s} />
           <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} />
-          <SelectIcon register={register} name="specs.antiquity" label="Edad / Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 9 años", "10 a 20 años", "Más de 20 años", "Remodelado"]} />
+          
+          {/* CAMPO NUEVO: FONDO */}
+          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={ArrowUpDown} s={s} />
+       </div>
+       
+       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* CAMPO NUEVO: NIVELES */}
+          <InputIcon register={register} name="specs.levels_qty" label="Nº Pisos/Niveles" icon={Layers} s={s} type="number" />
+          
+          <div className="col-span-2">
+             <SelectIcon register={register} name="specs.antiquity" label="Edad / Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 9 años", "10 a 20 años", "Más de 20 años", "Remodelado"]} />
+          </div>
        </div>
 
        {/* 2. DISTRIBUCIÓN */}

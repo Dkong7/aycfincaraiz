@@ -1,5 +1,7 @@
 ﻿import PocketBase from 'pocketbase';
 
-const url = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+// CAMBIO CRÍTICO: Dirección fija del servidor (Puerto 8080)
+const url = "http://209.126.77.41:8080";
+
 export const pb = new PocketBase(url);
 pb.autoCancellation(false);

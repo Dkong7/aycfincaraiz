@@ -1,11 +1,11 @@
 import React from "react";
 import { 
   Maximize, Ruler, Zap, ArrowUpFromLine, Layers, Warehouse, MapPin, 
-  Truck, Briefcase, Store, DollarSign, ShieldAlert, Droplets, Flame, 
+  Truck, Briefcase, ShoppingBag, DollarSign, ShieldAlert, Droplets, Flame, 
   Container, Factory, Siren, Calendar
 } from "lucide-react";
 
-// Lista de Amenidades de Seguridad (Para Checkboxes)
+// Lista de Amenidades de Seguridad
 const SECURITY_FEATURES = [
    {label: "Alarma Incendio", icon: Siren}, 
    {label: "Detectores Humo", icon: Flame}, 
@@ -98,7 +98,8 @@ export default function BodegaForm({ register, s }: any) {
           <div className="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
           <span className="text-[10px] font-black uppercase text-amber-500 mb-3 block tracking-wider">Rentabilidad / Locales</span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <InputIcon register={register} name="specs.locales_count" label="# Locales Comerciales" icon={Store} s={s} type="number"/>
+             {/* CAMBIO: ShoppingBag en lugar de Store */}
+             <InputIcon register={register} name="specs.locales_count" label="# Locales Comerciales" icon={ShoppingBag} s={s} type="number"/>
              <InputIcon register={register} name="specs.locales_rent_value" label="Valor Arriendo Locales" icon={DollarSign} s={s} type="number"/>
           </div>
        </div>
@@ -109,7 +110,6 @@ export default function BodegaForm({ register, s }: any) {
              <ShieldAlert size={16}/>
              <span className="text-xs font-black uppercase tracking-widest">Seguridad Industrial & Dotación</span>
           </div>
-          {/* El CheckGroup está definido dentro del componente arriba */}
           <CheckGroup options={SECURITY_FEATURES} register={register} name="specs.industrial_features" s={{label: "text-gray-400 hover:text-white"}} colorClass="text-gray-300 hover:text-white"/>
        </div>
 

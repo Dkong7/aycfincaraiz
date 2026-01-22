@@ -1,19 +1,17 @@
 ﻿import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { BadgeCheck, Scale, Video, ChevronDown, Menu, X } from "lucide-react";
-import { useApp } from "../context/AppContext"; // <--- 1. CONEXIÓN AL NUEVO CONTEXTO
+import { useApp } from "../context/AppContext"; 
 
 export default function Navbar() {
-  // 2. Extraemos las funciones del contexto global
   const { t, lang, toggleLang } = useApp(); 
   const location = useLocation();
-  
+   
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const timeoutRef = useRef<any>(null); 
-  
-  // --- LÓGICA PARA OCULTAR EN DASHBOARD/LOGIN ---
+   
   if (
     location.pathname.startsWith("/dashboard") || 
     location.pathname === "/agentes" || 
@@ -23,12 +21,15 @@ export default function Navbar() {
     return null;
   }
 
-  // LOGO: Muestra el logo correspondiente al idioma ACTUAL
+  // --- LÓGICA VISUAL ---
   const logoSrc = lang === "ES" ? "/ayclogo.svg" : "/ayclogoen.svg";
 
-  // BOTÓN: Muestra el idioma DESTINO
-  const targetLang = lang === "ES" ? "EN" : "ES";
-  const targetFlag = lang === "ES" ? "🇺🇸" : "🇪🇸";
+  // --- SOLUCIÓN BANDERA: Usamos imágenes reales para evitar las letras "CO/US" ---
+  // Si estamos en Español -> Bandera Colombia
+  // Si estamos en Inglés -> Bandera USA
+  const flagUrl = lang === "ES" 
+    ? "https://flagcdn.com/w80/co.png" 
+    : "https://flagcdn.com/w80/us.png";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,7 +52,7 @@ export default function Navbar() {
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 bg-[#0B1120] text-white shadow-2xl font-sans transition-all duration-500 ${isScrolled ? "pb-1" : "pb-2"}`}>
-      
+       
       <div className={`container mx-auto px-6 flex justify-between items-center relative z-50 transition-all duration-500 ${isScrolled ? "h-16" : "h-16 md:h-24"}`}>
         
         {/* LOGO */}
@@ -126,16 +127,23 @@ export default function Navbar() {
 
         {/* --- BOTONES DESKTOP --- */}
         <div className="hidden md:flex items-center gap-4">
-           {/* BOTÓN DE IDIOMA (MUESTRA EL DESTINO) */}
+           
+           {/* BOTÓN DE IDIOMA (IMAGEN REAL - CÍRCULO PERFECTO) */}
            <button 
              onClick={toggleLang} 
-             className="group relative flex items-center gap-2 pl-3 pr-4 py-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-green-500/50 transition-all duration-300 active:scale-95 backdrop-blur-md"
-             title={lang === "ES" ? "Switch to English" : "Cambiar a Español"}
+             className="
+               relative flex items-center justify-center w-9 h-9 rounded-full 
+               border-2 border-white/20 overflow-hidden
+               hover:border-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.4)] hover:scale-110
+               transition-all duration-300 active:scale-95 group
+             "
+             title={lang === "ES" ? "Cambiar a Inglés" : "Switch to Spanish"}
            >
-             <span className="text-lg filter drop-shadow-lg">{targetFlag}</span>
-             <span className="text-xs font-bold tracking-widest text-gray-400 group-hover:text-white transition-colors border-l border-white/10 pl-2">
-                {targetLang}
-             </span>
+             <img 
+               src={flagUrl} 
+               alt={lang} 
+               className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+             />
            </button>
 
            <Link to="/contacto" className="bg-green-600 text-white font-black px-6 py-2 rounded-full transition-all text-sm border border-green-500 animate-pulse hover:animate-none hover:scale-105 hover:shadow-[0_0_20px_rgba(22,163,74,0.4)] shadow-lg">
@@ -145,9 +153,9 @@ export default function Navbar() {
 
         {/* --- CONTROLES MÓVIL --- */}
         <div className="md:hidden flex items-center gap-3 z-50">
-            {/* Botón Idioma Móvil (Destino) */}
-            <button onClick={toggleLang} className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 active:bg-green-600/20 transition-colors">
-                <span className="text-xl">{targetFlag}</span>
+            {/* Botón Idioma Móvil */}
+            <button onClick={toggleLang} className="flex items-center justify-center w-9 h-9 rounded-full border border-white/20 overflow-hidden active:scale-90 transition-transform">
+                <img src={flagUrl} alt={lang} className="w-full h-full object-cover"/>
             </button>
             
             <button onClick={() => setIsMobileOpen(!isMobileOpen)} className="text-white p-2 hover:bg-white/5 rounded-lg transition-colors">

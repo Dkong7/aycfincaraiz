@@ -1,5 +1,5 @@
 import React from "react";
-import { Building2, Network, Briefcase, Maximize, ArrowUpFromLine, Car, Bath } from 'lucide-react';
+import { Building2, Network, Briefcase, Maximize, ArrowUpFromLine, Car, Bath, Layers } from 'lucide-react';
 
 const TECH_FEATURES = [
   { id: "structured_cabling", label: "Cableado Estructurado" },
@@ -56,10 +56,16 @@ export default function OficinaForm({ register, s }: any) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
            <InputIcon register={register} name="specs.area" label="Área Privada (m²)" icon={Maximize} s={s} type="number"/>
            <InputIcon register={register} name="specs.floor_level" label="Piso / Nivel" icon={ArrowUpFromLine} s={s} type="number"/>
+           
+           {/* CORRECCIÓN BUG #8: AGREGADO CAMPO ESTRATO */}
+           <InputIcon register={register} name="specs.stratum" label="Estrato" icon={Layers} s={s} type="number"/>
+
            <InputIcon register={register} name="specs.garages" label="Garajes Privados" icon={Car} s={s} type="number"/>
-           <SelectIcon register={register} name="specs.bathrooms_type" label="Tipo de Baños" icon={Bath} s={s} options={[
-              "Privados", "Batería Comunal", "Mixto"
-           ]} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+            <SelectIcon register={register} name="specs.bathrooms_type" label="Tipo de Baños" icon={Bath} s={s} options={["Privados", "Batería Comunal", "Mixto"]} />
+            <InputIcon register={register} name="specs.bathrooms" label="# Baños Internos" icon={Bath} s={s} type="number"/>
+            <InputIcon register={register} name="specs.condition" label="Estado Entrega" icon={Briefcase} s={s} />
         </div>
       </div>
 
@@ -88,7 +94,6 @@ export default function OficinaForm({ register, s }: any) {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-2">
            {CORPORATE_AMENITIES.map((item) => (
               <label key={item.id} className={`flex items-center gap-2 text-[10px] font-bold cursor-pointer hover:opacity-80 transition-opacity text-gray-600`}>
-                 {/* Guardamos en 'amenities' para diferenciar de las specs técnicas */}
                  <input type="checkbox" value={item.label} {...register("specs.amenities")} className="rounded focus:ring-0 w-3.5 h-3.5 border-gray-300 text-emerald-600"/> 
                  <span>{item.label}</span>
               </label>

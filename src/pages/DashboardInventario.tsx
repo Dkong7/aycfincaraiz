@@ -3,12 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { pb } from "../api"; 
 import { 
   LayoutGrid, PlusCircle, LogOut, Edit, Trash, Star, Crown, Zap, 
-  BookOpen, Users, Menu, X, AlertCircle, FilePlus, Eye // <--- Importamos Eye
+  BookOpen, Users, Menu, X, AlertCircle, FilePlus, Eye 
 } from "lucide-react";
 import CreatePropertyForm from "../components/dashboard/CreatePropertyForm";
 import SmartModal, { ModalConfig } from "../components/ui/SmartModal"; 
-
-// IMPORTAMOS LA CONFIGURACIÓN DE COLORES
 import { PROPERTY_TYPES_THEME, getFieldIcon } from "../config/propertyConfig";
 import { formatCurrency } from "../utils/formatters";
 
@@ -20,7 +18,8 @@ export default function DashboardInventario() {
   const [isLoading, setIsLoading] = useState(false);
   
   const storedTheme = localStorage.getItem("ayc_theme") || "agent";
-  const modalTheme = storedTheme.includes("claudia") ? "pink" : "blue";
+  // Evitamos crash si el tema no existe
+  const modalTheme = (storedTheme && storedTheme.includes("claudia")) ? "pink" : "blue";
 
   const [modalState, setModalState] = useState<{ isOpen: boolean; config: ModalConfig }>({
     isOpen: false,
@@ -28,7 +27,9 @@ export default function DashboardInventario() {
   });
   
   const navigate = useNavigate();
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+  // --- URL FIJA AL SERVIDOR ---
+  const PB_URL = "http://209.126.77.41:8080";
+  
   const currentUser = pb.authStore.model;
   const isManager = ["Alfonso", "Claudia", "admin"].includes(currentUser?.role || "");
 
@@ -39,7 +40,6 @@ export default function DashboardInventario() {
       });
   };
 
-  // --- LÓGICA HERO (FIFO) ---
   const heroItems = properties
       .filter(p => p.is_hero)
       .sort((a, b) => new Date(a.updated).getTime() - new Date(b.updated).getTime());
@@ -49,7 +49,6 @@ export default function DashboardInventario() {
     return index !== -1 ? index + 1 : null;
   };
 
-  // --- CONTADORES ---
   const counts = {
       hero: heroItems.length,
       reina: properties.filter(p => p.is_opportunity).length,
@@ -92,10 +91,12 @@ export default function DashboardInventario() {
       setIsMobileMenuOpen(false);
   };
 
+  // --- FIX CRÍTICO: EDITAR SIN NAVEGAR (EVITA PANTALLA BLANCA) ---
   const handleEdit = (prop: any) => { 
-      setEditingProp(prop); 
-      setView("NEW"); 
-      setIsMobileMenuOpen(false); 
+      // En lugar de navegar a una ruta que puede no existir,
+      // cargamos el formulario aquí mismo con los datos.
+      setEditingProp(prop);
+      setView("NEW");
   };
 
   const confirmDelete = (id: string) => {
@@ -111,6 +112,7 @@ export default function DashboardInventario() {
       try {
           await pb.collection("properties").delete(id);
           setProperties(prev => prev.filter(p => p.id !== id));
+          // Si estábamos editando justo el que borramos, limpiar
           if(editingProp?.id === id) {
               setEditingProp(null);
               setView("INVENTORY");
@@ -169,7 +171,6 @@ export default function DashboardInventario() {
         config={modalState.config}
       />
 
-      {/* HEADER MÓVIL */}
       <header className={`md:hidden flex justify-between items-center p-4 border-b transition-colors duration-500 bg-white/95 backdrop-blur shadow-sm sticky top-0 z-50`}>
           <div className="flex items-center gap-2">
              <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white font-black text-xs">AYC</div>
@@ -180,10 +181,8 @@ export default function DashboardInventario() {
           </button>
       </header>
 
-      {/* BACKDROP */}
       {isMobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-[60] md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>}
 
-      {/* SIDEBAR */}
       <aside className={`fixed md:relative inset-y-0 left-0 z-[70] w-72 md:w-64 flex flex-col py-6 border-r shadow-2xl md:shadow-none transition-transform duration-300 ease-out transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 ${s.sidebar}`}>
          <div className="md:hidden absolute top-4 right-4">
             <button onClick={() => setIsMobileMenuOpen(false)} className={`${s.sidebarText} opacity-70 hover:opacity-100 p-2`}><X size={24}/></button>
@@ -215,7 +214,6 @@ export default function DashboardInventario() {
          </div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 p-4 md:p-8 w-full relative z-0 md:overflow-y-auto">
          {view === "INVENTORY" ? (
             <div className="bg-white md:rounded-xl shadow-none md:shadow-lg border-t md:border border-gray-100 overflow-hidden flex flex-col h-auto md:h-full -mx-4 md:mx-0 rounded-none">
@@ -231,7 +229,6 @@ export default function DashboardInventario() {
                </div>
                
                <div className="flex-1 bg-gray-50 md:bg-white p-4 md:p-0 overflow-y-auto">
-                  {/* TABLA DESKTOP */}
                   <div className="hidden md:block overflow-x-auto">
                       <table className="w-full text-left border-collapse">
                          <thead className={`${s.tableHeader} text-[10px] font-bold uppercase transition-colors duration-500 sticky top-0 z-10 shadow-sm`}>
@@ -262,8 +259,9 @@ export default function DashboardInventario() {
                                             <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-[8px] font-bold"><AlertCircle size={14}/></div>
                                         )}
                                      </div>
-                                     <div>
-                                        <div className={`font-bold text-sm line-clamp-1 max-w-[200px] ${isDraft ? "text-yellow-800 italic" : "text-gray-800"}`}>
+                                     {/* --- CORRECCIÓN TÍTULO CORTADO --- */}
+                                     <div className="min-w-[180px]">
+                                        <div className={`font-bold text-sm whitespace-normal break-words ${isDraft ? "text-yellow-800 italic" : "text-gray-800"}`}>
                                             {p.title || "Nuevo Borrador..."}
                                         </div>
                                         <div className="text-[10px] text-gray-400 font-mono">{p.ayc_id || "..."}</div>
@@ -277,11 +275,11 @@ export default function DashboardInventario() {
                                   <td className="p-4 text-center">
                                      {isDraft ? (
                                         <span className="text-[10px] bg-yellow-200 border border-yellow-300 text-yellow-800 font-black px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1 animate-pulse">
-                                             <FilePlus size={10} /> Borrador
+                                              <FilePlus size={10} /> Borrador
                                         </span>
                                      ) : (
                                         <span className="text-[10px] bg-green-100 border border-green-200 text-green-700 font-bold px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1">
-                                             <Zap size={10} /> Publicado
+                                              <Zap size={10} /> Publicado
                                         </span>
                                      )}
                                   </td>
@@ -301,19 +299,19 @@ export default function DashboardInventario() {
                                   </td>
                                   <td className="p-4 text-right">
                                      <div className="flex items-center justify-end gap-2">
-                                         {/* BOTÓN VER WEB */}
-                                         <Link 
-                                            to={`/inmuebles/${p.ayc_id || p.id}`} 
-                                            target="_blank"
-                                            className={`p-2 rounded transition-colors ${isDraft ? "text-gray-300 cursor-not-allowed" : "text-gray-500 hover:bg-gray-100 hover:text-black"}`}
-                                            title="Ver en Web"
-                                            onClick={(e) => isDraft && e.preventDefault()}
-                                         >
-                                            <Eye size={16}/> {/* <--- CAMBIO A OJO */}
-                                         </Link>
-
-                                         <button onClick={() => handleEdit(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors" title={isDraft ? "Completar Borrador" : "Editar"}><Edit size={16}/></button>
-                                         <button onClick={() => confirmDelete(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors" title="Borrar"><Trash size={16}/></button>
+                                          <Link 
+                                             to={`/inmuebles/${p.ayc_id || p.id}`} 
+                                             target="_blank"
+                                             className={`p-2 rounded transition-colors ${isDraft ? "text-gray-300 cursor-not-allowed" : "text-gray-500 hover:bg-gray-100 hover:text-black"}`}
+                                             title="Ver en Web"
+                                             onClick={(e) => isDraft && e.preventDefault()}
+                                          >
+                                              <Eye size={16}/> 
+                                          </Link>
+                                          {/* --- EDITAR ABRE EL FORMULARIO AQUÍ MISMO --- */}
+                                          <button onClick={() => handleEdit(p)} className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors" title={isDraft ? "Completar Borrador" : "Editar"}><Edit size={16}/></button>
+                                          
+                                          <button onClick={() => confirmDelete(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors" title="Borrar"><Trash size={16}/></button>
                                      </div>
                                   </td>
                                </tr>
@@ -323,7 +321,6 @@ export default function DashboardInventario() {
                       </table>
                   </div>
                   
-                  {/* MOBILE CARDS */}
                   <div className="md:hidden space-y-4 pb-24">
                       {properties.map(p => {
                           const themeConfig = PROPERTY_TYPES_THEME[p.property_type] || PROPERTY_TYPES_THEME["default"];
@@ -338,18 +335,17 @@ export default function DashboardInventario() {
                                    <div>
                                         {isDraft && <span className="mb-1 inline-block text-[8px] bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded font-black uppercase">Borrador</span>}
                                         <span className={`block text-[10px] font-bold px-2 py-0.5 rounded w-fit ${themeConfig.bgLight} ${themeConfig.text}`}>{p.property_type || "N/A"}</span>
-                                        <h3 className={`font-bold text-sm mt-1 ${isDraft ? "text-gray-400 italic" : ""}`}>{p.title || "Sin Título"}</h3>
+                                        <h3 className={`font-bold text-sm mt-1 whitespace-normal ${isDraft ? "text-gray-400 italic" : ""}`}>{p.title || "Sin Título"}</h3>
                                         <p className="text-green-600 font-bold text-xs">{p.price_cop ? formatCurrency(p.price_cop) : "--"}</p>
                                    </div>
                                 </div>
                                 <div className="flex justify-between items-center gap-2 mt-4 border-t pt-3">
-                                    {/* BOTÓN VER WEB MOBILE */}
                                     <Link 
                                         to={`/inmuebles/${p.ayc_id || p.id}`} 
                                         target="_blank"
                                         className={`text-xs font-bold flex items-center gap-1 ${isDraft ? "text-gray-300 pointer-events-none" : "text-gray-600"}`}
                                     >
-                                        <Eye size={14}/> VER WEB {/* <--- CAMBIO A OJO */}
+                                        <Eye size={14}/> VER WEB
                                     </Link>
 
                                     <div className="flex gap-3">

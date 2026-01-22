@@ -2,7 +2,6 @@
 import { useParams, Link } from "react-router-dom";
 import { pb } from "../api";
 import Navbar from "../components/Navbar";
-// import Footer from "../components/Footer"; <--- ELIMINADO PARA EVITAR DUPLICIDAD
 
 // Configuración y Contexto
 import { PROPERTY_TYPES_THEME } from "../config/propertyConfig";
@@ -11,9 +10,9 @@ import { PROPERTY_TYPES_THEME } from "../config/propertyConfig";
 import HeroSection from "../components/property/HeroSection";
 import GallerySection from "../components/property/GallerySection";
 import ContactSidebar from "../components/property/ContactSidebar";
-import SpecsSection from "../components/property/SpecsSection"; // Fallback (Respaldo)
+import SpecsSection from "../components/property/SpecsSection"; 
 
-// --- IMPORTACIÓN DE MÓDULOS ESPECÍFICOS (NUEVA ARQUITECTURA) ---
+// --- IMPORTACIÓN DE MÓDULOS ESPECÍFICOS ---
 import HouseDetailView from "../modules/house/HouseDetailView";
 import ApartmentDetailView from "../modules/apartment/ApartmentDetailView";
 import BodegaDetailView from "../modules/bodega/BodegaDetailView";
@@ -32,14 +31,14 @@ const PropertyDetail = () => {
   const [activeImg, setActiveImg] = useState(0); 
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+  // --- CORRECCIÓN BUG #1: URL FIJA AL SERVIDOR ---
+  const PB_URL = "http://209.126.77.41:8080";
 
   useEffect(() => {
     const fetchProp = async () => {
       setLoading(true);
       try {
         let record;
-        // Busca por ID exacto o por ID amigable (AYC-...)
         if (id?.length === 15) {
            record = await pb.collection("properties").getOne(id);
         } else {
@@ -75,79 +74,28 @@ const PropertyDetail = () => {
   ];
   if (mediaList.length === 0) mediaList.push({ type: 'image', src: "https://via.placeholder.com/1200x800?text=SIN+FOTO" });
 
-  // Tema Visual (Colores del Badge)
   const theme = PROPERTY_TYPES_THEME[prop.property_type] || PROPERTY_TYPES_THEME["default"];
 
-  // --- RENDERIZADO DINÁMICO POR TIPO ---
   const renderDetailView = () => {
       switch (prop.property_type) {
           case 'Casa': 
-              return <HouseDetailView 
-                        specs={specs} 
-                        description={prop.description} 
-                        adminFee={prop.admin_fee}
-                        priceCop={prop.price_cop}
-                        priceUsd={prop.price_usd}
-                     />;
-          
+              return <HouseDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           case 'Apartamento': 
-              return <ApartmentDetailView 
-                        specs={specs} 
-                        description={prop.description} 
-                        adminFee={prop.admin_fee} 
-                        priceCop={prop.price_cop}
-                        priceUsd={prop.price_usd}
-                     />;
-          
+              return <ApartmentDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           case 'Bodega': 
-              return <BodegaDetailView 
-                        specs={specs} 
-                        description={prop.description} 
-                        adminFee={prop.admin_fee} 
-                        priceCop={prop.price_cop}
-                        priceUsd={prop.price_usd}
-                     />;
-          
-          // CASO RURAL: Incluye 'CasaCampo' (nombre DB) y variantes legacy
+              return <BodegaDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           case 'CasaCampo':
           case 'Finca': 
           case 'Rural': 
           case 'Casa Campestre': 
-              return <RuralDetailView 
-                        specs={specs} 
-                        description={prop.description}
-                        priceCop={prop.price_cop}
-                        priceUsd={prop.price_usd} 
-                     />;
-          
+              return <RuralDetailView specs={specs} description={prop.description} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           case 'Lote': 
           case 'Terreno': 
-              return <LoteDetailView 
-                        specs={specs} 
-                        description={prop.description} 
-                        adminFee={prop.admin_fee}
-                        priceCop={prop.price_cop}
-                        priceUsd={prop.price_usd} 
-                     />;
-          
+              return <LoteDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           case 'Local': 
-              return <LocalDetailView 
-                        specs={specs} 
-                        description={prop.description} 
-                        adminFee={prop.admin_fee}
-                        priceCop={prop.price_cop}
-                        priceUsd={prop.price_usd} 
-                     />;
-          
+              return <LocalDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           case 'Oficina': 
-              return <OficinaDetailView 
-                        specs={specs} 
-                        description={prop.description} 
-                        adminFee={prop.admin_fee}
-                        priceCop={prop.price_cop}
-                        priceUsd={prop.price_usd} 
-                     />;
-
+              return <OficinaDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           default:
               return <SpecsSection specs={specs} theme={theme} description={prop.description} />;
       }
@@ -156,38 +104,17 @@ const PropertyDetail = () => {
   return (
     <div className="bg-[#F3F4F6] min-h-screen font-sans pb-12">
       <Navbar />
-      
-      {/* HERO SECTION */}
-      <HeroSection 
-         prop={prop} 
-         theme={theme} 
-         mediaList={mediaList} 
-         activeImg={activeImg} 
-         onOpenLightbox={() => setLightboxOpen(true)}
-      />
+      <HeroSection prop={prop} theme={theme} mediaList={mediaList} activeImg={activeImg} onOpenLightbox={() => setLightboxOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12 -mt-10 relative z-10">
-         
-         {/* COLUMNA IZQUIERDA (2/3) */}
          <div className="lg:col-span-2 space-y-8">
             {renderDetailView()}
-            <GallerySection 
-               mediaList={mediaList} 
-               activeImg={activeImg} 
-               setActiveImg={setActiveImg} 
-               lightboxOpen={lightboxOpen} 
-               setLightboxOpen={setLightboxOpen}
-            />
+            <GallerySection mediaList={mediaList} activeImg={activeImg} setActiveImg={setActiveImg} lightboxOpen={lightboxOpen} setLightboxOpen={setLightboxOpen} />
          </div>
-
-         {/* COLUMNA DERECHA (1/3) */}
          <div className="lg:col-span-1">
              <ContactSidebar prop={prop} />
          </div>
-
       </div>
-      
-      {/* FOOTER ELIMINADO: Se asume que App.tsx ya lo renderiza globalmente */}
     </div>
   );
 };

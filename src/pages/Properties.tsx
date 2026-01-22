@@ -4,8 +4,7 @@ import { Search, Filter, MapPin, Home, Bed, Bath, ArrowRight, LayoutGrid, Star, 
 import { Link } from "react-router-dom";
 import { Property } from "../types/property";
 
-const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
-
+const PB_URL = "http://209.126.77.41:8080";
 // 1. HELPERS DE COLOR Y FORMATO
 const getTypeColor = (type: string) => {
   const t = type?.toLowerCase() || "";

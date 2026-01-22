@@ -38,8 +38,7 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
   // En lugar de translateDynamic, usamos 't' que ya viene conectado
   const { t } = useApp(); 
 
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
-  
+  const PB_URL = "http://209.126.77.41:8080";  
   const [propIndex, setPropIndex] = useState(0); 
   const [mediaIndex, setMediaIndex] = useState(0); 
 
