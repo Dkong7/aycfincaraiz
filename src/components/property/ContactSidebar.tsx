@@ -1,40 +1,82 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { User, Calendar, CheckCircle } from "lucide-react";
+import { Calendar, MessageCircle } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 
 export default function ContactSidebar({ prop }: any) {
   const { t } = useApp();
   
+  // Datos del Agente y Propiedad
+  const agentName = prop?.owner_name || "AyC Inmobiliaria";
+  const propertyCode = prop?.ayc_id || prop?.id || "N/A";
+  const propertyTitle = prop?.title || "Propiedad";
+  
+  // Teléfono Central (Oculto en la UI, solo para el link)
+  const mainPhone = "573134663832";
+
+  // Mensaje automático
+  const whatsappMsg = `Hola, estoy interesado en: ${propertyTitle} (Cód: ${propertyCode}).`;
+  const whatsappLink = `https://wa.me/${mainPhone}?text=${encodeURIComponent(whatsappMsg)}`;
+
+  // Link para Agendar (Mismo número, diferente intención)
+  const scheduleLink = `https://wa.me/${mainPhone}?text=${encodeURIComponent("Hola, quisiera agendar una visita para ver: " + propertyTitle)}`;
+
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 sticky top-24">
-        <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-green-100"><User size={32} className="text-green-600"/></div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Agente Responsable</p>
-            <h3 className="text-xl font-black text-gray-900">AyC Inmobiliaria</h3>
-        </div>
-
-        <div className="space-y-3">
-            <a href={`https://wa.me/573134663832?text=Hola, estoy interesado en el inmueble ${prop.ayc_id} (${prop.title})`} target="_blank" 
-                className="block w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black py-4 rounded-xl text-center transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-3">
-                {t('det_whatsapp')}
-            </a>
+    <div className="sticky top-24 font-sans animate-in fade-in slide-in-from-right-4 duration-700">
+        
+        {/* TARJETA DE CONTACTO EJECUTIVA */}
+        <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/40 border border-slate-100 relative overflow-hidden group hover:shadow-2xl transition-shadow duration-300">
             
-            <button className="block w-full bg-[#0A192F] hover:bg-[#112] text-white font-bold py-4 rounded-xl text-center transition-all shadow-lg flex items-center justify-center gap-2">
-                <Calendar size={18}/> {t('appraisal_final_btn') || "Agendar Visita"}
-            </button>
-        </div>
+            {/* Header Sutil */}
+            <div className="text-center mb-8 border-b border-slate-100 pb-6">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">
+                    {t('agent_title')}
+                </p>
+                <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+                    {agentName}
+                </h3>
+                {prop?.ayc_id && (
+                    <div className="mt-3 inline-flex items-center justify-center px-3 py-1 bg-slate-50 text-slate-500 text-[10px] font-bold rounded-full border border-slate-200">
+                        {t('code')}: {prop.ayc_id}
+                    </div>
+                )}
+            </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-100">
-            <div className="flex items-start gap-3 p-4 bg-green-50 rounded-xl">
-                <CheckCircle className="text-green-600 shrink-0 mt-0.5" size={18}/>
-                <div>
-                    <h4 className="font-bold text-sm text-green-800">¿Necesitas Crédito?</h4>
-                    <p className="text-xs text-green-700 mt-1 leading-relaxed">Tenemos aliados financieros para ayudarte a conseguir este inmueble.</p>
-                    <Link to="/servicios" className="text-xs font-black text-green-800 underline mt-2 block hover:text-green-900">Ver Aliados</Link>
-                </div>
+            {/* Acciones */}
+            <div className="space-y-4">
+                
+                {/* 1. WHATSAPP (Principal) */}
+                <a 
+                    href={whatsappLink}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="group relative w-full flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1ebc57] text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-green-100 hover:shadow-green-200 hover:-translate-y-0.5"
+                >
+                    <div className="absolute left-0 w-1 h-full bg-black/10 rounded-l-xl"></div>
+                    <MessageCircle size={20} className="fill-white/20 stroke-[2]"/> 
+                    <span className="tracking-wide">{t('btn_whatsapp')}</span>
+                </a>
+                
+                {/* 2. AGENDAR VISITA (Secundario) */}
+                <a 
+                    href={scheduleLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group w-full flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                    <Calendar size={18} className="text-slate-400 group-hover:text-white transition-colors"/> 
+                    <span className="tracking-wide">{t('appraisal_final_btn')}</span>
+                </a>
+
+            </div>
+
+            {/* Decoración Inferior */}
+            <div className="mt-8 pt-6 border-t border-slate-50 text-center">
+                <p className="text-[10px] text-slate-400 font-medium">
+                    Respuesta inmediata en horario de oficina.
+                </p>
             </div>
         </div>
+
     </div>
   );
 }

@@ -31,7 +31,7 @@ const PropertyDetail = () => {
   const [activeImg, setActiveImg] = useState(0); 
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // --- CORRECCIÓN BUG #1: URL FIJA AL SERVIDOR ---
+  // --- URL FIJA AL SERVIDOR ---
   const PB_URL = "http://209.126.77.41:8080";
 
   useEffect(() => {
@@ -39,6 +39,7 @@ const PropertyDetail = () => {
       setLoading(true);
       try {
         let record;
+        // Búsqueda por ID directo o por ID personalizado (AYC-XXX)
         if (id?.length === 15) {
            record = await pb.collection("properties").getOne(id);
         } else {
@@ -49,6 +50,7 @@ const PropertyDetail = () => {
         if(record) {
            setProp(record);
            try {
+               // Parseamos specs (que trae el estrato guardado)
                const parsed = typeof record.specs === 'string' ? JSON.parse(record.specs) : record.specs;
                setSpecs(parsed || {});
            } catch (e) { setSpecs({}); }
@@ -76,14 +78,36 @@ const PropertyDetail = () => {
 
   const theme = PROPERTY_TYPES_THEME[prop.property_type] || PROPERTY_TYPES_THEME["default"];
 
+  // --- RENDERIZADO CONDICIONAL DE VISTAS ---
   const renderDetailView = () => {
       switch (prop.property_type) {
           case 'Casa': 
-              return <HouseDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
+              return <HouseDetailView 
+                  specs={specs} 
+                  description={prop.description} 
+                  adminFee={prop.admin_fee} 
+                  priceCop={prop.price_cop} 
+                  priceUsd={prop.price_usd}
+                  stratum={specs.stratum || prop.stratum} 
+              />;
           case 'Apartamento': 
-              return <ApartmentDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
+              return <ApartmentDetailView 
+                  specs={specs} 
+                  description={prop.description} 
+                  adminFee={prop.admin_fee} 
+                  priceCop={prop.price_cop} 
+                  priceUsd={prop.price_usd}
+                  stratum={specs.stratum || prop.stratum}
+              />;
           case 'Bodega': 
-              return <BodegaDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
+              return <BodegaDetailView 
+                  specs={specs} 
+                  description={prop.description} 
+                  adminFee={prop.admin_fee} 
+                  priceCop={prop.price_cop} 
+                  priceUsd={prop.price_usd}
+                  stratum={specs.stratum || prop.stratum} 
+              />;
           case 'CasaCampo':
           case 'Finca': 
           case 'Rural': 
@@ -95,7 +119,15 @@ const PropertyDetail = () => {
           case 'Local': 
               return <LocalDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
           case 'Oficina': 
-              return <OficinaDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
+              return <OficinaDetailView 
+                  specs={specs} 
+                  description={prop.description} 
+                  adminFee={prop.admin_fee} 
+                  priceCop={prop.price_cop} 
+                  priceUsd={prop.price_usd}
+                  // --- FIX: ESTRATO CONECTADO A OFICINAS ---
+                  stratum={specs.stratum || prop.stratum} 
+              />;
           default:
               return <SpecsSection specs={specs} theme={theme} description={prop.description} />;
       }

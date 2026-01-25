@@ -1,5 +1,5 @@
 import React from "react";
-import { Building2, Network, Briefcase, Maximize, ArrowUpFromLine, Car, Bath, Layers } from 'lucide-react';
+import { Building2, Network, Briefcase, Maximize, ArrowUpFromLine, Car, Bath, Layers, Zap } from 'lucide-react';
 
 const TECH_FEATURES = [
   { id: "structured_cabling", label: "Cableado Estructurado" },
@@ -57,15 +57,20 @@ export default function OficinaForm({ register, s }: any) {
            <InputIcon register={register} name="specs.area" label="Área Privada (m²)" icon={Maximize} s={s} type="number"/>
            <InputIcon register={register} name="specs.floor_level" label="Piso / Nivel" icon={ArrowUpFromLine} s={s} type="number"/>
            
-           {/* CORRECCIÓN BUG #8: AGREGADO CAMPO ESTRATO */}
-           <InputIcon register={register} name="specs.stratum" label="Estrato" icon={Layers} s={s} type="number"/>
-
+           {/* Sin Estrato Aquí (Ya está en BasicInfo) */}
+           
            <InputIcon register={register} name="specs.garages" label="Garajes Privados" icon={Car} s={s} type="number"/>
+           <SelectIcon register={register} name="specs.condition" label="Estado Entrega" icon={Briefcase} s={s} options={["Obra Gris", "Adecuada", "Amoblada", "Remodelada"]} />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+        
+        {/* NUEVO: DETALLE DE BAÑOS Y ASCENSORES */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
             <SelectIcon register={register} name="specs.bathrooms_type" label="Tipo de Baños" icon={Bath} s={s} options={["Privados", "Batería Comunal", "Mixto"]} />
             <InputIcon register={register} name="specs.bathrooms" label="# Baños Internos" icon={Bath} s={s} type="number"/>
-            <InputIcon register={register} name="specs.condition" label="Estado Entrega" icon={Briefcase} s={s} />
+            
+            {/* NUEVOS CAMPOS ASCENSORES */}
+            <InputIcon register={register} name="specs.elevators_public" label="# Ascensores Públicos" icon={ArrowUpFromLine} s={s} type="number"/>
+            <InputIcon register={register} name="specs.elevators_service" label="# Ascensores Servicio" icon={Layers} s={s} type="number"/>
         </div>
       </div>
 
@@ -89,7 +94,7 @@ export default function OficinaForm({ register, s }: any) {
       <div className="bg-white p-5 rounded-xl border border-gray-200">
         <div className="flex items-center gap-2 mb-3 border-b border-gray-100 pb-2">
            <Briefcase className="text-emerald-500" size={16}/>
-           <h3 className={`text-[10px] font-bold uppercase opacity-70 ${labelColor}`}>Amenidades Edificio</h3>
+           <h3 className={`text-[10px] font-bold uppercase opacity-70 ${labelColor}`}>Amenidades Edificio (PH)</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-2">
            {CORPORATE_AMENITIES.map((item) => (

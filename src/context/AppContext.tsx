@@ -18,18 +18,58 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 // ==========================================
 const translations: Record<string, Record<string, string>> = {
   ES: {
+    // NAVEGACIÓN & HERO
     nav_home: "Inicio", nav_properties: "Inmuebles", nav_services: "Servicios", nav_blog: "Blog", nav_about: "Nosotros", nav_contact: "Contacto",
     hero_btn: "Ver Detalles", feat_title: "Propiedades Destacadas", view_all: "Ver todas",
+    
+    // DETALLES GENERALES
     det_desc: "Descripción", det_features: "Características", det_admin: "Valor Administración", det_whatsapp: "Consultar por WhatsApp",
+    
+    // --- FOOTER & CONTACTO (INTEGRADO) ---
+    footer_about_title: "SOBRE NOSOTROS",
+    footer_contact_title: "CONTACTO",
+    footer_desc: "Somos una inmobiliaria boutique en Bogotá, especializada en propiedades exclusivas y asesoría integral. Tu patrimonio, nuestra prioridad.",
+    
+    // --- BARRA LATERAL (SIDEBAR) ---
+    agent_title: "AGENTE RESPONSABLE",
+    code: "Cód",
+    btn_whatsapp: "Consultar por WhatsApp",
+    appraisal_final_btn: "Agendar Cita / Visita",
+    need_credit: "¿Necesitas Crédito?",
+    credit_desc: "Gestionamos tu crédito hipotecario con nuestros bancos aliados para facilitar tu compra.",
+    view_allies: "Ver Aliados Financieros",
+    location_priv_title: "Ubicación Privilegiada",
+    location_priv_desc: "Esta propiedad cuenta con una excelente ubicación estratégica. Contáctanos para conocer el punto exacto.",
+    
     // Mapeo DB -> Label UI (Español)
     Casa: "Casa", Apartamento: "Apartamento", Bodega: "Bodega", Oficina: "Oficina", 
     Local: "Local", Lote: "Lote", Finca: "Finca", Rural: "Rural", 
     CasaCampo: "Casa Campestre", Terreno: "Terreno"
   },
   EN: {
+    // NAVEGACIÓN & HERO
     nav_home: "Home", nav_properties: "Properties", nav_services: "Services", nav_blog: "Blog", nav_about: "About Us", nav_contact: "Contact",
     hero_btn: "View Details", feat_title: "Featured Properties", view_all: "View All",
+    
+    // DETALLES GENERALES
     det_desc: "Description", det_features: "Features", det_admin: "HOA Fee", det_whatsapp: "Chat on WhatsApp",
+    
+    // --- FOOTER & CONTACTO (INTEGRADO) ---
+    footer_about_title: "ABOUT US",
+    footer_contact_title: "CONTACT",
+    footer_desc: "We are a boutique real estate agency in Bogota, specializing in exclusive properties and comprehensive advice. Your heritage, our priority.",
+    
+    // --- BARRA LATERAL (SIDEBAR) ---
+    agent_title: "LISTING AGENT",
+    code: "Code",
+    btn_whatsapp: "Chat on WhatsApp",
+    appraisal_final_btn: "Schedule Visit",
+    need_credit: "Need a Mortgage?",
+    credit_desc: "We manage your mortgage loan with our allied banks to facilitate your purchase.",
+    view_allies: "View Financial Partners",
+    location_priv_title: "Prime Location",
+    location_priv_desc: "This property boasts a strategic location. Contact us to reveal the exact spot.",
+
     // Mapeo DB -> Label UI (Inglés)
     Casa: "House", Apartamento: "Apartment", Bodega: "Warehouse", Oficina: "Office", 
     Local: "Retail Store", Lote: "Lot", Finca: "Farm", Rural: "Rural", 
@@ -38,7 +78,7 @@ const translations: Record<string, Record<string, string>> = {
 };
 
 // ============================================================
-// 2. DICCIONARIO DINÁMICO (CORREGIDO: SIN DUPLICADOS)
+// 2. DICCIONARIO DINÁMICO (BASE DE DATOS -> IDIOMA)
 // ============================================================
 const dynamicKeywords: Record<string, string> = {
     // --- TIPOS DE INMUEBLE ---
@@ -53,10 +93,11 @@ const dynamicKeywords: Record<string, string> = {
     "Cerca": "Near", "Parque": "Park", "Vista": "View", "Exterior": "Exterior", 
     "Interior": "Interior", 
     "Centro Comercial": "Shopping Mall", 
-    "Esquinero": "Corner Location", // <--- UNIFICADO (Sirve para Lote y Local)
+    "Esquinero": "Corner Location",
     "Esquinera": "Corner Location",
-    "Vía Principal": "Main Road",   // <--- UNIFICADO
-    "Medianero": "Mid-block Lot",   // <--- NUEVO (Para Lotes)
+    "Vía Principal": "Main Road",
+    "Medianero": "Mid-block Lot",
+    "Medianera": "Mid-block Lot",
     
     // --- ADJETIVOS ---
     "Excelente": "Excellent", "Oportunidad": "Opportunity", "Inversión": "Investment", 
@@ -106,7 +147,7 @@ const dynamicKeywords: Record<string, string> = {
     "Árboles Frutales": "Fruit Trees", "Corral": "Corral",
     "Alambre de Púas": "Barbed Wire", "Cerca Viva": "Live Fence",
 
-    // --- BODEGA ---
+    // --- BODEGA (NUEVOS TÉRMINOS INDUSTRIALES) ---
     "Altura Triple": "Triple Height", "Doble Altura": "Double Height",
     "Altura Libre": "Clear Height", "Área Libre": "Clear Area",
     "Carga Eléctrica": "Electric Load", "Resistencia Piso": "Floor Load",
@@ -120,32 +161,50 @@ const dynamicKeywords: Record<string, string> = {
     "Mezanine": "Mezzanine", "Oficinas": "Offices", "Locales": "Retail Units",
     "Transformador": "Transformer", "Potencia": "Power", "Capacidad": "Capacity",
     "Corredizo": "Sliding", "Levadizo": "Overhead", "Persiana": "Roll-up", "Muelle": "Dock",
+    
+    // Extras Bodega
+    "Puente Grúa": "Crane Bridge", "Piso Epóxico": "Epoxy Floor",
+    "Techo Termoacústico": "Thermoacoustic Roof", "Iluminación Natural": "Natural Lighting",
+    "Subestación Eléctrica": "Electrical Substation", "Gas Industrial": "Industrial Gas",
+    "Batería de Baños": "Restroom Battery", "Vestier": "Locker Room", "Lockers": "Lockers",
+    "Casino": "Cafeteria", "Muelle con Nivelador": "Dock Leveler", "Muelle Nivelador": "Dock Leveler",
+    "Concreto Alta Resistencia": "High Resistance Concrete", "Afianzado": "Reinforced",
+    "Casino Empleados": "Employee Cafeteria", "Cocineta Básica": "Basic Kitchenette",
 
     // --- LOCAL COMERCIAL ---
     "Local a la Calle": "Street Level Store", "Plazoleta de Comidas": "Food Court",
     "Pasaje Comercial": "Commercial Arcade", 
     "Alto Tráfico": "High Foot Traffic", "Visibilidad": "Visibility",
     "Vitrina": "Showcase Window", "Terraza Privada": "Private Terrace",
-    "Gas Industrial": "Industrial Gas", "Ducto Extracción": "Exhaust Duct",
+    "Ducto Extracción": "Exhaust Duct",
     "Energía Trifásica": "Three-phase Power", "Trampa de Grasas": "Grease Trap",
     "Bahía de Parqueo": "Parking Bay", "Zona de Carga": "Loading Zone",
     "Adecuado para Restaurante": "Suitable for Restaurant",
     "Uso de Suelo": "Land Use", "Comercial": "Commercial",
     "Ficha Comercial": "Commercial Specs", "Descripción del Local": "Store Description",
 
-    // --- OFICINA (NUEVO) ---
+    // --- OFICINA (NUEVOS TÉRMINOS CORPORATIVOS) ---
     "Red de Datos": "Data Network", "Cableado Estructurado": "Structured Cabling",
-    "Aire Acondicionado": "Air Conditioning", "Sala de Juntas": "Meeting Room",
-    "Auditorio": "Auditorium", "Batería de Baños": "Restroom Battery",
-    "Cocineta": "Kitchenette", "Cafetería": "Cafeteria",
-    "Control de Acceso": "Access Control", "Biométrico": "Biometric",
+    "Aire Acondicionado": "Air Conditioning", "Aire Acondicionado Central": "Central A/C",
+    "Sala de Juntas": "Boardroom", "Auditorio": "Auditorium", 
+    "Cocineta / Cafetería": "Kitchenette / Cafeteria",
+    "Control de Acceso": "Access Control", "Biométrico": "Biometric", "Acceso Biométrico": "Biometric Access",
     "Piso Elevado": "Raised Floor", "Techo Modular": "Modular Ceiling",
     "Espacios Abiertos": "Open Spaces", "Divisiones Vidrio": "Glass Partitions",
-    "Obra Gris": "Grey Work (Unfinished)", "Adecuada": "Fitted Out", "Amoblada": "Furnished",
+    "Obra Gris": "Shell & Core (Grey Work)", "Adecuada": "Fitted Out", "Amoblada": "Furnished",
     "Edificio Corporativo": "Corporate Building", "Torre Empresarial": "Business Tower",
     "Ficha Corporativa": "Corporate Specs", "Entorno Empresarial": "Business Environment",
+    "Planta Suplencia Total": "Full Backup Power Plant", "Iluminación LED": "LED Lighting",
+    "Ascensores Inteligentes": "Smart Elevators", "Ascensores": "Elevators",
+    "Recepción / Lobby": "Reception / Lobby", "Parqueo Visitantes": "Visitor Parking",
+    "Terraza / Lounge": "Terrace / Lounge", "Resumen Corporativo": "Corporate Overview",
+    "Descripción de la Oficina": "Office Description", "Infraestructura Técnica": "Technical Infrastructure",
+    "Amenidades Edificio (PH)": "Building Amenities", "Eficiencia & Conectividad": "Efficiency & Connectivity",
+    "Públicos": "Public", "Carga": "Freight", "Servicio": "Service",
+    "Privados": "Private", "Batería Comunal": "Communal Battery", "Mixto": "Mixed",
+    "Estado Entrega": "Delivery Condition",
 
-    // --- LOTE / TERRENO (NUEVO) ---
+    // --- LOTE / TERRENO ---
     "Índice Ocupación": "Occupancy Rate", "Índice Construcción": "Construction Rate",
     "Licencia Construcción": "Construction License", "Norma Urbana": "Urban Regulation",
     "Uso Principal": "Main Use", "Uso Complementario": "Complementary Use",
@@ -183,15 +242,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (lang === "ES") return text;
     
     let translatedText = text;
+    // Ordenamos por longitud para reemplazar frases largas primero
     const sortedKeywords = Object.entries(dynamicKeywords).sort((a, b) => b[0].length - a[0].length);
     
     sortedKeywords.forEach(([es, en]) => {
         const escapedEs = es.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const isPhrase = es.trim().includes(" ");
+        // Si es frase, busca la frase exacta. Si es palabra, busca límites de palabra (\b)
         const regexPattern = isPhrase ? escapedEs : `\\b${escapedEs}\\b`;
         const regex = new RegExp(regexPattern, 'gi'); 
         
         translatedText = translatedText.replace(regex, (match) => {
+            // Mantiene la capitalización original (Mayúscula inicial)
             if (match[0] === match[0].toUpperCase()) {
                 return en.charAt(0).toUpperCase() + en.slice(1);
             }

@@ -47,15 +47,18 @@ export default function ApartmentPreview({ data }: any) {
          />
          {data.price_usd && Number(data.price_usd) > 0 && (
             <Row 
-                label="Precio USD" 
-                val={`$${data.price_usd}`} 
-                icon={DollarSign} 
-                valClass="text-green-600 font-bold" 
+               label="Precio USD" 
+               val={`$${data.price_usd}`} 
+               icon={DollarSign} 
+               valClass="text-green-600 font-bold" 
             />
          )}
+         
+         {/* CORRECCIÓN: Leemos data.stratum (Primer nivel) */}
+         <Row label="Estrato" val={data.stratum} icon={Layers} />
+         
          <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Receipt} />
          <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
-         <Row label="Estrato" val={s.stratum} icon={Layers} />
       </Section>
 
       {/* 2. UBICACIÓN & ESPACIO */}

@@ -1,5 +1,5 @@
 import React from "react";
-import { X, CheckCircle, MapPin, DollarSign, Youtube, User } from "lucide-react";
+import { X, CheckCircle, MapPin, DollarSign, Youtube, User, FileText } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { PROPERTY_TYPES_THEME } from "../../config/propertyConfig";
 import { formatCurrency } from "../../utils/formatters";
@@ -43,6 +43,7 @@ export default function PropertyPreviewModal({ data, activeType, onClose, onConf
 
   // --- RENDERIZADO DEL CONTENIDO ESPECÍFICO ---
   const renderSpecificContent = () => {
+      // Aquí pasamos 'data' completo. Si HousePreview.tsx tiene la fila de Estrato, aquí SE VERÁ.
       switch (activeType) {
           case 'Casa': 
               return <HousePreview data={data} />;
@@ -53,14 +54,12 @@ export default function PropertyPreviewModal({ data, activeType, onClose, onConf
           case 'Bodega': 
               return <BodegaPreview data={data} />;
           
-          // CASO RURAL / FINCA (Soporta nombre de BD 'CasaCampo')
           case 'Finca': 
           case 'Rural': 
           case 'CasaCampo':
           case 'Casa Campestre': 
               return <RuralPreview data={data} />;
           
-          // CASO LOTE / TERRENO
           case 'Lote': 
           case 'Terreno': 
               return <LotePreview data={data} />;
@@ -134,7 +133,7 @@ export default function PropertyPreviewModal({ data, activeType, onClose, onConf
               {data.description && (
                  <div>
                     <p className="text-[10px] font-bold uppercase text-gray-400 mb-2 flex items-center gap-2">
-                        <FileTextIcon size={12}/> Descripción Pública
+                        <FileText size={12}/> Descripción Pública
                     </p>
                     <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 text-gray-600 text-sm leading-relaxed whitespace-pre-wrap font-medium">
                        {data.description}
@@ -219,6 +218,3 @@ export default function PropertyPreviewModal({ data, activeType, onClose, onConf
     </div>
   );
 }
-
-// Icono Helper
-function FileTextIcon({size}:any) { return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>}

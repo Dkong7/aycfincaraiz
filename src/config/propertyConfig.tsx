@@ -7,7 +7,7 @@ import {
   ArrowUpFromLine, TreePine
 } from "lucide-react";
 
-// 1. CONFIGURACIÓN DE TIPOS (PALETA DE COLORES CORREGIDA)
+// 1. CONFIGURACIÓN DE TIPOS (PALETA DE COLORES OFICIAL)
 export const PROPERTY_TYPES_THEME: any = {
   "Casa": { 
       icon: <Home/>, 
@@ -23,65 +23,65 @@ export const PROPERTY_TYPES_THEME: any = {
       border: "border-blue-500", 
       bgLight: "bg-blue-50" 
   },
-  "Bodega": { // Marrón (Amber/Orange oscuro)
+  "Bodega": { // Tema Industrial (Ámbar)
       icon: <Warehouse/>, 
       color: "bg-amber-700", 
       text: "text-amber-800", 
       border: "border-amber-600", 
       bgLight: "bg-amber-50" 
   },
-  "CasaCampo": { // Morado (Valor de Base de Datos)
+  "CasaCampo": { 
       icon: <TreePine/>, 
       color: "bg-purple-600", 
       text: "text-purple-600", 
       border: "border-purple-500", 
       bgLight: "bg-purple-50" 
   },
-  "Casa Campestre": { // Morado (Alias UI)
+  "Casa Campestre": { // Alias
       icon: <TreePine/>, 
       color: "bg-purple-600", 
       text: "text-purple-600", 
       border: "border-purple-500", 
       bgLight: "bg-purple-50" 
   },
-  "Finca": { // Morado
+  "Finca": { 
       icon: <Mountain/>, 
       color: "bg-purple-600", 
       text: "text-purple-600", 
       border: "border-purple-500", 
       bgLight: "bg-purple-50" 
   },
-  "Rural": { // Morado (Legacy)
+  "Rural": { 
       icon: <Mountain/>, 
       color: "bg-purple-600", 
       text: "text-purple-600", 
       border: "border-purple-500", 
       bgLight: "bg-purple-50" 
   },
-  "Lote": { // Verde
+  "Lote": { 
       icon: <Layout/>, 
       color: "bg-green-600", 
       text: "text-green-700", 
       border: "border-green-500", 
       bgLight: "bg-green-50" 
   },
-  "Terreno": { // Verde
+  "Terreno": { 
       icon: <Layout/>, 
       color: "bg-green-600", 
       text: "text-green-700", 
       border: "border-green-500", 
       bgLight: "bg-green-50" 
   },
-  "Local": { // Rosado
+  "Local": { 
       icon: <Store/>, 
       color: "bg-pink-500", 
       text: "text-pink-600", 
       border: "border-pink-400", 
       bgLight: "bg-pink-50" 
   },
-  "Oficina": { // Azul Clarito (Cyan)
+  "Oficina": { // Tema Corporativo (Esmeralda)
       icon: <Briefcase/>, 
-      color: "bg-emerald-600", // Cambiado a Emerald para consistencia con el detalle
+      color: "bg-emerald-600", 
       text: "text-emerald-700", 
       border: "border-emerald-500", 
       bgLight: "bg-emerald-50" 
@@ -96,7 +96,7 @@ export const PROPERTY_TYPES_THEME: any = {
   }
 };
 
-// 2. DICCIONARIO DE METADATA
+// 2. DICCIONARIO DE METADATA (Mapeo de iconos para fallback)
 export const FIELD_METADATA: any = {
   rooms: { labelKey: "det_rooms", icon: <Bed size={18}/> },
   habs: { labelKey: "det_rooms", icon: <Bed size={18}/> },

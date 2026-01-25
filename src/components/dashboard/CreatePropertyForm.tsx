@@ -46,24 +46,37 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
   const { register, control, handleSubmit, watch, setValue, getValues, reset } = useForm({
     defaultValues: { 
       property_type: "", 
+      stratum: "", // Campo raíz para BasicInfo
       specs: { levels_list: [], has_rent: false, has_social: false }, 
       status: "borrador", 
       ...initialData 
     }
   });
 
-  // EFECTO: Carga de datos iniciales
+  // --- 1. CARGA DE DATOS INICIALES ---
   useEffect(() => {
     if (initialData) {
-      let parsedSpecs = initialData.specs;
-      // Aseguramos que specs sea un objeto real y no un string
+      let parsedSpecs: any = {};
+      
+      // Parseo seguro del JSON specs
       if (typeof initialData.specs === 'string') { 
-          try { parsedSpecs = JSON.parse(initialData.specs); } catch(e) {} 
+          try { 
+            parsedSpecs = JSON.parse(initialData.specs); 
+          } catch(e) { 
+            parsedSpecs = {}; 
+          } 
+      } else {
+          parsedSpecs = initialData.specs || {};
       }
       
+      // Lógica de recuperación de Estrato
+      // Busca en la raíz (si existe columna) O dentro de specs (si está en el JSON)
+      const existingStratum = initialData.stratum || parsedSpecs.stratum || "";
+
       reset({ 
           ...initialData, 
-          specs: parsedSpecs || {}, // Fallback a objeto vacío para evitar crashes
+          stratum: existingStratum, // Asigna al campo del formulario (Select de BasicInfo)
+          specs: parsedSpecs, 
           price_cop: initialData.price_cop, 
           price_usd: initialData.price_usd 
       });
@@ -83,7 +96,7 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
       return (points / 6) * 100;
   };
 
-  // --- GUARDADO EN BACKEND ---
+  // --- 2. GUARDADO EN BACKEND ---
   const saveToBackend = async (data: any, targetStatus: string) => {
     setLoading(true);
     try {
@@ -101,35 +114,28 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
       formData.append("price_usd", cleanNumber(data.price_usd));
       formData.append("admin_fee", cleanNumber(data.admin_fee)); 
       
-      // --- FIX BUG #5: LÓGICA DE IDs (AYC vs DRAFT) ---
+      // Lógica IDs
       let currentId = initialData?.ayc_id || "";
-      
-      // Normalización para detectar si es un borrador (Draft, DRAFT, draft...)
       const isDraftId = !currentId || currentId.toUpperCase().includes("DRAFT");
       const isTargetPublished = targetStatus === "publicado";
 
-      // Caso 1: Si es un borrador (o nuevo) Y lo estamos publicando -> CAMBIAR A AYC
       if (isDraftId && isTargetPublished) {
           currentId = "AYC-" + Math.floor(Math.random() * 9000 + 1000);
-      } 
-      // Caso 2: Si es nuevo y sigue siendo borrador -> ASIGNAR DRAFT
-      else if (!currentId) {
+      } else if (!currentId) {
           currentId = "DRAFT-" + Math.floor(Math.random() * 9000 + 1000);
       }
-      // Caso 3: Si ya era AYC, se mantiene el mismo ID.
-      
       formData.append("ayc_id", currentId);
 
-      // Orden de Galería
+      // Orden Galería
       const galleryOrder = sortedPreviewUrls.map(url => {
           if (url.startsWith("blob:")) return null; 
           try { const parts = url.split("/"); return parts[parts.length - 1]; } catch (e) { return null; }
       }).filter(Boolean);
 
-      // --- FIX BUG #3: CONSOLIDACIÓN DE SPECS ---
-      // Aseguramos que data.specs tenga todo lo necesario
+      // --- CONSOLIDACIÓN DE SPECS ---
       const finalSpecs = {
           ...data.specs,
+          stratum: data.stratum, // <--- Guardamos el valor raíz dentro del JSON specs para persistencia
           gallery_order: galleryOrder
       };
       
@@ -137,7 +143,7 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
       
       formData.append("municipality", data.municipality || "Bogotá");
       formData.append("neighborhood", data.neighborhood || "");
-      formData.append("address_text", data.address_visible || ""); // Dirección Pública (Visible)
+      formData.append("address_text", data.address_visible || ""); 
       
       // Privados
       formData.append("owner_name", data.owner_name || "");
@@ -168,6 +174,7 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
     }
   };
 
+  // --- 3. PREVISUALIZACIÓN ---
   const onPreSubmit = (data: any) => { 
       const hasOwnerInfo = data.owner_name && data.owner_name.length > 2;
 
@@ -175,14 +182,23 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
           alert("⚠️ Mínimo Requerido:\n\nPor favor ingresa al menos el NOMBRE DEL PROPIETARIO en la sección 'Datos Privados' para crear un borrador.");
           return;
       }
-      setPendingData(data); 
+      
+      // Preparamos la data para el Modal
+      const previewData = {
+          ...data,
+          specs: {
+              ...data.specs,
+              stratum: data.stratum // Sincronizamos para componentes legacy y vista previa
+          }
+      };
+
+      setPendingData(previewData); 
       setShowPreviewModal(true); 
   };
 
   const handleFinalPublish = () => {
     if (pendingData) {
         const progress = calculateCompleteness(pendingData);
-        // Regla: > 50% info para publicar, si no, se queda como borrador
         const status = progress >= 50 ? "publicado" : "borrador";
         saveToBackend(pendingData, status);
     }
@@ -196,10 +212,8 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
       
       <form onSubmit={handleSubmit(onPreSubmit)} className={`max-w-7xl mx-auto p-8 rounded-3xl border space-y-8 animate-in slide-in-from-bottom-4 shadow-xl ${s.bg} ${s.border}`}>
         
-        {/* --- HEADER CON BARRA DE HERRAMIENTAS --- */}
+        {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-center border-b pb-6 border-gray-200/20 gap-4">
-            
-            {/* IZQUIERDA: Navegación */}
             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
                 <Link to="/admin" className={`text-xs font-bold uppercase flex items-center gap-2 hover:opacity-70 transition-opacity ${s.text}`}>
                     <ArrowLeft size={16}/> Volver
@@ -212,9 +226,7 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
                 </button>
             </div>
 
-            {/* DERECHA: Acciones Rápidas */}
             <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                {/* Ver en Web (Solo si ya existe/editando) */}
                 {initialData?.id && (
                     <Link 
                         to={`/inmuebles/${initialData.ayc_id || initialData.id}`} 
@@ -226,7 +238,6 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
                     </Link>
                 )}
 
-                {/* Previsualizar */}
                 <button 
                     type="button" 
                     onClick={handleSubmit(onPreSubmit)} 
@@ -243,10 +254,10 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
             </div>
         </div>
 
-        {/* --- CONTENIDO DEL FORMULARIO --- */}
+        {/* CONTENIDO DEL FORMULARIO */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* COLUMNA IZQUIERDA: DATOS PÚBLICOS */}
+            {/* COLUMNA IZQUIERDA */}
             <div className="lg:col-span-2 space-y-6">
                <div className="p-6 border border-gray-200 rounded-xl bg-white shadow-sm"><BasicInfo register={register} setValue={setValue} getValues={getValues} s={s} /></div>
                
@@ -254,17 +265,20 @@ export default function CreatePropertyForm({ initialData, onSuccess }: any) {
                    <FinancialInfo register={register} setValue={setValue} watch={watch} s={s} />
                </div>
                
-               {/* --- RENDERIZADO MODULAR --- */}
+               {/* MODULOS DINÁMICOS */}
                {activeType === "Casa" && <div className="p-6 border-l-4 border-yellow-500 bg-yellow-50/10 rounded-xl shadow-sm"><HouseForm register={register} control={control} watch={watch} s={s} /></div>}
                {activeType === "Apartamento" && <div className="p-6 border-l-4 border-blue-500 bg-blue-50/10 rounded-xl shadow-sm"><ApartmentForm register={register} watch={watch} s={s} /></div>}
-               {activeType === "Bodega" && <div className="p-6 border-l-4 border-amber-600 bg-amber-50/10 rounded-xl shadow-sm"><BodegaForm register={register} s={s} /></div>}
+               
+               {/* --- CORRECCIÓN CRÍTICA: Se agregó 'watch={watch}' para que funcionen los toggles --- */}
+               {activeType === "Bodega" && <div className="p-6 border-l-4 border-amber-600 bg-amber-50/10 rounded-xl shadow-sm"><BodegaForm register={register} watch={watch} s={s} /></div>}
+               
                {(activeType === "CasaCampo" || activeType === "Finca" || activeType === "Rural") && <div className="p-6 border-l-4 border-purple-500 bg-purple-50/10 rounded-xl shadow-sm"><RuralForm register={register} s={s} /></div>}
                {(activeType === "Lote" || activeType === "Terreno") && <div className="p-6 border-l-4 border-gray-500 bg-gray-50/10 rounded-xl shadow-sm"><LoteForm register={register} s={s} /></div>}
                {activeType === "Local" && <div className="p-6 border-l-4 border-pink-500 bg-pink-50/10 rounded-xl shadow-sm"><LocalForm register={register} s={s} /></div>}
                {activeType === "Oficina" && <div className="p-6 border-l-4 border-emerald-500 bg-emerald-50/10 rounded-xl shadow-sm"><OficinaForm register={register} s={s} /></div>}
             </div>
 
-            {/* COLUMNA DERECHA: DATOS PRIVADOS & GUARDAR */}
+            {/* COLUMNA DERECHA */}
             <div className="space-y-6">
                <div className="p-6 border border-red-100 bg-red-50/30 rounded-xl shadow-sm"><PrivateInfo register={register} activeType={activeType} initialData={initialData} /></div>
                <div className="p-6 border-2 border-dashed border-gray-200 rounded-xl bg-white">

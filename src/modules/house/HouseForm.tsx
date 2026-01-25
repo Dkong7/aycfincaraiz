@@ -2,7 +2,7 @@ import React from "react";
 import { useFieldArray } from "react-hook-form";
 import { 
   Maximize, Grid, Ruler, Bed, Bath, Car, Flame, Utensils, Layers, 
-  ChefHat, Store, DollarSign, ShieldCheck, Coffee, Dumbbell, 
+  ChefHat, ShoppingBag, DollarSign, ShieldCheck, Coffee, Dumbbell, 
   Waves, Trophy, Trees, Zap, Heater, Tv, Dog, Wind, Sun, Flower2, 
   BookOpen, Shirt, Box, Calendar, ArrowUpDown
 } from "lucide-react";
@@ -74,18 +74,15 @@ export default function HouseForm({ register, control, watch, s }: any) {
   return (
     <div className="animate-in fade-in space-y-6">
        
-       {/* 1. DIMENSIONES Y EDAD (BUG #6 CORREGIDO) */}
+       {/* 1. DIMENSIONES Y EDAD (SIN ESTRATO AQUÍ) */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <InputIcon register={register} name="specs.area_lot" label="Lote m²" icon={Maximize} s={s} />
           <InputIcon register={register} name="specs.area_built" label="Construida m²" icon={Grid} s={s} />
           <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} />
-          
-          {/* CAMPO NUEVO: FONDO */}
           <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={ArrowUpDown} s={s} />
        </div>
        
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {/* CAMPO NUEVO: NIVELES */}
           <InputIcon register={register} name="specs.levels_qty" label="Nº Pisos/Niveles" icon={Layers} s={s} type="number" />
           
           <div className="col-span-2">
@@ -124,6 +121,7 @@ export default function HouseForm({ register, control, watch, s }: any) {
 
        <LevelsSection control={control} register={register} s={s} labelColor={labelColor} />
 
+       {/* ZONAS SOCIALES Y RENTA... (Mismo código de abajo) */}
        <div className="pt-4 border-t border-gray-100">
           <label className={`flex items-center gap-2 cursor-pointer font-bold mb-4 ${labelColor}`}>
              <input type="checkbox" {...register("specs.has_social")} className="toggle toggle-sm toggle-success" /> ¿TIENE ZONAS SOCIALES? (Conjunto)
@@ -149,7 +147,7 @@ export default function HouseForm({ register, control, watch, s }: any) {
           {hasRent && (
              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl animate-in slide-in-from-top-2">
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                   <SelectIcon register={register} name="specs.rent_type" label="Tipo de Renta" icon={Store} s={s} options={["Apartamento Independiente", "Local Comercial", "Oficina", "Paisa"]} />
+                   <SelectIcon register={register} name="specs.rent_type" label="Tipo de Renta" icon={ShoppingBag} s={s} options={["Apartamento Independiente", "Local Comercial", "Oficina", "Paisa"]} />
                    <InputIcon register={register} name="specs.rent_value" label="Canon Estimado Mensual ($)" icon={DollarSign} s={s} type="number" />
                 </div>
                 <div className="mb-4">

@@ -3,7 +3,7 @@ import { formatCurrency } from "../../utils/formatters";
 import { translate } from "./oficina.config";
 import { 
   Building2, Maximize, DollarSign, CheckCircle2, 
-  Briefcase, Network, Car, ArrowUpFromLine 
+  Briefcase, Network, Car, ArrowUpFromLine, Layers, Hash
 } from 'lucide-react';
 
 export default function OficinaPreview({ data }: any) {
@@ -50,12 +50,16 @@ export default function OficinaPreview({ data }: any) {
          />
          {data.price_usd && Number(data.price_usd) > 0 && (
             <Row 
-                label="Precio USD" 
-                val={`$${data.price_usd}`} 
-                icon={DollarSign} 
-                valClass="text-emerald-600 font-bold" 
+               label="Precio USD" 
+               val={`$${data.price_usd}`} 
+               icon={DollarSign} 
+               valClass="text-emerald-600 font-bold" 
             />
          )}
+         
+         {/* --- ESTRATO AGREGADO --- */}
+         <Row label="Estrato" val={data.stratum} icon={Layers} />
+         
          <Row label="Área Privada" val={`${s.area || 0} m²`} icon={Maximize} valClass="text-emerald-700 font-bold" />
          <Row label="Ubicación" val={`Piso ${s.floor_level || "-"}`} icon={ArrowUpFromLine} />
       </Section>
@@ -64,6 +68,22 @@ export default function OficinaPreview({ data }: any) {
       <Section title="Dotación & Espacio" icon={Building2}>
          <Row label="Garajes Privados" val={s.garages} icon={Car} />
          <Row label="Tipo de Baños" val={translate(s.bathrooms_type)} />
+         <Row label="Estado" val={s.condition} icon={CheckCircle2} />
+         
+         {/* --- ASCENSORES AGREGADOS --- */}
+         {(Number(s.elevators_public) > 0 || Number(s.elevators_service) > 0) && (
+            <div className="flex justify-between items-center border-b border-gray-50 py-1.5">
+               <div className="flex items-center gap-2">
+                  <ArrowUpFromLine size={13} className="text-gray-400" />
+                  <span className="font-bold text-xs text-gray-500">Ascensores:</span>
+               </div>
+               <div className="text-right text-[10px] font-bold text-gray-700">
+                  {s.elevators_public > 0 && <span>{s.elevators_public} Públicos </span>}
+                  {s.elevators_service > 0 && <span>• {s.elevators_service} Carga</span>}
+               </div>
+            </div>
+         )}
+
          <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={DollarSign} />
       </Section>
 
