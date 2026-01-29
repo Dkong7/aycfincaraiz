@@ -1,7 +1,10 @@
 import React from "react";
 import { formatCurrency } from "../../utils/formatters";
 import { translate } from "./local.config";
-import { Store, DollarSign, MapPin, Maximize, CheckCircle2 } from "lucide-react";
+import { 
+  Store, DollarSign, MapPin, Maximize, CheckCircle2,
+  Hash, Building, Calendar, Ruler, Layers, Flame
+} from "lucide-react";
 
 export default function LocalPreview({ data }: any) {
   const s = data.specs || {};
@@ -34,23 +37,33 @@ export default function LocalPreview({ data }: any) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm bg-pink-50/30 p-4 rounded-xl border border-pink-100/50">
       
+      {/* 1. RESUMEN FINANCIERO & LEGAL */}
       <Section title="Resumen Ejecutivo" icon={Store}>
          <Row label="Precio Venta" val={data.price_cop ? formatCurrency(data.price_cop) : "$0"} icon={DollarSign} valClass="text-green-600 font-black text-sm" />
          {data.price_usd && Number(data.price_usd) > 0 && (
             <Row label="Precio USD" val={`$${data.price_usd}`} icon={DollarSign} valClass="text-green-600 font-bold" />
          )}
-         <Row label="Área Total" val={`${s.area_total || 0} m²`} icon={Maximize} valClass="text-pink-700 font-bold" />
+         
+         <Row label="Estrato" val={data.stratum} icon={Hash} />
+         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
+         <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
          <Row label="Ubicación" val={translate(s.location_type)} icon={MapPin} />
       </Section>
 
-      <Section title="Detalles" icon={Store}>
-         <Row label="Frente Vitrina" val={`${s.front || 0} m`} />
+      {/* 2. DETALLES TÉCNICOS */}
+      <Section title="Dimensiones & Técnica" icon={Maximize}>
+         <Row label="Área Total" val={`${s.area_total || 0} m²`} icon={Maximize} valClass="text-pink-700 font-bold" />
+         <Row label="Frente / Vitrina" val={`${s.front || 0} m`} icon={Ruler} />
+         <Row label="Altura Libre" val={`${s.height || 0} m`} icon={Ruler} />
+         
          <Row label="Baños" val={translate(s.bathrooms)} />
-         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} />
+         <Row label="Pisos" val={translate(s.floors)} icon={Layers} />
+         <Row label="Gas" val={translate(s.gas_type)} icon={Flame} />
       </Section>
 
+      {/* 3. ADECUACIONES */}
       <div className="col-span-1 md:col-span-2">
-         <Section title="Adecuaciones" icon={CheckCircle2}>
+         <Section title="Equipamiento Especial" icon={CheckCircle2}>
             <p className="text-xs text-gray-600 leading-relaxed italic">
                {featuresList.length > 0 ? featuresList.join(", ") : "Sin equipamiento especial registrado"}
             </p>

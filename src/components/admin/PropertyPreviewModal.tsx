@@ -1,5 +1,5 @@
 import React from "react";
-import { X, CheckCircle, MapPin, DollarSign, Youtube, User, FileText } from "lucide-react";
+import { X, CheckCircle, MapPin, DollarSign, Youtube, User, FileText, Image as ImageIcon } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { PROPERTY_TYPES_THEME } from "../../config/propertyConfig";
 import { formatCurrency } from "../../utils/formatters";
@@ -23,7 +23,7 @@ interface ModalProps {
 }
 
 export default function PropertyPreviewModal({ data, activeType, onClose, onConfirm, loading, sortedPreviewUrls }: ModalProps) {
-  const { t } = useApp();
+  const { translateDynamic } = useApp();
   
   // Tema Visual según el tipo
   const theme = PROPERTY_TYPES_THEME[activeType] || PROPERTY_TYPES_THEME["default"];
@@ -35,48 +35,31 @@ export default function PropertyPreviewModal({ data, activeType, onClose, onConf
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  // Construir lista visual (Video primero, luego imágenes)
+  // --- CORRECCIÓN CRÍTICA: USAR SOLO sortedPreviewUrls ---
+  // sortedPreviewUrls viene del estado 'previews' de GalleryUpload, que es la fuente de verdad actual.
+  // No usamos data.images aquí porque data.images tiene las fotos viejas de la DB.
+  const visualGallery = sortedPreviewUrls || [];
+
+  // Construir lista visual final (Video + Fotos)
   const finalPreviewList = [
       ...(data?.video_url && getYoutubeId(data.video_url) ? [{ type: 'video', id: getYoutubeId(data.video_url) }] : []),
-      ...sortedPreviewUrls.map((url: string) => ({ type: 'image', url }))
+      ...visualGallery.map((url: string) => ({ type: 'image', url }))
   ];
 
   // --- RENDERIZADO DEL CONTENIDO ESPECÍFICO ---
   const renderSpecificContent = () => {
-      // Aquí pasamos 'data' completo. Si HousePreview.tsx tiene la fila de Estrato, aquí SE VERÁ.
       switch (activeType) {
-          case 'Casa': 
-              return <HousePreview data={data} />;
-          
-          case 'Apartamento': 
-              return <ApartmentPreview data={data} />;
-          
-          case 'Bodega': 
-              return <BodegaPreview data={data} />;
-          
-          case 'Finca': 
-          case 'Rural': 
-          case 'CasaCampo':
-          case 'Casa Campestre': 
-              return <RuralPreview data={data} />;
-          
-          case 'Lote': 
-          case 'Terreno': 
-              return <LotePreview data={data} />;
-          
-          case 'Local': 
-              return <LocalPreview data={data} />;
-          
-          case 'Oficina': 
-              return <OficinaPreview data={data} />;
-          
+          case 'Casa': return <HousePreview data={data} />;
+          case 'Apartamento': return <ApartmentPreview data={data} />;
+          case 'Bodega': return <BodegaPreview data={data} />;
+          case 'Finca': case 'Rural': case 'CasaCampo': case 'Casa Campestre': return <RuralPreview data={data} />;
+          case 'Lote': case 'Terreno': return <LotePreview data={data} />;
+          case 'Local': return <LocalPreview data={data} />;
+          case 'Oficina': return <OficinaPreview data={data} />;
           default:
               return (
                   <div className="p-4 border border-dashed border-gray-300 rounded text-center text-gray-500 italic text-xs bg-gray-50">
                       Vista previa genérica (Tipo no configurado o desconocido: {activeType})
-                      <pre className="mt-2 text-[10px] text-left overflow-auto max-h-20 bg-white p-2 border rounded">
-                          {JSON.stringify(data.specs, null, 2)}
-                      </pre>
                   </div>
               );
       }
@@ -124,7 +107,7 @@ export default function PropertyPreviewModal({ data, activeType, onClose, onConf
                   </div>
               </div>
 
-              {/* --- AQUÍ SE INYECTA EL PREVIEW MODULAR (Card Específica) --- */}
+              {/* --- PREVIEW MODULAR --- */}
               <div className="animate-in slide-in-from-bottom-2">
                   {renderSpecificContent()}
               </div>
@@ -141,31 +124,38 @@ export default function PropertyPreviewModal({ data, activeType, onClose, onConf
                  </div>
               )}
 
-              {/* Galería Visual */}
-              {finalPreviewList.length > 0 && (
-                  <div>
-                      <p className="text-[10px] font-bold uppercase text-gray-400 mb-2">Galería ({finalPreviewList.length} elementos)</p>
+              {/* Galería Visual (Revisión Final) */}
+              <div>
+                  <p className="text-[10px] font-bold uppercase text-gray-400 mb-2 flex items-center gap-2">
+                      <ImageIcon size={12}/> Galería Final ({finalPreviewList.length} elementos)
+                  </p>
+                  
+                  {finalPreviewList.length > 0 ? (
                       <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin">
-                         {finalPreviewList.map((item: any, i: number) => (
-                             <div key={i} className={`relative w-28 h-20 shrink-0 rounded-lg overflow-hidden border-2 shadow-sm transition-transform hover:scale-105 ${i===0 ? "border-green-500 ring-2 ring-green-100" : "border-gray-100"}`}>
+                          {finalPreviewList.map((item: any, i: number) => (
+                             <div key={i} className={`relative w-32 h-24 shrink-0 rounded-lg overflow-hidden border-2 shadow-sm transition-transform hover:scale-105 ${i===0 ? "border-green-500 ring-2 ring-green-100" : "border-gray-100"}`}>
                                 {item.type === 'video' ? (
                                    <>
                                      <img src={`https://img.youtube.com/vi/${item.id}/default.jpg`} className="w-full h-full object-cover opacity-80" alt="video"/>
                                      <div className="absolute inset-0 flex items-center justify-center"><div className="bg-red-600 rounded-full p-1 shadow-lg"><Youtube size={16} className="text-white"/></div></div>
                                    </>
                                 ) : (
-                                   <img src={item.url} className="w-full h-full object-cover" alt="preview"/>
+                                   <img src={item.url} className="w-full h-full object-cover" alt={`Preview ${i}`}/>
                                 )}
                                 <div className="absolute top-0 left-0 bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-br-lg backdrop-blur-sm">
                                     {i === 0 ? "PORTADA" : `#${i+1}`}
                                 </div>
                              </div>
-                         ))}
+                          ))}
                       </div>
-                  </div>
-              )}
+                  ) : (
+                      <div className="p-4 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-center text-xs text-gray-400 italic">
+                          Sin imágenes seleccionadas.
+                      </div>
+                  )}
+              </div>
 
-              {/* Datos Privados (Solo Admin) */}
+              {/* Datos Privados */}
               <div className="border-t border-red-100 pt-4 mt-4 bg-red-50/30 p-4 rounded-xl">
                   <p className="text-[10px] font-bold uppercase text-red-500 mb-3 flex items-center gap-2">
                       <User size={14}/> Datos Privados (No visibles al público)

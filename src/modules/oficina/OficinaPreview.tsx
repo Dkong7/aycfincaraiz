@@ -3,7 +3,8 @@ import { formatCurrency } from "../../utils/formatters";
 import { translate } from "./oficina.config";
 import { 
   Building2, Maximize, DollarSign, CheckCircle2, 
-  Briefcase, Network, Car, ArrowUpFromLine, Layers, Hash
+  Briefcase, Network, Car, ArrowUpFromLine, Layers, Hash,
+  Calendar, Building
 } from 'lucide-react';
 
 export default function OficinaPreview({ data }: any) {
@@ -57,8 +58,8 @@ export default function OficinaPreview({ data }: any) {
             />
          )}
          
-         {/* --- ESTRATO AGREGADO --- */}
-         <Row label="Estrato" val={data.stratum} icon={Layers} />
+         <Row label="Estrato" val={data.stratum} icon={Hash} />
+         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
          
          <Row label="Área Privada" val={`${s.area || 0} m²`} icon={Maximize} valClass="text-emerald-700 font-bold" />
          <Row label="Ubicación" val={`Piso ${s.floor_level || "-"}`} icon={ArrowUpFromLine} />
@@ -69,8 +70,9 @@ export default function OficinaPreview({ data }: any) {
          <Row label="Garajes Privados" val={s.garages} icon={Car} />
          <Row label="Tipo de Baños" val={translate(s.bathrooms_type)} />
          <Row label="Estado" val={s.condition} icon={CheckCircle2} />
+         <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
          
-         {/* --- ASCENSORES AGREGADOS --- */}
+         {/* DESGLOSE ASCENSORES */}
          {(Number(s.elevators_public) > 0 || Number(s.elevators_service) > 0) && (
             <div className="flex justify-between items-center border-b border-gray-50 py-1.5">
                <div className="flex items-center gap-2">
@@ -83,8 +85,6 @@ export default function OficinaPreview({ data }: any) {
                </div>
             </div>
          )}
-
-         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={DollarSign} />
       </Section>
 
       {/* 3. INFRAESTRUCTURA TÉCNICA */}

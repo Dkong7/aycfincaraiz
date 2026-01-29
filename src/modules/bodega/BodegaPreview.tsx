@@ -50,10 +50,13 @@ export default function BodegaPreview({ data }: any) {
             <Row label="Precio USD" val={`$${data.price_usd}`} icon={DollarSign} valClass="text-green-600 font-bold" />
          )}
          
-         {/* --- ESTRATO CORREGIDO --- */}
-         <Row label="Estrato" val={data.stratum} icon={Hash} />
+         <Row label="Estrato" val={data.stratum || s.stratum} icon={Hash} />
          
-         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
+         <Row 
+            label="Administración" 
+            val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} 
+            icon={Building} 
+         />
          <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
          <Row label="Ubicación" val={translate(s.location_type)} icon={Store} />
       </Section>
@@ -61,7 +64,8 @@ export default function BodegaPreview({ data }: any) {
       {/* 2. DIMENSIONES & ESTRUCTURA */}
       <Section title="Dimensiones & Estructura" icon={Maximize}>
          <Row label="Área Lote Total" val={`${s.area_total || 0} m²`} icon={Maximize} valClass="text-amber-700 font-bold" />
-         <Row label="Área Libre" val={`${s.area_free || 0} m²`} icon={Maximize} />
+         {/* CORRECCIÓN: Área Construida en lugar de Libre */}
+         <Row label="Área Construida" val={`${s.area_built || 0} m²`} icon={Maximize} />
          <Row label="Frente x Fondo" val={`${s.front || 0} x ${s.depth || 0} m`} icon={Ruler} />
          <Row label="Altura Libre" val={`${s.height || 0} m`} icon={ArrowUpFromLine} />
          <Row label="Niveles" val={s.levels_qty} icon={Layers} />
@@ -84,7 +88,7 @@ export default function BodegaPreview({ data }: any) {
          <Row label="Tractomulas" val={s.has_truck_access ? "Sí, Acceso" : "No"} icon={Truck} />
       </Section>
 
-      {/* 5. MÓDULOS OPCIONALES (Solo si existen) */}
+      {/* 5. MÓDULOS OPCIONALES */}
       
       {/* OFICINAS */}
       {s.has_offices && (

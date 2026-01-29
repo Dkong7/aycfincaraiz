@@ -1,24 +1,25 @@
 import React from "react";
 import { 
   Maximize, Warehouse, Truck, Weight, Bolt, Ruler, 
-  Container, CheckCircle2, DollarSign, ShoppingBag,
-  TrendingUp, RefreshCw, ShieldCheck, Layers, ArrowUpFromLine,
-  Briefcase, Utensils, Bath, Car, Factory, Grid, Hash
+  Container, DollarSign, ShoppingBag, Layers, ArrowUpFromLine,
+  Briefcase, Utensils, Bath, Car, Factory, Grid, Hash, CheckCircle2
 } from "lucide-react";
 import { useApp } from "../../context/AppContext"; 
 import { useTRM } from "../../hooks/useTRM";       
 import { formatCurrency } from "../../utils/formatters";
 import { translate } from "./bodega.config"; 
 
-// AÑADIDO: 'stratum' en las props
 export default function BodegaDetailView({ specs, description, adminFee, priceCop, priceUsd, stratum }: any) {
-  const { translateDynamic, currency, lang } = useApp();
-  const trm = useTRM();
+  const { translateDynamic, currency } = useApp();
   const tr = (key: string) => translateDynamic(key);
 
   const showUsd = currency === "USD";
   const mainPrice = showUsd ? (priceUsd ? `USD $${formatCurrency(priceUsd)}` : "USD --") : `$${formatCurrency(priceCop)}`;
   const secondaryPrice = showUsd ? `$${formatCurrency(priceCop)} COP` : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
+
+  // --- ADMIN FEE ROBUSTO ---
+  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
 
   // Helper de UI
   const SpecRow = ({ label, val, icon: Icon }: any) => (
@@ -43,10 +44,10 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                  {secondaryPrice && <span className="text-sm font-medium text-gray-400">{secondaryPrice}</span>}
               </div>
           </div>
-          {adminFee > 0 && (
+          {cleanAdmin > 0 && (
              <div className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl">
                  <p className="text-[10px] font-bold uppercase text-gray-400">Administración</p>
-                 <p className="font-bold text-gray-700">{formatCurrency(adminFee)}</p>
+                 <p className="font-bold text-gray-700">${formatCurrency(cleanAdmin)}</p>
              </div>
           )}
        </div>
@@ -60,15 +61,15 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                <p className="text-[10px] font-bold text-gray-400 uppercase">m² Lote Total</p>
            </div>
            
-           {/* Área Libre (Destacada) */}
+           {/* Área Construida (CORREGIDO para coincidir con el Form) */}
            <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center relative overflow-hidden shadow-sm">
                <div className="absolute top-0 right-0 p-1 bg-amber-200 rounded-bl-lg"><Truck size={12} className="text-amber-800"/></div>
                <Container className="mx-auto text-amber-600 mb-2" size={24}/>
-               <p className="text-2xl font-black text-amber-900">{specs.area_free || 0}</p>
-               <p className="text-[10px] font-bold text-amber-700 uppercase">m² Bodega Libre</p>
+               <p className="text-2xl font-black text-amber-900">{specs.area_built || 0}</p>
+               <p className="text-[10px] font-bold text-amber-700 uppercase">m² Construidos</p>
            </div>
 
-           {/* Estrato (CONECTADO) */}
+           {/* Estrato */}
            <div className="p-4 bg-white border border-gray-100 rounded-2xl text-center shadow-sm hover:shadow-md transition-shadow">
                <Hash className="mx-auto text-gray-400 mb-2" size={24}/>
                <p className="text-2xl font-black text-gray-800">{stratum || "N/A"}</p>
@@ -109,7 +110,7 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                  )}
               </div>
 
-              {/* MÓDULO OFICINAS (Si existe) */}
+              {/* MÓDULO OFICINAS */}
               {specs.has_offices && (
                  <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-blue-50 rounded-bl-full"></div>
@@ -137,7 +138,7 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                  </div>
               )}
 
-              {/* MÓDULO MEZZANINE (Si existe) */}
+              {/* MÓDULO MEZZANINE */}
               {specs.has_mezzanine && (
                  <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                     <h3 className="font-black text-sm text-gray-800 uppercase mb-4 flex items-center gap-2">
@@ -164,7 +165,6 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
           {/* COLUMNA DERECHA (1/3): ESPECIFICACIONES TÉCNICAS */}
           <div className="space-y-6">
               
-              {/* FICHA TÉCNICA PRINCIPAL */}
               <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                  <h3 className="font-black text-sm text-gray-800 uppercase mb-4 border-b pb-2 flex items-center gap-2">
                      <Bolt size={16} className="text-amber-600"/> {tr("Especificaciones Técnicas")}
@@ -179,7 +179,6 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                  </div>
               </div>
 
-              {/* LOGÍSTICA Y SERVICIOS */}
               <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                  <h3 className="font-black text-sm text-gray-800 uppercase mb-4 border-b pb-2 flex items-center gap-2">
                      <Truck size={16} className="text-amber-600"/> {tr("Logística & Bienestar")}
@@ -196,7 +195,7 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
           </div>
        </div>
        
-       {/* SECCIÓN 3: INFRAESTRUCTURA & SEGURIDAD (LISTA COMPLETA) */}
+       {/* SECCIÓN 3: INFRAESTRUCTURA */}
        {specs.features && specs.features.length > 0 && (
          <div className="bg-gray-900 p-8 rounded-3xl text-gray-300 shadow-xl">
             <h3 className="font-black text-sm text-amber-500 uppercase tracking-widest mb-6 flex items-center gap-2">

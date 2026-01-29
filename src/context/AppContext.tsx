@@ -18,19 +18,54 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 // ==========================================
 const translations: Record<string, Record<string, string>> = {
   ES: {
-    // NAVEGACIÓN & HERO
-    nav_home: "Inicio", nav_properties: "Inmuebles", nav_services: "Servicios", nav_blog: "Blog", nav_about: "Nosotros", nav_contact: "Contacto",
-    hero_btn: "Ver Detalles", feat_title: "Propiedades Destacadas", view_all: "Ver todas",
+    // --- NAVEGACIÓN & HERO ---
+    nav_home: "Inicio", 
+    nav_properties: "Inmuebles", 
+    nav_services: "Servicios", 
+    nav_blog: "Blog", 
+    nav_about: "Nosotros", 
+    nav_contact: "Contacto",
     
-    // DETALLES GENERALES
+    // *** CLAVES FALTANTES AGREGADAS ***
+    srv_appraisals: "Avalúos Certificados",
+    srv_legal: "Gestión Jurídica",
+    srv_audio: "Producción Visual",
+    // **********************************
+
+    hero_btn: "Ver Detalles", 
+    feat_title: "Propiedades Destacadas", 
+    view_all: "Ver todas",
+    
+    // --- DETALLES GENERALES ---
     det_desc: "Descripción", det_features: "Características", det_admin: "Valor Administración", det_whatsapp: "Consultar por WhatsApp",
     
-    // --- FOOTER & CONTACTO (INTEGRADO) ---
+    // --- FOOTER & CONTACTO ---
     footer_about_title: "SOBRE NOSOTROS",
     footer_contact_title: "CONTACTO",
     footer_desc: "Somos una inmobiliaria boutique en Bogotá, especializada en propiedades exclusivas y asesoría integral. Tu patrimonio, nuestra prioridad.",
     
-    // --- BARRA LATERAL (SIDEBAR) ---
+    // --- PÁGINA DE CONTACTO ---
+    contact_secure_badge: "Canal Seguro & Encriptado",
+    contact_title: "CONTÁCTANOS",
+    contact_hero_desc: "¿Buscas comprar, vender o un avalúo certificado? Estamos listos para asesorarte con total confidencialidad.",
+    contact_call: "Llámanos",
+    contact_write: "Escríbenos",
+    form_title: "Déjanos un Mensaje",
+    form_name: "Nombre Completo",
+    form_phone: "Teléfono",
+    form_email: "Correo Electrónico",
+    form_msg: "Tu Mensaje",
+    form_btn: "ENVIAR MENSAJE",
+    form_sending: "ENVIANDO...",
+    security_note: "Tus datos están protegidos por AyC Shield v2.0",
+    req_field: "Campo requerido",
+    inv_phone: "Número inválido",
+    inv_email: "Email inválido",
+    msg_sent: "¡Mensaje enviado con éxito!",
+    ph_name: "Ej: Juan Pérez",
+    ph_msg: "¿Cómo podemos ayudarte hoy?",
+
+    // --- BARRA LATERAL ---
     agent_title: "AGENTE RESPONSABLE",
     code: "Cód",
     btn_whatsapp: "Consultar por WhatsApp",
@@ -41,25 +76,60 @@ const translations: Record<string, Record<string, string>> = {
     location_priv_title: "Ubicación Privilegiada",
     location_priv_desc: "Esta propiedad cuenta con una excelente ubicación estratégica. Contáctanos para conocer el punto exacto.",
     
-    // Mapeo DB -> Label UI (Español)
+    // Mapeo DB -> Label UI
     Casa: "Casa", Apartamento: "Apartamento", Bodega: "Bodega", Oficina: "Oficina", 
     Local: "Local", Lote: "Lote", Finca: "Finca", Rural: "Rural", 
     CasaCampo: "Casa Campestre", Terreno: "Terreno"
   },
   EN: {
-    // NAVEGACIÓN & HERO
-    nav_home: "Home", nav_properties: "Properties", nav_services: "Services", nav_blog: "Blog", nav_about: "About Us", nav_contact: "Contact",
-    hero_btn: "View Details", feat_title: "Featured Properties", view_all: "View All",
+    // --- NAVEGACIÓN & HERO ---
+    nav_home: "Home", 
+    nav_properties: "Properties", 
+    nav_services: "Services", 
+    nav_blog: "Blog", 
+    nav_about: "About Us", 
+    nav_contact: "Contact",
+
+    // *** CLAVES FALTANTES AGREGADAS ***
+    srv_appraisals: "Certified Appraisals",
+    srv_legal: "Legal Management",
+    srv_audio: "Visual Production",
+    // **********************************
+
+    hero_btn: "View Details", 
+    feat_title: "Featured Properties", 
+    view_all: "View All",
     
-    // DETALLES GENERALES
+    // --- DETALLES GENERALES ---
     det_desc: "Description", det_features: "Features", det_admin: "HOA Fee", det_whatsapp: "Chat on WhatsApp",
     
-    // --- FOOTER & CONTACTO (INTEGRADO) ---
+    // --- FOOTER & CONTACTO ---
     footer_about_title: "ABOUT US",
     footer_contact_title: "CONTACT",
     footer_desc: "We are a boutique real estate agency in Bogota, specializing in exclusive properties and comprehensive advice. Your heritage, our priority.",
     
-    // --- BARRA LATERAL (SIDEBAR) ---
+    // --- PÁGINA DE CONTACTO ---
+    contact_secure_badge: "Secure & Encrypted Channel",
+    contact_title: "GET IN TOUCH",
+    contact_hero_desc: "Looking to buy, sell, or need a certified appraisal? We are ready to advise you with total confidentiality.",
+    contact_call: "Call Us",
+    contact_write: "Email Us",
+    form_title: "Drop Us a Message",
+    form_name: "Full Name",
+    form_phone: "Phone Number",
+    form_email: "Email Address",
+    form_msg: "Your Message",
+    form_btn: "SEND MESSAGE",
+    form_sending: "SENDING...",
+    security_note: "Your data is protected by AyC Shield v2.0",
+    req_field: "Required field",
+    inv_phone: "Invalid phone number",
+    inv_email: "Invalid email",
+    msg_sent: "Message sent successfully!",
+    ph_name: "Ex: John Doe",
+    ph_msg: "How can we help you today?",
+
+    // --- BARRA LATERAL ---
     agent_title: "LISTING AGENT",
     code: "Code",
     btn_whatsapp: "Chat on WhatsApp",
@@ -70,7 +140,7 @@ const translations: Record<string, Record<string, string>> = {
     location_priv_title: "Prime Location",
     location_priv_desc: "This property boasts a strategic location. Contact us to reveal the exact spot.",
 
-    // Mapeo DB -> Label UI (Inglés)
+    // Mapeo DB -> Label UI
     Casa: "House", Apartamento: "Apartment", Bodega: "Warehouse", Oficina: "Office", 
     Local: "Retail Store", Lote: "Lot", Finca: "Farm", Rural: "Rural", 
     CasaCampo: "Country House", Terreno: "Land"
@@ -93,11 +163,9 @@ const dynamicKeywords: Record<string, string> = {
     "Cerca": "Near", "Parque": "Park", "Vista": "View", "Exterior": "Exterior", 
     "Interior": "Interior", 
     "Centro Comercial": "Shopping Mall", 
-    "Esquinero": "Corner Location",
-    "Esquinera": "Corner Location",
-    "Vía Principal": "Main Road",
-    "Medianero": "Mid-block Lot",
-    "Medianera": "Mid-block Lot",
+    "Esquinero": "Corner Location", "Esquinera": "Corner Location",
+    "Vía Principal": "Main Road", 
+    "Medianero": "Mid-block Lot", "Medianera": "Mid-block Lot",
     
     // --- ADJETIVOS ---
     "Excelente": "Excellent", "Oportunidad": "Opportunity", "Inversión": "Investment", 
@@ -147,7 +215,7 @@ const dynamicKeywords: Record<string, string> = {
     "Árboles Frutales": "Fruit Trees", "Corral": "Corral",
     "Alambre de Púas": "Barbed Wire", "Cerca Viva": "Live Fence",
 
-    // --- BODEGA (NUEVOS TÉRMINOS INDUSTRIALES) ---
+    // --- BODEGA (INDUSTRIAL) ---
     "Altura Triple": "Triple Height", "Doble Altura": "Double Height",
     "Altura Libre": "Clear Height", "Área Libre": "Clear Area",
     "Carga Eléctrica": "Electric Load", "Resistencia Piso": "Floor Load",
@@ -161,8 +229,6 @@ const dynamicKeywords: Record<string, string> = {
     "Mezanine": "Mezzanine", "Oficinas": "Offices", "Locales": "Retail Units",
     "Transformador": "Transformer", "Potencia": "Power", "Capacidad": "Capacity",
     "Corredizo": "Sliding", "Levadizo": "Overhead", "Persiana": "Roll-up", "Muelle": "Dock",
-    
-    // Extras Bodega
     "Puente Grúa": "Crane Bridge", "Piso Epóxico": "Epoxy Floor",
     "Techo Termoacústico": "Thermoacoustic Roof", "Iluminación Natural": "Natural Lighting",
     "Subestación Eléctrica": "Electrical Substation", "Gas Industrial": "Industrial Gas",
@@ -183,7 +249,7 @@ const dynamicKeywords: Record<string, string> = {
     "Uso de Suelo": "Land Use", "Comercial": "Commercial",
     "Ficha Comercial": "Commercial Specs", "Descripción del Local": "Store Description",
 
-    // --- OFICINA (NUEVOS TÉRMINOS CORPORATIVOS) ---
+    // --- OFICINA (CORPORATIVO) ---
     "Red de Datos": "Data Network", "Cableado Estructurado": "Structured Cabling",
     "Aire Acondicionado": "Air Conditioning", "Aire Acondicionado Central": "Central A/C",
     "Sala de Juntas": "Boardroom", "Auditorio": "Auditorium", 

@@ -4,11 +4,14 @@ import { translate } from "./rural.config";
 import { 
   Mountain, Home, DollarSign, Trees, 
   Map, Droplets, Route, Fence, 
-  Bed, Bath, Maximize
+  Bed, Bath, Maximize, Building, Calendar
 } from "lucide-react";
 
 export default function RuralPreview({ data }: any) {
   const s = data.specs || {};
+
+  // VALIDACIÓN DEFENSIVA: Aseguramos que sea un array
+  const featuresList = Array.isArray(s.features) ? s.features : [];
 
   // Helper para Secciones
   const Section = ({ title, icon: Icon, children }: any) => (
@@ -47,12 +50,15 @@ export default function RuralPreview({ data }: any) {
          />
          {data.price_usd && Number(data.price_usd) > 0 && (
             <Row 
-                label="Precio USD" 
-                val={`$${data.price_usd}`} 
-                icon={DollarSign} 
-                valClass="text-green-600 font-bold" 
+               label="Precio USD" 
+               val={`$${data.price_usd}`} 
+               icon={DollarSign} 
+               valClass="text-green-600 font-bold" 
             />
          )}
+         
+         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
+         
          <Row label="Área Lote" val={s.land_area} icon={Maximize} valClass="text-purple-700 font-bold" />
          <Row label="Topografía" val={translate(s.topography)} icon={Map} />
       </Section>
@@ -65,12 +71,12 @@ export default function RuralPreview({ data }: any) {
       </Section>
 
       {/* 3. CASA PRINCIPAL (Si existe) */}
-      {Number(s.built_area) > 0 && (
+      {(Number(s.built_area) > 0 || Number(s.bedrooms) > 0) && (
          <Section title="Casa Principal" icon={Home}>
-            <Row label="Área Const." val={`${s.built_area} m²`} icon={Maximize} />
+            <Row label="Área Const." val={`${s.built_area || 0} m²`} icon={Maximize} />
             <Row label="Habitaciones" val={s.bedrooms} icon={Bed} />
             <Row label="Baños" val={s.bathrooms} icon={Bath} />
-            <Row label="Niveles" val={s.levels} icon={Home} />
+            <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
          </Section>
       )}
 
@@ -78,7 +84,7 @@ export default function RuralPreview({ data }: any) {
       <div className="col-span-1 md:col-span-2">
          <Section title="Inventario & Recreación" icon={Trees}>
             <p className="text-xs text-gray-600 leading-relaxed italic">
-               {[...(s.features || [])].join(", ") || "Sin inventario adicional"}
+               {featuresList.length > 0 ? featuresList.join(", ") : "Sin inventario adicional"}
             </p>
          </Section>
       </div>

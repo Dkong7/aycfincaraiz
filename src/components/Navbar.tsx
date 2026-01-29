@@ -24,9 +24,7 @@ export default function Navbar() {
   // --- LÓGICA VISUAL ---
   const logoSrc = lang === "ES" ? "/ayclogo.svg" : "/ayclogoen.svg";
 
-  // --- SOLUCIÓN BANDERA: Usamos imágenes reales para evitar las letras "CO/US" ---
-  // Si estamos en Español -> Bandera Colombia
-  // Si estamos en Inglés -> Bandera USA
+  // --- BANDERA (Solución visual limpia) ---
   const flagUrl = lang === "ES" 
     ? "https://flagcdn.com/w80/co.png" 
     : "https://flagcdn.com/w80/us.png";
@@ -95,24 +93,30 @@ export default function Navbar() {
                   onMouseLeave={handleMouseLeave}
                >
                   <div className="bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden py-2 border-t-4 border-green-600 ring-1 ring-black/5">
+                    
+                    {/* AVALÚOS */}
                     <Link to="/servicios/avaluos" className="flex items-center gap-3 px-6 py-4 hover:bg-green-50 border-b border-gray-100 group/item transition-colors">
                        <BadgeCheck className="text-green-600 group-hover/item:scale-110 transition-transform" size={20}/>
                        <div>
-                           <span className="block font-bold text-sm text-[#0A192F]">{t('srv_appraisals')}</span>
+                           <span className="block font-bold text-sm text-[#0A192F]">{t('srv_appraisals') || "Avalúos Certificados"}</span>
                            <span className="text-[10px] text-gray-400 font-normal">Certificados RAA</span>
                        </div>
                     </Link>
+                    
+                    {/* JURÍDICO */}
                     <Link to="/servicios/juridico" className="flex items-center gap-3 px-6 py-4 hover:bg-green-50 border-b border-gray-100 group/item transition-colors">
                        <Scale className="text-green-600 group-hover/item:scale-110 transition-transform" size={20}/>
                        <div>
-                           <span className="block font-bold text-sm text-[#0A192F]">{t('srv_legal')}</span>
+                           <span className="block font-bold text-sm text-[#0A192F]">{t('srv_legal') || "Gestión Jurídica"}</span>
                            <span className="text-[10px] text-gray-400 font-normal">Saneamiento predial</span>
                        </div>
                     </Link>
+                    
+                    {/* AUDIOVISUAL */}
                     <Link to="/servicios/audiovisual" className="flex items-center gap-3 px-6 py-4 hover:bg-green-50 group/item transition-colors">
                        <Video className="text-green-600 group-hover/item:scale-110 transition-transform" size={20}/>
                        <div>
-                           <span className="block font-bold text-sm text-[#0A192F]">{t('srv_audio')}</span>
+                           <span className="block font-bold text-sm text-[#0A192F]">{t('srv_audio') || "Producción Visual"}</span>
                            <span className="text-[10px] text-gray-400 font-normal">Drones 4K & Recorridos</span>
                        </div>
                     </Link>
@@ -128,7 +132,7 @@ export default function Navbar() {
         {/* --- BOTONES DESKTOP --- */}
         <div className="hidden md:flex items-center gap-4">
            
-           {/* BOTÓN DE IDIOMA (IMAGEN REAL - CÍRCULO PERFECTO) */}
+           {/* BOTÓN DE IDIOMA */}
            <button 
              onClick={toggleLang} 
              className="
@@ -177,13 +181,13 @@ export default function Navbar() {
             <div className="space-y-4 border-l-2 border-green-600/30 pl-6 my-2">
                 <p className="text-xs uppercase text-green-500 font-bold tracking-[0.2em]">{t('nav_services')}</p>
                 <Link to="/servicios/avaluos" onClick={() => setIsMobileOpen(false)} className="block text-lg text-gray-300 hover:text-white font-medium">
-                  {t('srv_appraisals')}
+                  {t('srv_appraisals') || "Avalúos"}
                 </Link>
                 <Link to="/servicios/juridico" onClick={() => setIsMobileOpen(false)} className="block text-lg text-gray-300 hover:text-white font-medium">
-                  {t('srv_legal')}
+                  {t('srv_legal') || "Jurídico"}
                 </Link>
                 <Link to="/servicios/audiovisual" onClick={() => setIsMobileOpen(false)} className="block text-lg text-gray-300 hover:text-white font-medium">
-                  {t('srv_audio')}
+                  {t('srv_audio') || "Audiovisual"}
                 </Link>
             </div>
 

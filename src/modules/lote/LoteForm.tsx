@@ -36,46 +36,65 @@ const SelectIcon = ({ icon: Icon, label, register, name, options, s }: any) => (
 );
 
 export default function LoteForm({ register, s }: any) {
-  const labelColor = "text-gray-600"; // Color neutro para Lotes (Gris/Plata)
+  const labelColor = "text-gray-600"; // Color neutro para Lotes
 
   return (
     <div className="animate-in fade-in space-y-6">
 
-      {/* SECCIÓN 1: DIMENSIONES Y USO */}
+      {/* SECCIÓN 1: DIMENSIONES BÁSICAS */}
       <div>
         <div className="flex items-center gap-2 border-b border-gray-300 pb-2 mb-4">
            <Map className="text-gray-600" size={18}/>
-           <h3 className="font-black text-gray-700 uppercase text-xs tracking-widest">Dimensiones & Uso</h3>
+           <h3 className="font-black text-gray-700 uppercase text-xs tracking-widest">Dimensiones & Terreno</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
            <InputIcon register={register} name="specs.area" label="Área Total (m²)" icon={Maximize} s={s} type="number" placeholder="Ej: 500"/>
            <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number"/>
            <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} type="number"/>
-           
-           <SelectIcon register={register} name="specs.soil_use" label="Uso de Suelo" icon={Briefcase} s={s} options={[
-              "Residencial", "Comercial", "Industrial", "Agrícola", "Institucional", "Mixto"
-           ]} />
+           <SelectIcon register={register} name="specs.topography" label="Topografía" icon={Layers} s={s} options={["Plano", "Inclinado", "Mixto", "Ondulado"]} />
         </div>
       </div>
 
-      {/* SECCIÓN 2: UBICACIÓN Y TOPOGRAFÍA */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <SelectIcon register={register} name="specs.topography" label="Topografía" icon={Layers} s={s} options={["Plano", "Inclinado", "Mixto"]} />
-          <SelectIcon register={register} name="specs.location_type" label="Ubicación Lote" icon={MapPin} s={s} options={["Esquinero", "Medianero", "Sobre Vía Principal", "Interior"]} />
-          <SelectIcon register={register} name="specs.classification" label="Clasificación" icon={Map} s={s} options={["Urbano", "Suburbano", "Rural", "Expansión Urbana"]} />
-          <InputIcon register={register} name="specs.norm_code" label="Código Normativa" icon={ScrollText} s={s} placeholder="Ej: UPZ-123"/>
+      {/* SECCIÓN 2: UBICACIÓN Y CLASIFICACIÓN */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <SelectIcon register={register} name="specs.location_type" label="Ubicación Lote" icon={MapPin} s={s} options={["Esquinero", "Medianero", "Sobre Vía Principal", "Interior", "Callejón"]} />
+          <SelectIcon register={register} name="specs.classification" label="Clasificación Suelo" icon={Map} s={s} options={["Urbano", "Suburbano", "Rural", "Expansión Urbana"]} />
+          <InputIcon register={register} name="specs.max_height" label="Altura Permitida (Pisos)" icon={Ruler} s={s} type="number" placeholder="Ej: 5"/>
       </div>
 
-      {/* SECCIÓN 3: NORMATIVA */}
+      {/* SECCIÓN 3: USO DE SUELO (REEMPLAZO DE NORMATIVA) */}
       <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
         <div className="flex items-center gap-2 mb-3">
-           <ScrollText className="text-gray-500" size={16}/>
-           <h3 className={`text-[10px] font-bold uppercase opacity-70 ${labelColor}`}>Indices de Construcción</h3>
+           <Briefcase className="text-gray-500" size={16}/>
+           <h3 className={`text-[10px] font-bold uppercase opacity-70 ${labelColor}`}>Potencial de Desarrollo (Usos)</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-           <InputIcon register={register} name="specs.occupation_index" label="Índice Ocupación (%)" icon={Layers} s={s} placeholder="Ej: 40%"/>
-           <InputIcon register={register} name="specs.construction_index" label="Índice Construcción" icon={Layers} s={s} placeholder="Ej: 2.5"/>
-           <InputIcon register={register} name="specs.max_height" label="Altura Máxima (Pisos)" icon={Ruler} s={s} type="number"/>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           {/* Uso Principal */}
+           <SelectIcon 
+              register={register} 
+              name="specs.soil_use" 
+              label="Uso Principal Permitido" 
+              icon={Briefcase} 
+              s={s} 
+              options={[
+                 "Residencial (Vivienda)", 
+                 "Comercial / Servicios", 
+                 "Industrial / Bodegas", 
+                 "Dotacional / Institucional", 
+                 "Mixto (Vivienda + Comercio)",
+                 "Agrícola / Recreativo"
+              ]} 
+           />
+           
+           {/* Uso Complementario (Opcional) */}
+           <InputIcon 
+              register={register} 
+              name="specs.soil_use_secondary" 
+              label="Usos Complementarios / Notas" 
+              icon={ScrollText} 
+              s={s} 
+              placeholder="Ej: Comercio en primer piso, Oficinas..."
+           />
         </div>
       </div>
 

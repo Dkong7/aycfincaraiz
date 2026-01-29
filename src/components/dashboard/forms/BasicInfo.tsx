@@ -1,7 +1,6 @@
 import React from "react";
 import { Home, Map, Sparkles, Layers } from "lucide-react";
 
-// Helper para Input con Icono
 const InputIcon = ({ icon: Icon, label, register, name, placeholder, s }: any) => (
   <div className="w-full">
     <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>
@@ -20,7 +19,7 @@ const InputIcon = ({ icon: Icon, label, register, name, placeholder, s }: any) =
 
 export default function BasicInfo({ register, setValue, getValues, s }: any) {
   
-  // --- IA CONTEXTUAL MEJORADA (Motor de Copywriting) ---
+  // --- IA CONTEXTUAL MEJORADA ---
   const handleAIEnrich = () => {
       const title = getValues("title");
       const hood = getValues("neighborhood");
@@ -37,48 +36,31 @@ export default function BasicInfo({ register, setValue, getValues, s }: any) {
       setValue("description", "🤖 Redactando descripción persuasiva...");
       
       setTimeout(() => {
-        // 1. GANCHOS DE APERTURA (Variedad)
         const hooks = [
             `¡EXCLUSIVIDAD Y CONFORT EN ${hood.toUpperCase()}!`,
             `Descubre tu próximo hogar en una de las zonas más valorizadas de ${city}.`,
             `¿Buscas calidad de vida? Este ${type} en ${hood} lo tiene todo.`,
-            `Oportunidad única de inversión en el corazón de ${hood}.`,
-            `Espectacular ${type} que redefine el concepto de bienestar.`
+            `Oportunidad única de inversión en el corazón de ${hood}.`
         ];
-
-        // 2. CUERPO DESCRIPTIVO (Venta de beneficios)
         const bodies = [
             `Esta propiedad destaca por su diseño inteligente y espacios generosos, pensados para maximizar la entrada de luz natural. Cada rincón ha sido cuidado para ofrecer una atmósfera de calidez y modernidad inigualable.`,
-            `Al ingresar, te recibirá un ambiente sofisticado y acogedor. Su distribución es perfecta para familias modernas o ejecutivos que valoran la privacidad sin sacrificar áreas sociales para compartir momentos inolvidables.`,
-            `Más que un ${type}, es un refugio de tranquilidad. Sus acabados y su arquitectura funcional garantizan una experiencia de vida superior, combinando estética y comodidad en cada metro cuadrado.`,
-            `Ideal para quienes exigen lo mejor. Este inmueble ofrece el equilibrio perfecto entre elegancia y funcionalidad, convirtiéndose en el escenario ideal para escribir nuevas historias.`
+            `Al ingresar, te recibirá un ambiente sofisticado y acogedor. Su distribución es perfecta para familias modernas o ejecutivos que valoran la privacidad sin sacrificar áreas sociales.`
         ];
-
-        // 3. ENTORNO Y UBICACIÓN (Contexto)
         const locations = [
-            `Su ubicación es estratégica: rodeado de parques, con acceso inmediato a vías principales y cerca de la mejor oferta gastronómica y comercial de ${city}.`,
-            `Disfruta de la conveniencia de vivir en ${hood}, un sector caracterizado por su seguridad, sus zonas verdes y su cercanía a todo lo que necesitas en tu día a día.`,
-            `Ubicado en un entorno privilegiado de estrato ${stratum || "alto"}, garantizando no solo un excelente estilo de vida, sino una sólida valorización de tu patrimonio a largo plazo.`,
-            `Vivir aquí significa tenerlo todo cerca: colegios de prestigio, centros comerciales y facilidades de transporte, en un barrio tranquilo y residencial.`
+            `Su ubicación es estratégica: rodeado de parques, con acceso inmediato a vías principales y cerca de la mejor oferta gastronómica de ${city}.`,
+            `Disfruta de la conveniencia de vivir en ${hood}, un sector caracterizado por su seguridad, sus zonas verdes y su cercanía a todo lo que necesitas.`
         ];
-
-        // 4. CIERRE (Llamada a la acción)
         const ctas = [
-            `No dejes pasar esta oportunidad de mercado. ¡Contáctanos hoy mismo para agendar tu visita!`,
-            `Propiedades con estas características no duran mucho en el mercado. ¡Agenda tu cita ahora!`,
-            `Haz realidad el sueño de vivir como mereces. Llámanos y conoce tu futuro hogar.`,
-            `Una inversión inteligente para tu futuro. ¡Escríbenos para más detalles!`
+            `No dejes pasar esta oportunidad. ¡Contáctanos hoy mismo para agendar tu visita!`,
+            `Propiedades con estas características no duran mucho. ¡Agenda tu cita ahora!`
         ];
 
-        // Función para elegir al azar
         const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-
         const generatedText = `${pick(hooks)}\n\n${pick(bodies)} ${pick(locations)}\n\n${pick(ctas)}`;
         
-        // Conserva lo que el usuario ya escribió si no es el mensaje de carga
         const finalDesc = (currentDesc && !currentDesc.includes("🤖") ? currentDesc + "\n\n" : "") + generatedText;
         setValue("description", finalDesc);
-      }, 1500); // Un poco más de tiempo para "simular" pensamiento complejo
+      }, 1500);
   };
 
   return (
@@ -86,7 +68,7 @@ export default function BasicInfo({ register, setValue, getValues, s }: any) {
        {/* Título */}
        <InputIcon register={register} name="title" label="Título del Anuncio" placeholder="Ej: Espectacular Casa en Santa Ana" icon={Home} s={s} />
        
-       {/* Descripción con IA Mejorada */}
+       {/* Descripción */}
        <div className="relative">
           <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>Descripción Detallada</label>
           <textarea 
@@ -104,12 +86,11 @@ export default function BasicInfo({ register, setValue, getValues, s }: any) {
           </button>
        </div>
 
-       {/* Ubicación y Detalles (Ahora 3 Columnas) */}
+       {/* Ubicación y Detalles */}
        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <InputIcon register={register} name="municipality" label="Ciudad" placeholder="Bogotá" icon={Map} s={s} />
           <InputIcon register={register} name="neighborhood" label="Barrio" placeholder="Chicó" icon={Map} s={s} />
           
-          {/* Selector de Estrato */}
           <div className="w-full">
             <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>Estrato</label>
             <div className="relative group">
@@ -127,7 +108,6 @@ export default function BasicInfo({ register, setValue, getValues, s }: any) {
                     <option value="Campestre">Campestre / Rural</option>
                     <option value="Comercial">Comercial / Ind.</option>
                 </select>
-                {/* Flechita custom para el select */}
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-[10px]">▼</div>
             </div>
           </div>

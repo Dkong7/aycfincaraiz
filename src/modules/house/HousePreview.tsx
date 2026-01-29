@@ -41,7 +41,7 @@ export default function HousePreview({ data }: any) {
             <Row label="Precio USD" val={`$${data.price_usd}`} icon={DollarSign} valClass="text-green-600 font-bold" />
          )}
          
-         {/* CORRECCIÓN: Leemos data.stratum (Primer nivel, no specs) */}
+         {/* CORRECCIÓN: Leemos data.stratum (Primer nivel) */}
          <Row label="Estrato" val={data.stratum} icon={Hash} />
          
          <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
@@ -50,6 +50,7 @@ export default function HousePreview({ data }: any) {
 
       <Section title="Dimensiones" icon={Maximize}>
          <Row label="Área Lote" val={`${s.area_lot || 0} m²`} icon={Maximize} />
+         {/* CORRECCIÓN: area_built */}
          <Row label="Área Construida" val={`${s.area_built || 0} m²`} icon={Ruler} />
          {s.area_private && <Row label="Área Privada" val={`${s.area_private || 0} m²`} icon={Ruler} />}
          <Row label="Frente x Fondo" val={`${s.front || 0} x ${s.depth || 0} m`} icon={Grid} />

@@ -1,5 +1,8 @@
 import React from "react";
-import { Building2, Network, Briefcase, Maximize, ArrowUpFromLine, Car, Bath, Layers, Zap } from 'lucide-react';
+import { 
+  Building2, Network, Briefcase, Maximize, ArrowUpFromLine, 
+  Car, Bath, Layers, Zap, Calendar
+} from 'lucide-react';
 
 const TECH_FEATURES = [
   { id: "structured_cabling", label: "Cableado Estructurado" },
@@ -56,19 +59,30 @@ export default function OficinaForm({ register, s }: any) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
            <InputIcon register={register} name="specs.area" label="Área Privada (m²)" icon={Maximize} s={s} type="number"/>
            <InputIcon register={register} name="specs.floor_level" label="Piso / Nivel" icon={ArrowUpFromLine} s={s} type="number"/>
-           
-           {/* Sin Estrato Aquí (Ya está en BasicInfo) */}
-           
            <InputIcon register={register} name="specs.garages" label="Garajes Privados" icon={Car} s={s} type="number"/>
            <SelectIcon register={register} name="specs.condition" label="Estado Entrega" icon={Briefcase} s={s} options={["Obra Gris", "Adecuada", "Amoblada", "Remodelada"]} />
         </div>
         
-        {/* NUEVO: DETALLE DE BAÑOS Y ASCENSORES */}
+        {/* NUEVO: DETALLE DE BAÑOS Y ANTIGÜEDAD */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
             <SelectIcon register={register} name="specs.bathrooms_type" label="Tipo de Baños" icon={Bath} s={s} options={["Privados", "Batería Comunal", "Mixto"]} />
             <InputIcon register={register} name="specs.bathrooms" label="# Baños Internos" icon={Bath} s={s} type="number"/>
             
-            {/* NUEVOS CAMPOS ASCENSORES */}
+            {/* NUEVO CAMPO: ANTIGÜEDAD */}
+            <div className="col-span-2 md:col-span-2">
+                <SelectIcon 
+                  register={register} 
+                  name="specs.antiquity" 
+                  label="Edad Edificio" 
+                  icon={Calendar} 
+                  s={s} 
+                  options={["Estrenar", "1 a 5 años", "5 a 10 años", "10 a 20 años", "+20 años", "Remodelado"]} 
+                />
+            </div>
+        </div>
+
+        {/* CAMPOS DE ELEVADORES */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
             <InputIcon register={register} name="specs.elevators_public" label="# Ascensores Públicos" icon={ArrowUpFromLine} s={s} type="number"/>
             <InputIcon register={register} name="specs.elevators_service" label="# Ascensores Servicio" icon={Layers} s={s} type="number"/>
         </div>

@@ -1,19 +1,30 @@
 import { 
   MapPin, Droplets, Zap, FileText, Pickaxe, Mountain, Construction, 
-  Map, Ruler, Maximize, Briefcase, LandPlot
+  Map, Ruler, Maximize, Briefcase, FileCheck, Wifi, Flame, Lightbulb,
+  Footprints, Waves, Files, Car
 } from "lucide-react";
 
-// Iconos Específicos para Lotes
+// Iconos Específicos para Lotes (Mapeo de 'features' y etiquetas)
 export const LOTE_ICONS: Record<string, any> = {
-  "Vía Principal": MapPin,
-  "Acueducto": Droplets,
-  "Energía": Zap,
-  "Alcantarillado": Droplets,
-  "Gas Natural": Zap,
+  // Servicios & Infraestructura
+  "Acometida Agua": Droplets,
+  "Energía / Luz": Zap,
+  "Alcantarillado": Waves,
+  "Gas Natural": Flame,
+  "Vías Pavimentadas": Car,
+  "Alumbrado Público": Lightbulb,
+  "Andenes": Footprints,
+  "Red Internet": Wifi,
+  
+  // Estado Legal
+  "Licencia Vigente": FileCheck,
+  "Predio Desenglobado": Files,
   "Licencia Construcción": FileText,
   "Estudio Suelos": Pickaxe,
   "Levantamiento Topo": Mountain,
   "Cerramiento": Construction,
+
+  // Genéricos Ficha
   "Uso de Suelo": Briefcase,
   "Topografía": Mountain,
   "Area": Maximize,
@@ -21,32 +32,34 @@ export const LOTE_ICONS: Record<string, any> = {
   "Fondo": Ruler
 };
 
-// Traducciones Específicas
+// Traducciones Específicas (Valor DB -> Texto Legible)
 export const TRANSLATIONS: Record<string, string> = {
-  // Topografía
-  "Plano": "Plano / Flat",
-  "Inclinado": "Inclinado / Sloped",
-  "Mixto": "Mixto / Mixed",
+  // --- TOPOGRAFÍA ---
+  "Plano": "Terreno Plano",
+  "Inclinado": "Terreno Inclinado",
+  "Mixto": "Topografía Mixta",
+  "Ondulado": "Terreno Ondulado",
   
-  // Ubicación (Claves Únicas)
-  "Esquinero": "Esquinero / Corner Lot",
-  "Medianero": "Medianero / Mid-block Lot",
-  "Sobre Vía Principal": "Sobre Vía Ppal / On Main Road",
-  "Interior": "Interior / Inner Lot",
+  // --- UBICACIÓN ---
+  "Esquinero": "Lote Esquinero",
+  "Medianero": "Lote Medianero",
+  "Sobre Vía Principal": "Sobre Vía Principal",
+  "Interior": "Lote Interior",
+  "Callejón": "En Callejón",
 
-  // Clasificación
-  "Urbano": "Urbano / Urban",
-  "Suburbano": "Suburbano / Suburban",
-  "Rural": "Rural / Rural",
-  "Expansión Urbana": "Expansión Urbana / Urban Expansion",
+  // --- CLASIFICACIÓN ---
+  "Urbano": "Suelo Urbano",
+  "Suburbano": "Suelo Suburbano",
+  "Rural": "Suelo Rural",
+  "Expansión Urbana": "Expansión Urbana",
 
-  // Uso de Suelo
-  "Residencial": "Residencial",
-  "Comercial": "Comercial",
-  "Industrial": "Industrial",
-  "Institucional": "Institucional",
-  "Agrícola": "Agrícola",
-  "Uso Mixto": "Uso Mixto"
+  // --- USO DE SUELO (Mapeo de opciones largas a cortas) ---
+  "Residencial (Vivienda)": "Uso Residencial",
+  "Comercial / Servicios": "Comercial y Servicios",
+  "Industrial / Bodegas": "Industrial / Logístico",
+  "Dotacional / Institucional": "Dotacional / Institucional",
+  "Mixto (Vivienda + Comercio)": "Uso Mixto",
+  "Agrícola / Recreativo": "Agrícola / Recreativo"
 };
 
 export const translate = (val: string) => TRANSLATIONS[val] || val;

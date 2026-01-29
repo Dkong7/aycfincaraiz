@@ -2,7 +2,7 @@ import React from "react";
 import { 
   TreePine, Map, Route, Droplets, Fence, Home, 
   Maximize, ArrowUpFromLine, Bed, Bath, Flame, Warehouse,
-  Waves, Utensils, PawPrint, Flower2, Zap
+  Waves, Utensils, PawPrint, Flower2, Zap, Calendar
 } from "lucide-react";
 
 // Lista de Amenidades Rurales (Para Checkboxes)
@@ -77,6 +77,16 @@ export default function RuralForm({ register, s }: any) {
             <InputIcon register={register} name="specs.bedrooms" label="Habitaciones" icon={Bed} s={s} type="number" />
             <InputIcon register={register} name="specs.bathrooms" label="Baños" icon={Bath} s={s} type="number" />
             <SelectIcon register={register} name="specs.gas_type" label="Gas" icon={Flame} s={s} options={[{val: "Red Natural", label: "Red Natural"}, {val: "Pipeta", label: "Pipeta / Propano"}, {val: "No tiene", label: "No tiene"}]} />
+            
+            {/* NUEVO CAMPO: ANTIGÜEDAD */}
+            <SelectIcon 
+                register={register} 
+                name="specs.antiquity" 
+                label="Edad Casa" 
+                icon={Calendar} 
+                s={s} 
+                options={["Estrenar", "1 a 5 años", "5 a 10 años", "10 a 20 años", "+20 años", "Remodelado"]} 
+            />
          </div>
       </div>
 

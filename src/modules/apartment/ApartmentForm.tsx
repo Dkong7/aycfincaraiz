@@ -1,6 +1,6 @@
 import React from "react";
 import { 
-  Maximize, ArrowUpFromLine, Building, DollarSign, Bed, Bath, 
+  Maximize, ArrowUpFromLine, Building, Bed, Bath, 
   Car, Flame, Calendar, Eye, ShieldCheck, Coffee, Dumbbell, Waves, 
   Trophy, Trees, Zap, Heater, Tv, Dog, LandPlot, MonitorPlay, Mountain, 
   User, ChefHat, Layers, Utensils, Shirt, DoorOpen
@@ -63,12 +63,13 @@ export default function ApartmentForm({ register, watch, s }: any) {
     <div className="animate-in fade-in space-y-6">
         
         {/* BLOQUE 1: DATOS BÁSICOS */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
            <InputIcon register={register} name="specs.area_built" label="Área m²" icon={Maximize} s={s} type="number" />
            <InputIcon register={register} name="specs.floor_level" label="Piso N°" icon={ArrowUpFromLine} s={s} type="number" />
            <InputIcon register={register} name="specs.total_floors" label="Pisos Ed." icon={Building} s={s} type="number" />
            <SelectIcon register={register} name="specs.antiquity" label="Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 9 años", "10 a 20 años", "Más de 20 años"]} />
-           <InputIcon register={register} name="admin_fee" label="Administración ($)" icon={DollarSign} s={s} type="number" />
+           
+           {/* NOTA: 'admin_fee' se gestiona en FinancialInfo */}
         </div>
 
         {/* BLOQUE 2: DISTRIBUCIÓN */}

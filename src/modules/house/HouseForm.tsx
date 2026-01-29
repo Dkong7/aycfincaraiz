@@ -74,12 +74,12 @@ export default function HouseForm({ register, control, watch, s }: any) {
   return (
     <div className="animate-in fade-in space-y-6">
        
-       {/* 1. DIMENSIONES Y EDAD (SIN ESTRATO AQUÍ) */}
+       {/* 1. DIMENSIONES Y EDAD */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <InputIcon register={register} name="specs.area_lot" label="Lote m²" icon={Maximize} s={s} />
-          <InputIcon register={register} name="specs.area_built" label="Construida m²" icon={Grid} s={s} />
-          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} />
-          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={ArrowUpDown} s={s} />
+          <InputIcon register={register} name="specs.area_lot" label="Lote m²" icon={Maximize} s={s} type="number" />
+          <InputIcon register={register} name="specs.area_built" label="Construida m²" icon={Grid} s={s} type="number" />
+          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" />
+          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={ArrowUpDown} s={s} type="number" />
        </div>
        
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -121,7 +121,7 @@ export default function HouseForm({ register, control, watch, s }: any) {
 
        <LevelsSection control={control} register={register} s={s} labelColor={labelColor} />
 
-       {/* ZONAS SOCIALES Y RENTA... (Mismo código de abajo) */}
+       {/* ZONAS SOCIALES */}
        <div className="pt-4 border-t border-gray-100">
           <label className={`flex items-center gap-2 cursor-pointer font-bold mb-4 ${labelColor}`}>
              <input type="checkbox" {...register("specs.has_social")} className="toggle toggle-sm toggle-success" /> ¿TIENE ZONAS SOCIALES? (Conjunto)
@@ -140,6 +140,7 @@ export default function HouseForm({ register, control, watch, s }: any) {
           )}
        </div>
 
+       {/* RENTA */}
        <div className="border-t border-gray-200 pt-4">
           <label className={`flex items-center gap-2 cursor-pointer font-bold ${labelColor}`}>
              <input type="checkbox" {...register("specs.has_rent")} className="toggle toggle-sm toggle-success" /> ¿TIENE RENTA? (Apto/Local)

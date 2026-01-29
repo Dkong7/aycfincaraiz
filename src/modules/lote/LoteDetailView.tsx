@@ -1,14 +1,14 @@
 import React from "react";
 import { 
   Maximize, Ruler, Map, ScrollText, Zap, 
-  Briefcase, MapPin, CheckCircle2, TrendingUp, RefreshCw
+  Briefcase, MapPin, CheckCircle2, TrendingUp, RefreshCw, DollarSign
 } from "lucide-react";
 import { useApp } from "../../context/AppContext"; 
 import { useTRM } from "../../hooks/useTRM";       
 import { translate as localTranslate, LOTE_ICONS } from "./lote.config";
 import { formatCurrency } from "../../utils/formatters";
 
-export default function LoteDetailView({ specs, description, adminFee, priceCop, priceUsd }: any) {
+export default function LoteDetailView({ specs, description, adminFee, priceCop, priceUsd, neighborhood, municipality }: any) {
   const { translateDynamic, currency, lang } = useApp();
   const trm = useTRM();
 
@@ -25,6 +25,18 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
       : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
 
   const featuresList = Array.isArray(specs.features) ? specs.features : [];
+
+  // --- MAPA ÚNICO (ESTÁNDAR) ---
+  const locCity = municipality || "Bogotá";
+  const locHood = neighborhood || "";
+  const query = `${locHood}, ${locCity}, Colombia`;
+  const encodedQuery = encodeURIComponent(query);
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed`;
+
+  // --- ADMIN FEE ---
+  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
+  const hasAdmin = cleanAdmin > 0;
 
   // --- SUB-COMPONENTES UI (Tema Verde/Tierra) ---
 
@@ -43,14 +55,14 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
     </div>
   );
 
-  const SpecRow = ({ label, val, icon: Icon }: any) => (
+  const SpecRow = ({ label, val, icon: Icon, isCurrency = false }: any) => (
      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0 group hover:bg-green-50/30 px-2 rounded transition-colors">
         <div className="flex items-center gap-3">
            <div className="text-gray-300 group-hover:text-green-500 transition-colors"><Icon size={16}/></div>
            <span className="text-sm font-bold text-gray-600">{translateDynamic(label)}</span>
         </div>
         <span className="text-sm font-medium text-gray-800 text-right capitalize">
-            {val ? tr(val) : "N/A"}
+            {val ? (isCurrency ? val : tr(val)) : "N/A"}
         </span>
      </div>
   );
@@ -97,31 +109,38 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
           
           {/* Descripción */}
           <div className="lg:col-span-2 space-y-8">
-             <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-green-100 to-transparent rounded-full opacity-50 blur-2xl"></div>
-                <h3 className="font-black text-xl text-gray-800 mb-4 flex items-center gap-2 relative z-10">
-                   <ScrollText size={20} className="text-green-600"/> {translateDynamic("Descripción del Lote")}
-                </h3>
-                <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base relative z-10 text-justify">
-                   {translateDynamic(description)}
-                </p>
-             </div>
+              <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-green-100 to-transparent rounded-full opacity-50 blur-2xl"></div>
+                 <h3 className="font-black text-xl text-gray-800 mb-4 flex items-center gap-2 relative z-10">
+                    <ScrollText size={20} className="text-green-600"/> {translateDynamic("Descripción del Lote")}
+                 </h3>
+                 <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base relative z-10 text-justify">
+                    {translateDynamic(description)}
+                 </p>
+              </div>
           </div>
 
           {/* Normativa */}
           <div className="space-y-6">
-             <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
-                <h3 className="font-black text-sm text-gray-800 uppercase mb-4 border-b pb-2 flex items-center gap-2">
-                    <Ruler size={16} className="text-green-600"/> {translateDynamic("Normativa & Usos")}
-                </h3>
-                <div className="flex flex-col">
-                   <SpecRow label="Índice Ocupación" val={specs.occupation_index ? `${specs.occupation_index}%` : "N/A"} icon={ScrollText} />
-                   <SpecRow label="Índice Construcción" val={specs.construction_index} icon={ScrollText} />
-                   <SpecRow label="Altura Máxima" val={specs.max_height ? `${specs.max_height} Pisos` : "N/A"} icon={Maximize} />
-                   <SpecRow label="Frente" val={`${specs.front || 0} m`} icon={Ruler} />
-                   <SpecRow label="Fondo" val={`${specs.depth || 0} m`} icon={Ruler} />
-                </div>
-             </div>
+              <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                 <h3 className="font-black text-sm text-gray-800 uppercase mb-4 border-b pb-2 flex items-center gap-2">
+                     <Ruler size={16} className="text-green-600"/> {translateDynamic("Normativa & Usos")}
+                 </h3>
+                 <div className="flex flex-col">
+                    <SpecRow label="Uso Complementario" val={specs.soil_use_secondary} icon={Briefcase} />
+                    <SpecRow label="Altura Máxima" val={specs.max_height ? `${specs.max_height} Pisos` : "N/A"} icon={Maximize} />
+                    <SpecRow label="Frente" val={`${specs.front || 0} m`} icon={Ruler} />
+                    <SpecRow label="Fondo" val={`${specs.depth || 0} m`} icon={Ruler} />
+                    
+                    {/* ADMIN FEE (A veces aplica en condominios campestres) */}
+                    <SpecRow 
+                        label="Administración" 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        icon={DollarSign} 
+                        isCurrency={true}
+                    />
+                 </div>
+              </div>
           </div>
        </div>
 
@@ -145,6 +164,26 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
          </section>
        )}
 
+       {/* MAPA ÚNICO (Solo si hay municipio) */}
+       {(municipality) && (
+           <section className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+               <div className="flex items-center gap-2 mb-4">
+                   <MapPin className="text-green-500" size={20}/>
+                   <h3 className="font-black text-sm text-gray-800 uppercase tracking-widest">{translateDynamic("Ubicación Lote")}</h3>
+               </div>
+               
+               <div className="w-full h-80 rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-gray-200">
+                   <iframe 
+                       width="100%" 
+                       height="100%" 
+                       style={{border:0}} 
+                       loading="lazy" 
+                       src={mapUrl} 
+                       title="Ubicación Lote"
+                   ></iframe>
+               </div>
+           </section>
+       )}
     </div>
   );
 }

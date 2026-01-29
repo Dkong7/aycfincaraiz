@@ -2,11 +2,10 @@ import {
   Building2, ArrowUpFromLine, Calendar, MonitorPlay, User, ShieldCheck, 
   Layers, Mountain, Coffee, Dumbbell, Waves, Trophy, Trees, Flame, Zap, 
   Heater, Tv, LandPlot, Dog, ChefHat, Utensils, Eye, Maximize,
-  DoorOpen, // <--- CAMBIO: Usamos DoorOpen para Balcón
-  Car, Sun, DollarSign
+  DoorOpen, Car, Sun, DollarSign
 } from "lucide-react";
 
-// Mapeo de Iconos para Características y Amenidades
+// Mapeo de Iconos
 export const APARTMENT_ICONS: Record<string, any> = {
   // Características Internas
   "Ascensor": ArrowUpFromLine,
@@ -18,7 +17,7 @@ export const APARTMENT_ICONS: Record<string, any> = {
   "Puerta Seguridad": ShieldCheck, 
   "Duplex": Layers, 
   "Penthouse": Mountain,
-  "Balcón": DoorOpen, // <--- CORREGIDO
+  "Balcón": DoorOpen,
   "Terraza": Sun,
   "Chimenea": Flame,
   
@@ -47,35 +46,40 @@ export const APARTMENT_ICONS: Record<string, any> = {
   // Generales
   "Vista": Eye,
   "Habitaciones": User,
-  "Baños": User, // Icono genérico si falta
-  "Garajes": Car
+  "Baños": User, 
+  "Garajes": Car,
+  "Cocina": ChefHat,
+  "Pisos": Layers,
+  "Zona Ropas": Utensils
 };
 
-// DICCIONARIO DE TRADUCCIÓN LOCAL (Mapeo DB -> Label UI)
+// DICCIONARIO DE TRADUCCIÓN LOCAL
 export const TRANSLATIONS: Record<string, string> = {
   // Cocina
-  "Integral": "Integral",
-  "Americana (Abierta)": "Americana",
-  "Tipo Isla": "Tipo Isla",
-  "Cerrada (Indep.)": "Cerrada",
+  "Integral": "Cocina Integral",
+  "Americana (Abierta)": "Cocina Americana",
+  "Tipo Isla": "Cocina Tipo Isla",
+  "Cerrada (Indep.)": "Cocina Cerrada",
   "Para Remodelar": "Para Remodelar",
 
   // Pisos
   "Madera Maciza": "Madera Maciza",
   "Madera Laminada": "Madera Laminada",
   "Madera Granadillo": "Madera Granadillo",
-  "Laminado": "Laminado",
+  "Laminado": "Piso Laminado",
   "Porcelanato": "Porcelanato",
   "Mármol": "Mármol",
   "Cerámica": "Cerámica",
   "Alfombra": "Alfombra",
   "PVC / Vinilo": "PVC / Vinilo",
 
-  // Zona de Ropas
-  "Independiente": "Zona Ropas Indep.",
-  "En Cocina": "En Cocina",
+  // Zona de Ropas & Espacios (Unificados para evitar error TS1117)
+  "En Cocina": "Zona Ropas en Cocina",
   "Cuarto de Ropas": "Cuarto de Ropas",
   "No tiene": "Sin Zona Ropas",
+  
+  // SOLUCIÓN: Usamos una clave genérica para evitar duplicados
+  "Independiente": "Independiente", 
 
   // Garaje
   "Cubierto": "Cubierto",
@@ -92,9 +96,9 @@ export const TRANSLATIONS: Record<string, string> = {
   "Ninguno": "Sin Gas",
 
   // Vista
-  "Exterior": "Exterior",
-  "Interior": "Interior",
-  "Panorámica": "Panorámica",
+  "Exterior": "Vista Exterior",
+  "Interior": "Vista Interior",
+  "Panorámica": "Vista Panorámica",
 
   // Sala/Comedor
   "Un solo ambiente": "Sala-Comedor",
@@ -102,5 +106,4 @@ export const TRANSLATIONS: Record<string, string> = {
   "Con Balcón": "Con Balcón"
 };
 
-// Helper function
 export const translate = (val: string) => TRANSLATIONS[val] || val;

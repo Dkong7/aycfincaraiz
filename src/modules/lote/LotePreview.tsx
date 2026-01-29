@@ -3,7 +3,7 @@ import { formatCurrency } from "../../utils/formatters";
 import { translate } from "./lote.config";
 import { 
   Map, ScrollText, Zap, Maximize, Ruler, 
-  DollarSign, CheckCircle2, Briefcase, MapPin 
+  DollarSign, CheckCircle2, Briefcase, MapPin, Building
 } from 'lucide-react';
 
 export default function LotePreview({ data }: any) {
@@ -49,34 +49,36 @@ export default function LotePreview({ data }: any) {
          />
          {data.price_usd && Number(data.price_usd) > 0 && (
             <Row 
-                label="Precio USD" 
-                val={`$${data.price_usd}`} 
-                icon={DollarSign} 
-                valClass="text-green-600 font-bold" 
+               label="Precio USD" 
+               val={`$${data.price_usd}`} 
+               icon={DollarSign} 
+               valClass="text-green-600 font-bold" 
             />
          )}
+         
+         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
+         
          <Row label="Área Total" val={`${s.area || 0} m²`} icon={Maximize} valClass="text-green-700 font-bold" />
-         <Row label="Uso Suelo" val={translate(s.soil_use)} icon={Briefcase} />
+         <Row label="Uso Principal" val={translate(s.soil_use)} icon={Briefcase} />
       </Section>
 
-      {/* 2. NORMATIVA & DIMENSIONES */}
-      <Section title="Normativa & Dimensiones" icon={ScrollText}>
+      {/* 2. DIMENSIONES & DETALLES */}
+      <Section title="Técnica & Normativa" icon={Ruler}>
          <Row label="Dimensiones" val={`${s.front || 0} x ${s.depth || 0} m`} icon={Ruler} />
          <Row label="Topografía" val={translate(s.topography)} icon={Map} />
-         <Row label="Índice Ocup." val={s.occupation_index ? `${s.occupation_index}%` : "--"} icon={ScrollText} />
-         <Row label="Índice Const." val={s.construction_index} icon={ScrollText} />
-         <Row label="Licencia Vigente" val={featuresList.includes("Licencia Vigente") ? "Sí" : "No"} icon={CheckCircle2} />
+         <Row label="Altura Máx." val={s.max_height ? `${s.max_height} Pisos` : "--"} icon={Maximize} />
+         <Row label="Ubicación" val={translate(s.location_type)} icon={MapPin} />
+         <Row label="Clasificación" val={translate(s.classification)} icon={ScrollText} />
       </Section>
 
-      {/* 3. UBICACIÓN */}
-      <div className="col-span-1 md:col-span-2">
-         <Section title="Ubicación & Entorno" icon={MapPin}>
-             <div className="grid grid-cols-2 gap-4">
-                 <Row label="Tipo Ubicación" val={translate(s.location_type)} />
-                 <Row label="Clasificación" val={translate(s.classification)} />
-             </div>
-         </Section>
-      </div>
+      {/* 3. USOS COMPLEMENTARIOS (Si hay nota) */}
+      {s.soil_use_secondary && (
+          <div className="col-span-1 md:col-span-2">
+             <Section title="Potencial / Uso Complementario" icon={Briefcase}>
+                <p className="text-xs text-gray-700 italic">{s.soil_use_secondary}</p>
+             </Section>
+          </div>
+      )}
 
       {/* 4. SERVICIOS */}
       <div className="col-span-1 md:col-span-2">

@@ -2,20 +2,21 @@ import React from "react";
 import { 
   Maximize, Building2, Calendar, Car, Layout, 
   ArrowUpFromLine, Briefcase, Bath, Network, 
-  Users, CheckCircle2, DollarSign, Layers, 
-  Zap, Lock, Ruler
+  CheckCircle2, DollarSign, Layers, 
+  Zap, Ruler, MapPin, TrendingUp, RefreshCw
 } from "lucide-react";
 
 import { useApp } from "../../context/AppContext"; 
 import { useTRM } from "../../hooks/useTRM";       
 import { formatCurrency } from "../../utils/formatters";
+import { translate as localTranslate } from "./oficina.config";
 
-// Props: Incluye 'stratum' y 'adminFee'
-export default function OficinaDetailView({ specs, description, adminFee, priceCop, priceUsd, stratum }: any) {
+// Props: Incluye 'stratum', 'adminFee', 'neighborhood', 'municipality'
+export default function OficinaDetailView({ specs, description, adminFee, priceCop, priceUsd, stratum, neighborhood, municipality }: any) {
   
-  const { translateDynamic, currency } = useApp();
+  const { translateDynamic, currency, lang } = useApp();
   const trm = useTRM();
-  const tr = (key: string) => translateDynamic(key);
+  const tr = (key: string) => translateDynamic(localTranslate(key));
 
   // Lógica de Precios
   const showUsd = currency === "USD";
@@ -26,6 +27,18 @@ export default function OficinaDetailView({ specs, description, adminFee, priceC
   const secondaryPrice = showUsd
       ? `$${formatCurrency(priceCop)} COP`
       : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
+
+  // --- MAPA ÚNICO (CORREGIDO) ---
+  const locCity = municipality || "Bogotá";
+  const locHood = neighborhood || "";
+  const query = `${locHood}, ${locCity}, Colombia`;
+  const encodedQuery = encodeURIComponent(query);
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed`;
+
+  // --- ADMIN FEE ROBUSTO ---
+  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
+  const hasAdmin = cleanAdmin > 0;
 
   // --- SUB-COMPONENTES UI (Tema Emerald/Verde Corporativo) ---
 
@@ -44,14 +57,14 @@ export default function OficinaDetailView({ specs, description, adminFee, priceC
     </div>
   );
 
-  const SpecRow = ({ label, val, icon: Icon }: any) => (
+  const SpecRow = ({ label, val, icon: Icon, isCurrency = false }: any) => (
      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0 group hover:bg-emerald-50/30 px-2 rounded transition-colors">
         <div className="flex items-center gap-3">
            <div className="text-gray-300 group-hover:text-emerald-500 transition-colors"><Icon size={16}/></div>
            <span className="text-sm font-bold text-gray-600">{tr(label)}</span>
         </div>
         <span className="text-sm font-medium text-gray-800 text-right capitalize">
-            {val ? tr(val) : "N/A"}
+            {val ? (isCurrency ? val : tr(val)) : "N/A"}
         </span>
      </div>
   );
@@ -69,15 +82,23 @@ export default function OficinaDetailView({ specs, description, adminFee, priceC
               </div>
           </div>
           
-          {/* Badge de Administración (Crucial en Oficinas) */}
-          <div className="flex flex-col items-end">
-              {Number(adminFee) > 0 ? (
-                  <div className="px-5 py-3 bg-emerald-50 border border-emerald-100 rounded-xl text-right">
-                      <p className="text-[10px] font-bold uppercase text-emerald-600">Cuota de Administración</p>
-                      <p className="font-black text-emerald-800 text-lg">{formatCurrency(adminFee)}</p>
+          <div className="flex flex-col items-end gap-2">
+              {/* TRM */}
+              <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200">
+                  <div className={`p-2 rounded-full ${trm > 0 ? "bg-green-100 text-green-600" : "bg-gray-200 text-gray-400"}`}>
+                      {trm > 0 ? <TrendingUp size={18}/> : <RefreshCw size={18} className="animate-spin"/>}
                   </div>
-              ) : (
-                  <span className="text-xs text-gray-400 italic">Administración no definida</span>
+                  <div>
+                      <p className="text-[10px] uppercase font-bold text-gray-400">TRM {lang === "EN" ? "Rate" : "Hoy"}</p>
+                      <p className="font-bold text-gray-700">{trm > 0 ? `$${formatCurrency(Math.round(trm))} COP` : "Cargando..."}</p>
+                  </div>
+              </div>
+
+              {/* Badge de Administración */}
+              {hasAdmin && (
+                  <div className="px-4 py-1 bg-emerald-50 border border-emerald-100 rounded-lg text-right w-full">
+                      <p className="text-[9px] font-bold uppercase text-emerald-600">Admin: <span className="text-emerald-800 text-sm ml-1">${formatCurrency(cleanAdmin)}</span></p>
+                  </div>
               )}
           </div>
        </div>
@@ -91,10 +112,7 @@ export default function OficinaDetailView({ specs, description, adminFee, priceC
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              <MainStat label="Área Privada" val={`${specs.area || 0} m²`} icon={Maximize} />
              <MainStat label="Ubicación" val={`${specs.floor_level || "?"}° Piso`} icon={ArrowUpFromLine} />
-             
-             {/* ESTRATO CONECTADO */}
              <MainStat label="Estrato" val={stratum} icon={Layers} />
-             
              <MainStat label="Garajes Privados" val={specs.garages} icon={Car} />
           </div>
        </section>
@@ -159,12 +177,13 @@ export default function OficinaDetailView({ specs, description, adminFee, priceC
                  </h3>
                  <div className="flex flex-col">
                     <SpecRow label="Estado Entrega" val={specs.condition} icon={Briefcase} />
+                    <SpecRow label="Antigüedad" val={specs.antiquity} icon={Calendar} />
                     
                     {/* DETALLE DE BAÑOS */}
                     <SpecRow label="Tipo de Baños" val={specs.bathrooms_type} icon={Bath} />
                     <SpecRow label="Baños Internos" val={specs.bathrooms} icon={Bath} />
                     
-                    {/* ASCENSORES (NUEVO) */}
+                    {/* ASCENSORES */}
                     {(Number(specs.elevators_public) > 0 || Number(specs.elevators_service) > 0) && (
                         <div className="py-2 border-b border-gray-100">
                             <div className="flex items-center gap-3 mb-1">
@@ -183,14 +202,25 @@ export default function OficinaDetailView({ specs, description, adminFee, priceC
                  </div>
               </div>
 
-              {/* BARRA DE VALOR AGREGADO */}
-              <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100 text-center">
-                 <Zap size={24} className="mx-auto text-emerald-500 mb-2"/>
-                 <h4 className="font-bold text-emerald-800 text-sm mb-1">{tr("Eficiencia & Conectividad")}</h4>
-                 <p className="text-xs text-emerald-600 leading-relaxed">
-                    {tr("Espacios diseñados para potenciar la productividad de tu equipo con estándares corporativos.")}
-                 </p>
-              </div>
+              {/* MAPA ÚNICO (Solo si hay municipio) */}
+              {(municipality) && (
+                  <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100">
+                      <div className="flex items-center gap-2 mb-4">
+                          <MapPin className="text-emerald-600" size={20}/>
+                          <h3 className="font-black text-sm text-emerald-800 uppercase tracking-widest">{translateDynamic("Ubicación Corporativa")}</h3>
+                      </div>
+                      <div className="w-full h-64 rounded-2xl overflow-hidden bg-white relative shadow-sm border border-emerald-200">
+                          <iframe 
+                              width="100%" 
+                              height="100%" 
+                              style={{border:0}} 
+                              loading="lazy" 
+                              src={mapUrl} 
+                              title="Mapa Oficina"
+                          ></iframe>
+                      </div>
+                  </div>
+              )}
           </div>
        </div>
 

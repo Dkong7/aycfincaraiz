@@ -39,18 +39,20 @@ const PropertyDetail = () => {
       setLoading(true);
       try {
         let record;
-        // Búsqueda por ID directo o por ID personalizado (AYC-XXX)
+        // Forzamos $autoCancel: false para evitar cancelaciones
+        const options = { $autoCancel: false };
+
         if (id?.length === 15) {
-           record = await pb.collection("properties").getOne(id);
+           record = await pb.collection("properties").getOne(id, options);
         } else {
-           const res = await pb.collection("properties").getList(1, 1, { filter: `ayc_id="${id}"` });
+           const res = await pb.collection("properties").getList(1, 1, { filter: `ayc_id="${id}"`, ...options });
            if (res.items.length > 0) record = res.items[0];
         }
         
         if(record) {
            setProp(record);
            try {
-               // Parseamos specs (que trae el estrato guardado)
+               // Parseamos specs inmediatamente para usarlo en el render
                const parsed = typeof record.specs === 'string' ? JSON.parse(record.specs) : record.specs;
                setSpecs(parsed || {});
            } catch (e) { setSpecs({}); }
@@ -63,17 +65,43 @@ const PropertyDetail = () => {
   if (loading) return <div className="min-h-screen bg-[#0A192F] flex items-center justify-center text-white font-bold tracking-widest">CARGANDO...</div>;
   if (!prop) return <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center"><h2 className="text-2xl font-bold mb-4 text-gray-800">Inmueble no encontrado</h2><Link to="/inmuebles" className="text-green-600 underline font-bold">Volver al listado</Link></div>;
 
-  // Lógica de Media (Video + Fotos)
+  // --- LÓGICA DE ORDENAMIENTO DE IMÁGENES (FIX) ---
+  let sortedImages = prop.images || [];
+  const galleryOrder = specs.gallery_order; // Obtenemos el orden guardado
+
+  if (galleryOrder && Array.isArray(galleryOrder) && galleryOrder.length > 0) {
+      // Si existe un orden guardado, reordenamos el array físico
+      sortedImages = [...sortedImages].sort((a: string, b: string) => {
+          const indexA = galleryOrder.indexOf(a);
+          const indexB = galleryOrder.indexOf(b);
+          
+          // Si la imagen no está en la lista de orden (ej: nueva), va al final (999)
+          const valA = indexA === -1 ? 999 : indexA;
+          const valB = indexB === -1 ? 999 : indexB;
+          
+          return valA - valB;
+      });
+  }
+
+  // Lógica de Media (Video + Fotos Ordenadas)
   const getYoutubeId = (url: string) => {
     if (!url) return null;
     const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
     return (match && match[2].length === 11) ? match[2] : null;
   };
+  
   const videoId = getYoutubeId(prop.video_url || "");
+  
   const mediaList = [
       ...(videoId ? [{ type: 'video', src: videoId, thumb: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` }] : []),
-      ...(prop.images?.map((img: string) => ({ type: 'image', src: `${PB_URL}/api/files/${prop.collectionId}/${prop.id}/${img}` })) || [])
+      // Usamos sortedImages en lugar de prop.images directo
+      ...sortedImages.map((img: string) => ({ 
+          type: 'image', 
+          // Agregamos timestamp ?t=updated para romper el caché si la imagen cambió
+          src: `${PB_URL}/api/files/${prop.collectionId}/${prop.id}/${img}?t=${prop.updated}` 
+      }))
   ];
+  
   if (mediaList.length === 0) mediaList.push({ type: 'image', src: "https://via.placeholder.com/1200x800?text=SIN+FOTO" });
 
   const theme = PROPERTY_TYPES_THEME[prop.property_type] || PROPERTY_TYPES_THEME["default"];
@@ -88,7 +116,9 @@ const PropertyDetail = () => {
                   adminFee={prop.admin_fee} 
                   priceCop={prop.price_cop} 
                   priceUsd={prop.price_usd}
-                  stratum={specs.stratum || prop.stratum} 
+                  stratum={specs.stratum || prop.stratum}
+                  neighborhood={prop.neighborhood}
+                  municipality={prop.municipality} 
               />;
           case 'Apartamento': 
               return <ApartmentDetailView 
@@ -98,6 +128,8 @@ const PropertyDetail = () => {
                   priceCop={prop.price_cop} 
                   priceUsd={prop.price_usd}
                   stratum={specs.stratum || prop.stratum}
+                  neighborhood={prop.neighborhood}
+                  municipality={prop.municipality}
               />;
           case 'Bodega': 
               return <BodegaDetailView 
@@ -106,18 +138,43 @@ const PropertyDetail = () => {
                   adminFee={prop.admin_fee} 
                   priceCop={prop.price_cop} 
                   priceUsd={prop.price_usd}
-                  stratum={specs.stratum || prop.stratum} 
+                  stratum={specs.stratum || prop.stratum}
+                  neighborhood={prop.neighborhood}
+                  municipality={prop.municipality} 
               />;
           case 'CasaCampo':
           case 'Finca': 
           case 'Rural': 
           case 'Casa Campestre': 
-              return <RuralDetailView specs={specs} description={prop.description} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
+              return <RuralDetailView 
+                  specs={specs} 
+                  description={prop.description} 
+                  priceCop={prop.price_cop} 
+                  priceUsd={prop.price_usd}
+                  neighborhood={prop.neighborhood}
+                  municipality={prop.municipality}
+              />;
           case 'Lote': 
           case 'Terreno': 
-              return <LoteDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
+              return <LoteDetailView 
+                  specs={specs} 
+                  description={prop.description} 
+                  adminFee={prop.admin_fee} 
+                  priceCop={prop.price_cop} 
+                  priceUsd={prop.price_usd}
+                  neighborhood={prop.neighborhood}
+                  municipality={prop.municipality}
+              />;
           case 'Local': 
-              return <LocalDetailView specs={specs} description={prop.description} adminFee={prop.admin_fee} priceCop={prop.price_cop} priceUsd={prop.price_usd} />;
+              return <LocalDetailView 
+                  specs={specs} 
+                  description={prop.description} 
+                  adminFee={prop.admin_fee} 
+                  priceCop={prop.price_cop} 
+                  priceUsd={prop.price_usd}
+                  neighborhood={prop.neighborhood}
+                  municipality={prop.municipality}
+              />;
           case 'Oficina': 
               return <OficinaDetailView 
                   specs={specs} 
@@ -125,8 +182,9 @@ const PropertyDetail = () => {
                   adminFee={prop.admin_fee} 
                   priceCop={prop.price_cop} 
                   priceUsd={prop.price_usd}
-                  // --- FIX: ESTRATO CONECTADO A OFICINAS ---
-                  stratum={specs.stratum || prop.stratum} 
+                  stratum={specs.stratum || prop.stratum}
+                  neighborhood={prop.neighborhood}
+                  municipality={prop.municipality} 
               />;
           default:
               return <SpecsSection specs={specs} theme={theme} description={prop.description} />;
@@ -136,6 +194,7 @@ const PropertyDetail = () => {
   return (
     <div className="bg-[#F3F4F6] min-h-screen font-sans pb-12">
       <Navbar />
+      {/* Pasamos mediaList ordenado aquí, así que el Hero mostrará la foto #1 correcta */}
       <HeroSection prop={prop} theme={theme} mediaList={mediaList} activeImg={activeImg} onOpenLightbox={() => setLightboxOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12 -mt-10 relative z-10">

@@ -2,7 +2,7 @@ import React from "react";
 import { 
   Maximize, Map, Route, Droplets, Fence, Home, 
   CheckCircle2, Ruler, DollarSign, TrendingUp, RefreshCw,
-  Mountain, Trees, Shovel, Zap, Warehouse
+  Mountain, Trees, Shovel, Zap, Warehouse, Calendar, MapPin
 } from "lucide-react";
 
 // Imports de Lógica
@@ -11,7 +11,7 @@ import { useTRM } from "../../hooks/useTRM";
 import { translate as localTranslate, RURAL_ICONS } from "./rural.config";
 import { formatCurrency } from "../../utils/formatters";
 
-export default function RuralDetailView({ specs, description, priceCop, priceUsd }: any) {
+export default function RuralDetailView({ specs, description, adminFee, priceCop, priceUsd, neighborhood, municipality }: any) {
   
   // 1. Hooks Globales
   const { translateDynamic, currency, lang } = useApp();
@@ -19,8 +19,8 @@ export default function RuralDetailView({ specs, description, priceCop, priceUsd
 
   // 2. Helper de Traducción
   const tr = (key: string) => {
-     const spanishLabel = localTranslate(key);
-     return translateDynamic(spanishLabel);
+      const spanishLabel = localTranslate(key);
+      return translateDynamic(spanishLabel);
   };
 
   // 3. Lógica de Precios
@@ -32,6 +32,19 @@ export default function RuralDetailView({ specs, description, priceCop, priceUsd
   const secondaryPrice = showUsd
       ? `$${formatCurrency(priceCop)} COP`
       : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
+
+  // --- MAPA ÚNICO (CORREGIDO) ---
+  const locCity = municipality || "Colombia";
+  const locHood = neighborhood || "";
+  const query = `${locHood}, ${locCity}, Colombia`;
+  const encodedQuery = encodeURIComponent(query);
+  // Zoom 14 es ideal para zonas rurales (menos detalle de calles, más contexto)
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=14&output=embed`;
+
+  // --- ADMIN FEE ROBUSTO ---
+  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
+  const hasAdmin = cleanAdmin > 0;
 
   // --- SUB-COMPONENTES UI (Tema Rural - Morado/Verde) ---
 
@@ -50,14 +63,14 @@ export default function RuralDetailView({ specs, description, priceCop, priceUsd
     </div>
   );
 
-  const SpecRow = ({ label, val, icon: Icon }: any) => (
+  const SpecRow = ({ label, val, icon: Icon, isCurrency = false }: any) => (
      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0 group hover:bg-purple-50/30 px-2 rounded transition-colors">
         <div className="flex items-center gap-3">
            <div className="text-gray-300 group-hover:text-purple-500 transition-colors"><Icon size={16}/></div>
            <span className="text-sm font-bold text-gray-600">{translateDynamic(label)}</span>
         </div>
         <span className="text-sm font-medium text-gray-800 text-right capitalize">
-            {val ? tr(val) : "N/A"}
+            {val ? (isCurrency ? val : tr(val)) : "N/A"}
         </span>
      </div>
   );
@@ -92,7 +105,7 @@ export default function RuralDetailView({ specs, description, priceCop, priceUsd
              <h3 className="font-black text-sm text-gray-400 uppercase tracking-widest">{translateDynamic("Resumen del Terreno")}</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             <MainStat label="Área Lote" val={`${specs.land_area || 0} m²`} icon={Maximize} />
+             <MainStat label="Área Lote" val={`${specs.land_area || 0}`} icon={Maximize} />
              <MainStat label="Topografía" val={specs.topography} icon={Map} />
              <MainStat label="Agua" val={specs.water_source} icon={Droplets} />
              <MainStat label="Acceso" val={specs.access_type} icon={Route} />
@@ -104,49 +117,82 @@ export default function RuralDetailView({ specs, description, priceCop, priceUsd
           
           {/* COLUMNA IZQUIERDA (2/3): Descripción */}
           <div className="lg:col-span-2 space-y-8">
-             <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-purple-100 to-transparent rounded-full opacity-50 blur-2xl"></div>
-                <h3 className="font-black text-xl text-gray-800 mb-4 flex items-center gap-2 relative z-10">
-                   <Trees size={20} className="text-purple-600"/> {translateDynamic("La Finca")}
-                </h3>
-                <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base relative z-10 text-justify">
-                   {translateDynamic(description)}
-                </p>
+              <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-purple-100 to-transparent rounded-full opacity-50 blur-2xl"></div>
+                 <h3 className="font-black text-xl text-gray-800 mb-4 flex items-center gap-2 relative z-10">
+                    <Trees size={20} className="text-purple-600"/> {translateDynamic("La Finca")}
+                 </h3>
+                 <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base relative z-10 text-justify">
+                    {translateDynamic(description)}
+                 </p>
 
-                {/* Badge Casa Principal */}
-                {Number(specs.built_area) > 0 && (
-                  <div className="mt-8 p-5 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-4 items-start">
-                     <div className="p-3 bg-purple-100 rounded-full text-purple-700"><Home size={20}/></div>
-                     <div>
-                        <h4 className="font-bold text-purple-800 text-sm uppercase mb-1">{translateDynamic("Casa Principal")}</h4>
-                        <p className="text-purple-900 font-bold text-lg">
-                           {specs.built_area} m² <span className="text-xs font-normal opacity-70">/ {specs.bedrooms} Habs - {specs.bathrooms} Baños</span>
-                        </p>
-                        <p className="text-xs text-purple-700 italic mt-1">{translateDynamic("Incluye casa de mayordomo si aplica")}</p>
-                     </div>
-                  </div>
-                )}
-             </div>
+                 {/* Badge Casa Principal */}
+                 {Number(specs.built_area) > 0 && (
+                   <div className="mt-8 p-5 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-4 items-start">
+                      <div className="p-3 bg-purple-100 rounded-full text-purple-700"><Home size={20}/></div>
+                      <div>
+                         <h4 className="font-bold text-purple-800 text-sm uppercase mb-1">{translateDynamic("Casa Principal")}</h4>
+                         <p className="text-purple-900 font-bold text-lg">
+                            {specs.built_area} m² <span className="text-xs font-normal opacity-70">/ {specs.bedrooms} Habs - {specs.bathrooms} Baños</span>
+                         </p>
+                         <p className="text-xs text-purple-700 italic mt-1">{translateDynamic("Incluye casa de mayordomo si aplica")}</p>
+                      </div>
+                   </div>
+                 )}
+              </div>
           </div>
 
           {/* COLUMNA DERECHA (1/3): Detalles Técnicos */}
           <div className="space-y-6">
-             <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
-                <h3 className="font-black text-sm text-gray-800 uppercase mb-4 border-b pb-2 flex items-center gap-2">
-                    <Shovel size={16} className="text-purple-600"/> {translateDynamic("Infraestructura")}
-                </h3>
-                <div className="flex flex-col">
-                   <SpecRow label="Cerramiento" val={specs.fencing} icon={Fence} />
-                   <SpecRow label="Fuente Agua" val={specs.water_source} icon={Droplets} />
-                   <SpecRow label="Energía" val={specs.energy_source || "Red Eléctrica"} icon={Zap} />
-                   <SpecRow label="Tipo Gas" val={specs.gas_type} icon={TrendingUp} />
-                   {specs.levels && <SpecRow label="Niveles Casa" val={specs.levels} icon={Ruler} />}
-                </div>
-             </div>
+              <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                 <h3 className="font-black text-sm text-gray-800 uppercase mb-4 border-b pb-2 flex items-center gap-2">
+                     <Shovel size={16} className="text-purple-600"/> {translateDynamic("Infraestructura")}
+                 </h3>
+                 <div className="flex flex-col">
+                    <SpecRow label="Cerramiento" val={specs.fencing} icon={Fence} />
+                    <SpecRow label="Fuente Agua" val={specs.water_source} icon={Droplets} />
+                    <SpecRow label="Energía" val={specs.energy_source || "Red Eléctrica"} icon={Zap} />
+                    <SpecRow label="Tipo Gas" val={specs.gas_type} icon={TrendingUp} />
+                    
+                    {/* ANTIGÜEDAD */}
+                    {specs.antiquity && <SpecRow label="Edad Casa" val={specs.antiquity} icon={Calendar} />}
+                    
+                    {/* NIVELES */}
+                    {specs.levels && <SpecRow label="Niveles Casa" val={specs.levels} icon={Ruler} />}
+                    
+                    {/* ADMIN FEE */}
+                    <SpecRow 
+                        label="Administración" 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        icon={DollarSign} 
+                        isCurrency={true}
+                    />
+                 </div>
+              </div>
+
+              {/* MAPA ÚNICO (Si hay ubicación) */}
+              {municipality && (
+                  <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4">
+                          <MapPin className="text-purple-500" size={20}/>
+                          <h3 className="font-black text-sm text-gray-800 uppercase tracking-widest">{translateDynamic("Ubicación Aproximada")}</h3>
+                      </div>
+                      <div className="w-full h-80 rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-gray-200">
+                          <iframe 
+                              width="100%" 
+                              height="100%" 
+                              style={{border:0}} 
+                              loading="lazy" 
+                              src={mapUrl} 
+                              title="Mapa Rural"
+                          ></iframe>
+                      </div>
+                  </div>
+              )}
           </div>
        </div>
 
-       {/* SECCIÓN 3: AMENIDADES Y CULTIVOS (TAGS) */}
+       {/* SECCIÓN 3: AMENIDADES Y CULTIVOS */}
        {specs.features && specs.features.length > 0 && (
          <section>
             <h3 className="font-black text-sm text-purple-600 uppercase tracking-widest mb-5 flex items-center gap-2 border-b border-purple-100 pb-2">

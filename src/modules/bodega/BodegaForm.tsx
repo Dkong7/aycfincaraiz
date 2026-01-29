@@ -7,8 +7,6 @@ import {
 } from "lucide-react";
 
 // --- LISTAS DE AMENIDADES ---
-
-// 1. Seguridad Básica (Ya existente)
 const SECURITY_FEATURES = [
    {label: "Alarma Incendio", icon: Siren}, 
    {label: "Detectores Humo", icon: Flame}, 
@@ -16,11 +14,10 @@ const SECURITY_FEATURES = [
    {label: "Tanques Agua", icon: Container},
    {label: "Planta Eléctrica", icon: Zap}, 
    {label: "Vigilancia 24h", icon: ShieldAlert}, 
-   {label: "CCTV / Cámaras", icon: EyeIcon}, // Agregado
-   {label: "Control Acceso", icon: Lock}     // Agregado
+   {label: "CCTV / Cámaras", icon: EyeIcon}, 
+   {label: "Control Acceso", icon: Lock}
 ];
 
-// 2. Extras Industriales (LOS 10+ ITEMS INÉDITOS)
 const INDUSTRIAL_EXTRAS = [
    {label: "Puente Grúa", icon: Hammer},
    {label: "Piso Epóxico", icon: Layers},
@@ -67,13 +64,11 @@ const CheckGroup = ({ options, register, name, s, colorClass }: any) => (
   </div>
 );
 
-// Icono helper para CCTV
 function EyeIcon({size}:any){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>}
 
-export default function BodegaForm({ register, s, watch }: any) { // <-- IMPORTANTE: recibir 'watch'
+export default function BodegaForm({ register, s, watch }: any) { 
   const labelColor = "text-amber-700"; 
   
-  // Detectar Toggles
   const hasOffices = watch("specs.has_offices");
   const hasMezzanine = watch("specs.has_mezzanine");
   
@@ -85,16 +80,17 @@ export default function BodegaForm({ register, s, watch }: any) { // <-- IMPORTA
           <h3 className="font-black text-amber-800 uppercase text-xs tracking-widest">Ficha Técnica Bodega</h3>
        </div>
 
-       {/* 1. DIMENSIONES, NIVELES Y EDAD */}
+       {/* 1. DIMENSIONES (CORREGIDO: LOTE x CONSTRUIDA) */}
        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <InputIcon register={register} name="specs.area_total" label="Área Lote Total m²" icon={Maximize} s={s} type="number" />
-          <InputIcon register={register} name="specs.area_free" label="Área Libre Bodega m²" icon={Maximize} s={s} type="number" />
+          {/* CAMBIO CLAVE: area_built en lugar de area_free */}
+          <InputIcon register={register} name="specs.area_built" label="Área Total Construida m²" icon={Maximize} s={s} type="number" />
           <InputIcon register={register} name="specs.levels_qty" label="Niveles / Pisos" icon={Layers} s={s} type="number" />
           <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" />
           <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} type="number" />
        </div>
 
-       {/* 2. CAPACIDAD Y SERVICIOS BÁSICOS */}
+       {/* 2. CAPACIDAD */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <InputIcon register={register} name="specs.height" label="Altura Libre (m)" icon={ArrowUpFromLine} s={s} type="number"/>
           <InputIcon register={register} name="specs.energy_kva" label="Capacidad KVA" icon={Zap} s={s} type="number" />
@@ -122,7 +118,7 @@ export default function BodegaForm({ register, s, watch }: any) { // <-- IMPORTA
           </div>
        </div>
 
-       {/* 4. MÓDULO OFICINAS (CONDICIONAL) */}
+       {/* 4. OFICINAS */}
        <div className="border-t border-amber-100 pt-4">
           <label className={`flex items-center gap-2 cursor-pointer font-black text-sm mb-3 ${labelColor}`}>
              <input type="checkbox" {...register("specs.has_offices")} className="toggle toggle-sm toggle-warning" /> ¿TIENE ÁREA DE OFICINAS?
@@ -145,7 +141,7 @@ export default function BodegaForm({ register, s, watch }: any) { // <-- IMPORTA
           )}
        </div>
 
-       {/* 5. MÓDULO MEZZANINE (CONDICIONAL) */}
+       {/* 5. MEZZANINE */}
        <div className="border-t border-amber-100 pt-4">
           <label className={`flex items-center gap-2 cursor-pointer font-black text-sm mb-3 ${labelColor}`}>
              <input type="checkbox" {...register("specs.has_mezzanine")} className="toggle toggle-sm toggle-warning" /> ¿TIENE MEZZANINE DE CARGA?
@@ -171,7 +167,7 @@ export default function BodegaForm({ register, s, watch }: any) { // <-- IMPORTA
           </div>
        )}
 
-       {/* 7. CHECKLIST INDUSTRIAL AVANZADO */}
+       {/* 7. CHECKLIST */}
        <div className="bg-[#222] p-5 rounded-2xl border border-gray-800 text-gray-300 shadow-xl">
           <div className="flex items-center gap-2 mb-4 text-amber-500">
              <Factory size={18}/>

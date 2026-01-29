@@ -259,7 +259,7 @@ const Properties = () => {
                      <option value="Lote">Lote</option>
                      <option value="Local">Local</option>
                      <option value="Oficina">Oficina</option>
-                     <option value="Finca">Finca</option>
+                     <option value="Rural">Rural</option>
                   </select>
                </div>
 
