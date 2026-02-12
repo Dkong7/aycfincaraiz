@@ -1,7 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { pb } from "../api";
 import Hero from "../components/Hero";
-// 1. IMPORTAR LA BARRA DE BÚSQUEDA
 import { SearchBar } from "../components/search/SearchBar"; 
 import { FeaturedProperties, ServicesIntro, LatestBlog } from "../components/sections/HomeSections";
 import { useApp } from "../context/AppContext";
@@ -15,13 +14,21 @@ export default function Home() {
   useEffect(() => {
     const loadData = async () => {
         try {
-            // Cargar Hero (Inmuebles destacados)
-            const heroResult = await pb.collection("properties").getList(1, 10, { 
+            // 1. Intentar cargar Inmuebles Destacados (Hero)
+            let heroResult = await pb.collection("properties").getList(1, 10, { 
                 filter: "is_hero=true", 
                 sort: "-created" 
             });
+
+            // 2. FALLBACK: Si no hay destacados, cargar los últimos 5 agregados
+            if (heroResult.items.length === 0) {
+                heroResult = await pb.collection("properties").getList(1, 5, { 
+                    sort: "-created" 
+                });
+            }
+
             setHeroProps(heroResult.items);
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error("Error cargando Home:", e); }
     };
     loadData();
 
@@ -33,13 +40,13 @@ export default function Home() {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* 1. HERO PRINCIPAL */}
+      {/* Pasamos los inmuebles al Hero */}
       <Hero properties={heroProps} currency={currency} exchangeRate={exchangeRate} />
       
-      {/* 2. BARRA DE BÚSQUEDA (Flotante sobre el final del Hero) */}
+      {/* Barra de búsqueda */}
       <SearchBar />
 
-      {/* 3. RESTO DE SECCIONES */}
+      {/* Resto de secciones */}
       <FeaturedProperties />
       <ServicesIntro />
       <LatestBlog />

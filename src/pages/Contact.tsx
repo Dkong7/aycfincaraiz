@@ -48,10 +48,10 @@ const Contact = () => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const phoneRegex = /^[0-9+ ]{7,15}$/; 
 
-      if (!formData.name.trim()) newErrors.name = t('req_field') || "Requerido";
-      if (!formData.phone.trim() || !phoneRegex.test(formData.phone)) newErrors.phone = t('inv_phone') || "Número inválido";
-      if (!formData.email.trim() || !emailRegex.test(formData.email)) newErrors.email = t('inv_email') || "Email inválido";
-      if (!formData.msg.trim()) newErrors.msg = t('req_field') || "Requerido";
+      if (!formData.name.trim()) newErrors.name = t('req_field');
+      if (!formData.phone.trim() || !phoneRegex.test(formData.phone)) newErrors.phone = t('inv_phone');
+      if (!formData.email.trim() || !emailRegex.test(formData.email)) newErrors.email = t('inv_email');
+      if (!formData.msg.trim()) newErrors.msg = t('req_field');
 
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
@@ -62,7 +62,7 @@ const Contact = () => {
       if (!validateForm()) return;
       setIsSubmitting(true);
       setTimeout(() => {
-          alert(t('msg_sent') || "Mensaje enviado seguro.");
+          alert(t('msg_sent'));
           setFormData({ name: "", phone: "", email: "", msg: "" });
           setIsSubmitting(false);
       }, 1500);
@@ -140,7 +140,7 @@ const Contact = () => {
                     <input 
                       type="text" name="name" value={formData.name} onChange={handleChange}
                       className={`w-full p-4 bg-slate-50 border ${errors.name ? 'border-red-300 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'} rounded-2xl outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all font-bold placeholder:text-slate-300`}
-                      placeholder={t('ph_name') || "Tu nombre completo"} autoComplete="off"
+                      placeholder={t('ph_name')} autoComplete="off"
                     />
                     {errors.name && <p className="text-red-500 text-xs font-bold mt-2 ml-1 flex items-center gap-1"><AlertTriangle size={10}/> {errors.name}</p>}
                  </div>
@@ -171,20 +171,20 @@ const Contact = () => {
                     <textarea 
                       rows={4} name="msg" value={formData.msg} onChange={handleChange}
                       className={`w-full p-4 bg-slate-50 border ${errors.msg ? 'border-red-300 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'} rounded-2xl outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all font-bold placeholder:text-slate-300 resize-none`}
-                      placeholder={t('ph_msg') || "¿En qué podemos asesorarte hoy?"}
+                      placeholder={t('ph_msg')}
                     ></textarea>
                     {errors.msg && <p className="text-red-500 text-xs font-bold mt-2 ml-1">{errors.msg}</p>}
                  </div>
 
                  <button 
-                    disabled={isSubmitting}
-                    className={`w-full py-5 bg-[#0A192F] text-white font-black rounded-2xl hover:bg-green-600 transition-all uppercase tracking-widest shadow-xl hover:shadow-2xl hover:-translate-y-1 flex justify-center items-center gap-3 ${isSubmitting ? 'opacity-80 cursor-wait' : ''}`}
+                   disabled={isSubmitting}
+                   className={`w-full py-5 bg-[#0A192F] text-white font-black rounded-2xl hover:bg-green-600 transition-all uppercase tracking-widest shadow-xl hover:shadow-2xl hover:-translate-y-1 flex justify-center items-center gap-3 ${isSubmitting ? 'opacity-80 cursor-wait' : ''}`}
                  >
-                    {isSubmitting ? (
-                        <>{t('form_sending')} <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div></>
-                    ) : (
-                        t('form_btn')
-                    )}
+                   {isSubmitting ? (
+                       <>{t('form_sending')} <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div></>
+                   ) : (
+                       t('form_btn')
+                   )}
                  </button>
                  
                  <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-6 flex items-center justify-center gap-1.5">

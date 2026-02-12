@@ -64,7 +64,6 @@ export default function BodegaPreview({ data }: any) {
       {/* 2. DIMENSIONES & ESTRUCTURA */}
       <Section title="Dimensiones & Estructura" icon={Maximize}>
          <Row label="Área Lote Total" val={`${s.area_total || 0} m²`} icon={Maximize} valClass="text-amber-700 font-bold" />
-         {/* CORRECCIÓN: Área Construida en lugar de Libre */}
          <Row label="Área Construida" val={`${s.area_built || 0} m²`} icon={Maximize} />
          <Row label="Frente x Fondo" val={`${s.front || 0} x ${s.depth || 0} m`} icon={Ruler} />
          <Row label="Altura Libre" val={`${s.height || 0} m`} icon={ArrowUpFromLine} />
@@ -95,7 +94,8 @@ export default function BodegaPreview({ data }: any) {
          <div className="col-span-1 md:col-span-2">
             <Section title="Área Administrativa (Oficinas)" icon={Briefcase}>
                <div className="grid grid-cols-2 gap-4">
-                  <Row label="Área Oficinas" val={`${s.office_area || 0} m²`} icon={Maximize} />
+                  {/* CAMBIO: # Espacios */}
+                  <Row label="# Espacios" val={`${s.office_area || 0}`} icon={Maximize} />
                   <Row label="Baños Admin." val={s.office_bathrooms} icon={Bath} />
                   <Row label="Estado" val={s.office_condition} icon={CheckCircle2} />
                   <div className="text-xs text-gray-500 flex gap-2 mt-1">

@@ -69,6 +69,7 @@ function EyeIcon({size}:any){return <svg width={size} height={size} viewBox="0 0
 export default function BodegaForm({ register, s, watch }: any) { 
   const labelColor = "text-amber-700"; 
   
+  // SELECTOR PARA DESPLEGAR OFICINAS
   const hasOffices = watch("specs.has_offices");
   const hasMezzanine = watch("specs.has_mezzanine");
   
@@ -80,10 +81,9 @@ export default function BodegaForm({ register, s, watch }: any) {
           <h3 className="font-black text-amber-800 uppercase text-xs tracking-widest">Ficha Técnica Bodega</h3>
        </div>
 
-       {/* 1. DIMENSIONES (CORREGIDO: LOTE x CONSTRUIDA) */}
+       {/* 1. DIMENSIONES */}
        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <InputIcon register={register} name="specs.area_total" label="Área Lote Total m²" icon={Maximize} s={s} type="number" />
-          {/* CAMBIO CLAVE: area_built en lugar de area_free */}
           <InputIcon register={register} name="specs.area_built" label="Área Total Construida m²" icon={Maximize} s={s} type="number" />
           <InputIcon register={register} name="specs.levels_qty" label="Niveles / Pisos" icon={Layers} s={s} type="number" />
           <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" />
@@ -108,25 +108,29 @@ export default function BodegaForm({ register, s, watch }: any) {
        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100">
           <SelectIcon register={register} name="specs.gate_type" label="Tipo Portón" icon={Warehouse} s={s} options={["Doble Altura", "Corredizo", "Levadizo", "Persiana", "Muelle Nivelador"]} />
           <InputIcon register={register} name="specs.entry_count" label="# Entradas Camión" icon={Truck} s={s} type="number"/>
-          <SelectIcon register={register} name="specs.location_type" label="Ubicación" icon={MapPin} s={s} options={["Parque Industrial", "Zona Franca", "Vía Principal", "Interior", "Esquinera", "Medianera"]} />
+          
+          {/* Opción Sector Industrial incluida */}
+          <SelectIcon register={register} name="specs.location_type" label="Ubicación" icon={MapPin} s={s} options={["Sector Industrial", "Parque Industrial", "Zona Franca", "Vía Principal", "Interior", "Esquinera", "Medianera"]} />
           
           <div className="col-span-1 md:col-span-3 pt-2">
-             <label className={`flex items-center gap-2 text-xs font-bold ${labelColor} cursor-pointer`}>
-                <input type="checkbox" {...register("specs.has_truck_access")} className="rounded text-amber-600 focus:ring-0 w-4 h-4"/> 
-                <Truck size={14}/> ACCESO PARA TRACTOMULAS Y CONTENEDORES
-             </label>
+              <label className={`flex items-center gap-2 text-xs font-bold ${labelColor} cursor-pointer`}>
+                 <input type="checkbox" {...register("specs.has_truck_access")} className="rounded text-amber-600 focus:ring-0 w-4 h-4"/> 
+                 <Truck size={14}/> ACCESO PARA TRACTOMULAS Y CONTENEDORES
+              </label>
           </div>
        </div>
 
-       {/* 4. OFICINAS */}
+       {/* 4. OFICINAS (CON SELECTOR DE DESPLIEGUE) */}
        <div className="border-t border-amber-100 pt-4">
           <label className={`flex items-center gap-2 cursor-pointer font-black text-sm mb-3 ${labelColor}`}>
-             <input type="checkbox" {...register("specs.has_offices")} className="toggle toggle-sm toggle-warning" /> ¿TIENE ÁREA DE OFICINAS?
+              {/* CAMBIO SOLICITADO: Texto del Toggle */}
+              <input type="checkbox" {...register("specs.has_offices")} className="toggle toggle-sm toggle-warning" /> ¿TIENE OFICINAS?
           </label>
           
           {hasOffices && (
              <div className="p-4 bg-white border border-amber-200 rounded-xl shadow-sm animate-in slide-in-from-top-2 grid grid-cols-2 md:grid-cols-4 gap-3">
-                <InputIcon register={register} name="specs.office_area" label="Área Oficinas m²" icon={Maximize} s={s} type="number"/>
+                {/* Etiqueta actualizada */}
+                <InputIcon register={register} name="specs.office_area" label="# Oficinas / Espacios" icon={Briefcase} s={s} type="number"/>
                 <InputIcon register={register} name="specs.office_bathrooms" label="Baños Administrativos" icon={Bath} s={s} type="number"/>
                 <SelectIcon register={register} name="specs.office_condition" label="Estado Oficinas" icon={Briefcase} s={s} options={["Obra Gris", "Adecuadas", "Amobladas", "Modernas"]} />
                 <div className="flex flex-col justify-center">
@@ -144,7 +148,7 @@ export default function BodegaForm({ register, s, watch }: any) {
        {/* 5. MEZZANINE */}
        <div className="border-t border-amber-100 pt-4">
           <label className={`flex items-center gap-2 cursor-pointer font-black text-sm mb-3 ${labelColor}`}>
-             <input type="checkbox" {...register("specs.has_mezzanine")} className="toggle toggle-sm toggle-warning" /> ¿TIENE MEZZANINE DE CARGA?
+              <input type="checkbox" {...register("specs.has_mezzanine")} className="toggle toggle-sm toggle-warning" /> ¿TIENE MEZZANINE DE CARGA?
           </label>
           
           {hasMezzanine && (

@@ -13,9 +13,8 @@ export default function DashboardTeam() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAgent, setEditingAgent] = useState<any>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Estado menú móvil
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
   
-  // Stats en tiempo real
   const [stats, setStats] = useState<any>({});
 
   const { register, handleSubmit, reset, setValue } = useForm();
@@ -23,7 +22,8 @@ export default function DashboardTeam() {
   const theme = localStorage.getItem("ayc_theme") || "agent";
   const currentUser = pb.authStore.model;
   
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+  // CAMBIO CRÍTICO: URL SEGURA FIJA
+  const PB_URL = "https://www.aycfincaraiz.com";
 
   // --- SEGURIDAD: SOLO ADMINS ---
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function DashboardTeam() {
       `}>
          <div className="md:hidden absolute top-4 right-4">
             <button onClick={() => setIsMobileMenuOpen(false)} className={`${s.sidebarText} opacity-70 hover:opacity-100 p-2`}>
-                <X size={24}/>
+               <X size={24}/>
             </button>
          </div>
 
@@ -197,7 +197,7 @@ export default function DashboardTeam() {
 
          <div className="px-6 mt-auto">
             <button onClick={handleLogout} className="flex items-center gap-2 text-xs font-bold text-red-500 hover:text-red-400 transition-colors w-full p-4 bg-red-50 md:bg-transparent rounded-xl justify-center md:justify-start">
-                <LogOut size={16}/> CERRAR SESIÓN
+               <LogOut size={16}/> CERRAR SESIÓN
             </button>
          </div>
       </aside>

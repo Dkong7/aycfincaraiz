@@ -7,12 +7,10 @@ import {
 } from "lucide-react";
 import type { RecordModel } from "pocketbase";
 
-// 1. IMPORTACIÓN CORREGIDA
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import BlotFormatter from 'quill-blot-formatter';
 
-// 2. ACCESO SEGURO A QUILL Y REGISTRO DE MÓDULO
 const Quill = (ReactQuill as any).Quill;
 if (Quill) {
     Quill.register('modules/blotFormatter', BlotFormatter);
@@ -27,18 +25,17 @@ export default function DashboardBlog() {
   const [heroPreview, setHeroPreview] = useState<string | null>(null);
   const [contentBody, setContentBody] = useState("");
   
-  // Estado para el Modal de Confirmación
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  // Estado temporal para datos del formulario antes de guardar
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
-  // Estado para menú móvil
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const quillRef = useRef<ReactQuill>(null);
   const navigate = useNavigate();
   
   const theme = localStorage.getItem("ayc_theme") || "agent";
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+
+  // CAMBIO CRÍTICO: URL SEGURA FIJA (Ignoramos variables de entorno por seguridad)
+  const PB_URL = "https://www.aycfincaraiz.com";
 
   // Estilos
   const s = ((t) => {
@@ -79,7 +76,7 @@ export default function DashboardBlog() {
       setContentBody(post?.content || "");
       setPendingFormData(null); 
       setShowConfirmModal(false);
-      setIsMobileMenuOpen(false); // Cerrar menú al abrir editor
+      setIsMobileMenuOpen(false); 
       
       if (post?.image) {
           setHeroPreview(`${PB_URL}/api/files/${post.collectionId}/${post.id}/${post.image}`);
@@ -150,7 +147,6 @@ export default function DashboardBlog() {
       if (file) setHeroPreview(URL.createObjectURL(file));
   };
 
-  // --- PASO 1: PREPARAR PREVIEW ---
   const handlePreSave = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -167,7 +163,6 @@ export default function DashboardBlog() {
     setShowConfirmModal(true); 
   };
 
-  // --- PASO 2: GUARDADO FINAL ---
   const handleFinalConfirm = async () => {
     if (!pendingFormData) return;
     
@@ -237,7 +232,7 @@ export default function DashboardBlog() {
       `}>
          <div className="md:hidden absolute top-4 right-4">
             <button onClick={() => setIsMobileMenuOpen(false)} className={`${s.sidebarText} opacity-70 hover:opacity-100 p-2`}>
-                <X size={24}/>
+               <X size={24}/>
             </button>
          </div>
 
@@ -277,10 +272,10 @@ export default function DashboardBlog() {
                   <table className="w-full text-left min-w-[600px] md:min-w-0">
                      <thead className="bg-black/5 text-[10px] font-bold uppercase">
                         <tr>
-                            <th className="p-4">Artículo</th>
-                            <th className="p-4">Autor</th>
-                            <th className="p-4">Fecha</th>
-                            <th className="p-4 text-right">Acciones</th>
+                           <th className="p-4">Artículo</th>
+                           <th className="p-4">Autor</th>
+                           <th className="p-4">Fecha</th>
+                           <th className="p-4 text-right">Acciones</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-gray-200/20">
@@ -349,8 +344,8 @@ export default function DashboardBlog() {
                                </>
                            ) : (
                                <div className="text-center opacity-50 group-hover:opacity-100 transition-opacity">
-                                   <ImageIcon size={40} className="mx-auto mb-2"/>
-                                   <span className="text-[10px] font-black uppercase">Click para subir</span>
+                                    <ImageIcon size={40} className="mx-auto mb-2"/>
+                                    <span className="text-[10px] font-black uppercase">Click para subir</span>
                                </div>
                            )}
                            <input type="file" name="image" onChange={handleHeroChange} className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />

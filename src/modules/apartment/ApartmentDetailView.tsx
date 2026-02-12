@@ -30,21 +30,25 @@ export default function ApartmentDetailView({
       ? `$${formatCurrency(priceCop)} COP`
       : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
 
+  // --- FIX: Unificar todas las amenidades ---
   const allFeatures = [
       ...(Array.isArray(specs.features) ? specs.features : []),
-      ...(Array.isArray(specs.club_features) ? specs.club_features : [])
+      ...(Array.isArray(specs.social) ? specs.social : []), // Importante: 'social' es Club House
+      ...(Array.isArray(specs.club_features) ? specs.club_features : []) // Legacy support
   ];
+  // Filtrar duplicados y vacíos
+  const uniqueFeatures = [...new Set(allFeatures)].filter(Boolean);
 
-  // --- MAPA ÚNICO Y CORREGIDO ---
+  // --- MAPA ÚNICO ---
   const locCity = municipality || "Bogotá";
   const locHood = neighborhood || "";
   const query = `${locHood}, ${locCity}, Colombia`;
   const encodedQuery = encodeURIComponent(query);
   
-  // Usamos el dominio estándar de Google Maps con HTTPS para evitar bloqueos
+  // Usamos HTTPS para evitar mixed content
   const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed`;
 
-  // --- ADMIN FEE ---
+  // --- ADMIN FEE ROBUSTO ---
   const rawAdmin = adminFee || specs?.admin_fee || "0";
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
   const hasAdmin = cleanAdmin > 0;
@@ -121,6 +125,7 @@ export default function ApartmentDetailView({
                  <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base relative z-10 text-justify">
                     {translateDynamic(description)}
                  </p>
+                 
                  {specs.has_rent && (
                    <div className="mt-8 p-5 bg-green-50/50 rounded-2xl border border-green-100 flex gap-4 items-start">
                       <div className="p-3 bg-green-100 rounded-full text-green-600"><ShieldCheck size={20}/></div>
@@ -141,11 +146,16 @@ export default function ApartmentDetailView({
                      <Ruler size={16} className="text-blue-500"/> {translateDynamic("Ficha Técnica")}
                  </h3>
                  <div className="flex flex-col">
-                    <SpecRow label="Habitaciones" val={specs.habs} icon={Bed} />
-                    <SpecRow label="Baños" val={specs.baths} icon={Bath} />
+                    <SpecRow label="Habitaciones" val={specs.habs || specs.rooms} icon={Bed} />
+                    <SpecRow label="Baños" val={specs.baths || specs.bathrooms} icon={Bath} />
                     <SpecRow label="Estrato" val={stratum} icon={Layers} />
-                    {/* ADMINISTRACIÓN */}
-                    <SpecRow label="Administración" val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} icon={DollarSign} isCurrency={true} />
+                    {/* ADMINISTRACIÓN CORREGIDA */}
+                    <SpecRow 
+                        label="Administración" 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        icon={DollarSign} 
+                        isCurrency={true} 
+                    />
                     <SpecRow label="Antigüedad" val={specs.antiquity} icon={Calendar} />
                  </div>
               </div>
@@ -163,13 +173,14 @@ export default function ApartmentDetailView({
           </div>
        </div>
 
-       {allFeatures.length > 0 && (
+       {/* COMODIDADES (AMENIDADES UNIFICADAS) */}
+       {uniqueFeatures.length > 0 && (
           <section>
               <h3 className="font-black text-sm text-blue-600 uppercase tracking-widest mb-5 flex items-center gap-2 border-b border-blue-100 pb-2">
                  <Armchair size={16}/> {translateDynamic("Comodidades & Zonas Comunes")}
               </h3>
               <div className="flex flex-wrap gap-3">
-                 {allFeatures.map((feat: string, i: number) => {
+                 {uniqueFeatures.map((feat: string, i: number) => {
                     const Icon = APARTMENT_ICONS[feat] || CheckCircle2;
                     return (
                       <div key={`${feat}-${i}`} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white border border-gray-100 text-sm font-bold text-gray-600 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-default">
@@ -182,7 +193,7 @@ export default function ApartmentDetailView({
           </section>
        )}
 
-       {/* MAPA ÚNICO ESTÁNDAR */}
+       {/* MAPA */}
        {(municipality) && (
            <section className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                <div className="flex items-center gap-2 mb-4">

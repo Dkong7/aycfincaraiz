@@ -2,11 +2,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlane, faVrCardboard, faArrowRight, faFilm, faMusic } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import { useApp } from "../../context/AppContext"; // 1. CAMBIO
+import { useApp } from "../../context/AppContext"; 
 import Navbar from "../../components/Navbar";
 
 const Audiovisual = () => {
-  // 2. CAMBIO
   const { t } = useApp();
 
   return (
@@ -15,22 +14,21 @@ const Audiovisual = () => {
        
        {/* 1. HERO CINEMA */}
        <div className="relative h-[70vh] flex items-center justify-center overflow-hidden">
-          {/* Fondo Video/Imagen con Overlay */}
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center"></div>
           <div className="absolute inset-0 bg-gradient-to-br from-[#0A192F]/90 via-[#0A192F]/80 to-emerald-900/80 backdrop-blur-sm"></div>
           
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto animate-in fade-in zoom-in duration-1000">
              <div className="inline-block px-4 py-1 mb-6 border border-emerald-500/50 rounded-full text-emerald-400 text-xs font-black uppercase tracking-[0.3em]">
-                {t('media_badge') || "CINEMATOGRAFÍA 4K"}
+                {t('media_badge')}
              </div>
              <h1 className="text-6xl md:text-8xl font-black uppercase mb-6 tracking-tighter drop-shadow-2xl">
-                {t('media_title_1') || "Marketing"} <br/>
+                {t('media_title_1')} <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300">
-                   {t('media_title_2') || "Audiovisual"}
+                   {t('media_title_2')}
                 </span>
              </h1>
              <p className="text-xl md:text-2xl text-slate-300 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
-                {t('media_desc') || "Elevamos el nivel de su propiedad con producción de video de alta gama, drones y recorridos inmersivos."}
+                {t('media_desc')}
              </p>
           </div>
        </div>
@@ -75,29 +73,29 @@ const Audiovisual = () => {
                 {/* Feature 1 */}
                 <div className="bg-slate-900/50 p-10 rounded-[2rem] border border-slate-800 hover:border-emerald-500/50 transition-all group hover:-translate-y-2">
                    <FontAwesomeIcon icon={faPlane} className="text-emerald-500 text-4xl mb-6 group-hover:scale-110 transition-transform" />
-                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_1_t') || "Drones Profesionales"}</h3>
-                   <p className="text-slate-400 leading-relaxed">{t('feat_1_d') || "Capturamos la magnitud de su propiedad y el entorno desde perspectivas únicas."}</p>
+                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_1_t')}</h3>
+                   <p className="text-slate-400 leading-relaxed">{t('feat_1_d')}</p>
                 </div>
 
                 {/* Feature 2 */}
                 <div className="bg-slate-900/50 p-10 rounded-[2rem] border border-slate-800 hover:border-blue-500/50 transition-all group hover:-translate-y-2">
                    <FontAwesomeIcon icon={faVrCardboard} className="text-blue-500 text-4xl mb-6 group-hover:scale-110 transition-transform" />
-                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_2_t') || "Tour Virtual 360"}</h3>
-                   <p className="text-slate-400 leading-relaxed">{t('feat_2_d') || "Permita que los clientes caminen por el inmueble desde cualquier lugar del mundo."}</p>
+                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_2_t')}</h3>
+                   <p className="text-slate-400 leading-relaxed">{t('feat_2_d')}</p>
                 </div>
 
                 {/* Feature 3 */}
                 <div className="bg-slate-900/50 p-10 rounded-[2rem] border border-slate-800 hover:border-purple-500/50 transition-all group hover:-translate-y-2">
                    <FontAwesomeIcon icon={faFilm} className="text-purple-500 text-4xl mb-6 group-hover:scale-110 transition-transform" />
-                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_3_t') || "Storytelling Visual"}</h3>
-                   <p className="text-slate-400 leading-relaxed">{t('feat_3_d') || "No solo mostramos espacios, contamos la historia de vida que ofrece su propiedad."}</p>
+                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_3_t')}</h3>
+                   <p className="text-slate-400 leading-relaxed">{t('feat_3_d')}</p>
                 </div>
 
                 {/* Feature 4 */}
                 <div className="bg-slate-900/50 p-10 rounded-[2rem] border border-slate-800 hover:border-orange-500/50 transition-all group hover:-translate-y-2">
                    <FontAwesomeIcon icon={faMusic} className="text-orange-500 text-4xl mb-6 group-hover:scale-110 transition-transform" />
-                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_4_t') || "Edición Premium"}</h3>
-                   <p className="text-slate-400 leading-relaxed">{t('feat_4_d') || "Colorización cinematográfica y diseño sonoro para maximizar el impacto emocional."}</p>
+                   <h3 className="text-2xl font-bold mb-3 text-white">{t('feat_4_t')}</h3>
+                   <p className="text-slate-400 leading-relaxed">{t('feat_4_d')}</p>
                 </div>
 
              </div>
@@ -108,9 +106,9 @@ const Audiovisual = () => {
        <div className="relative py-24 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/20 to-blue-900/20"></div>
           <div className="relative z-10 px-6">
-             <h2 className="text-4xl md:text-5xl font-black mb-8">{t('media_final_cta') || "¿Listo para impactar?"}</h2>
+             <h2 className="text-4xl md:text-5xl font-black mb-8">{t('media_final_cta')}</h2>
              <Link to="/contacto" className="inline-flex items-center gap-3 px-10 py-5 bg-white text-slate-950 font-black uppercase tracking-widest rounded-full hover:bg-emerald-400 transition-all transform hover:scale-105 shadow-2xl shadow-emerald-500/20">
-                {t('media_final_btn') || "Agendar Producción"} <FontAwesomeIcon icon={faArrowRight} />
+                {t('media_final_btn')} <FontAwesomeIcon icon={faArrowRight} />
              </Link>
           </div>
        </div>

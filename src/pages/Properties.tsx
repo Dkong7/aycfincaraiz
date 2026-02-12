@@ -4,7 +4,9 @@ import { Search, Filter, MapPin, Home, Bed, Bath, ArrowRight, LayoutGrid, Star, 
 import { Link } from "react-router-dom";
 import { Property } from "../types/property";
 
-const PB_URL = "http://209.126.77.41:8080";
+// CAMBIO CRÍTICO: URL Segura (HTTPS)
+const PB_URL = "https://www.aycfincaraiz.com";
+
 // 1. HELPERS DE COLOR Y FORMATO
 const getTypeColor = (type: string) => {
   const t = type?.toLowerCase() || "";
@@ -26,7 +28,7 @@ const Properties = () => {
   // PAGINACIÓN REAL
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const ITEMS_PER_PAGE = 15; // <--- CAMBIO: 15 items por carga
+  const ITEMS_PER_PAGE = 15; 
 
   const [showTopBtn, setShowTopBtn] = useState(false);
 
@@ -46,7 +48,7 @@ const Properties = () => {
       try {
         const res = await pb.collection("properties").getList(1, 1, {
           filter: "is_opportunity=true",
-          sort: "-updated", // La más recientemente actualizada
+          sort: "-updated", 
         });
         if (res.items.length > 0) setQueen(res.items[0] as unknown as Property);
       } catch (e) { console.error("Error Reina:", e); }
@@ -60,7 +62,7 @@ const Properties = () => {
     
     try {
       // Construir filtro
-      const conditions = ["is_opportunity=false"]; // Excluir reina del listado normal
+      const conditions = ["is_opportunity=false"]; 
       if (filters.keyword) conditions.push(`(title ~ "${filters.keyword}" || municipality ~ "${filters.keyword}" || ayc_id ~ "${filters.keyword}" || neighborhood ~ "${filters.keyword}")`);
       if (filters.type) conditions.push(`property_type = "${filters.type}"`);
       if (filters.minPrice) conditions.push(`price_cop >= ${filters.minPrice}`);
@@ -71,7 +73,7 @@ const Properties = () => {
       // --- PETICIÓN REAL A POCKETBASE ---
       const result = await pb.collection("properties").getList(pageNum, ITEMS_PER_PAGE, {
         filter: filterString,
-        sort: "-created", // Orden cronológico (Nuevas primero) para evitar duplicados del random
+        sort: "-created", 
       });
 
       const newItems = result.items as unknown as Property[];
@@ -82,7 +84,6 @@ const Properties = () => {
         setProperties(prev => [...prev, ...newItems]);
       }
 
-      // Validar si quedan más páginas reales
       setHasMore(result.page < result.totalPages);
 
     } catch (error) {
@@ -97,7 +98,7 @@ const Properties = () => {
   useEffect(() => {
     setPage(1);
     setHasMore(true);
-    fetchProperties(1, true); // Página 1, es filtro nuevo
+    fetchProperties(1, true); 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
@@ -106,10 +107,9 @@ const Properties = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-            // Incrementamos página y hacemos la petición
             const nextPage = page + 1;
             setPage(nextPage);
-            fetchProperties(nextPage, false); // No es filtro nuevo, es append
+            fetchProperties(nextPage, false); 
         }
       },
       { threshold: 0.5 }
@@ -259,6 +259,8 @@ const Properties = () => {
                      <option value="Lote">Lote</option>
                      <option value="Local">Local</option>
                      <option value="Oficina">Oficina</option>
+                     
+                     {/* CAMBIO DE CONSISTENCIA: Finca -> Rural */}
                      <option value="Rural">Rural</option>
                   </select>
                </div>
@@ -298,7 +300,7 @@ const Properties = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               {/* 1. LA REINA (Siempre arriba si no hay filtros) */}
+               {/* 1. LA REINA */}
                {queen && !filters.keyword && !filters.type && !filters.minPrice && !filters.maxPrice && (
                    <div className="md:col-span-2 relative group z-0">
                        <div className="absolute -inset-1 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-[2rem] blur opacity-40 group-hover:opacity-75 transition duration-1000 z-0"></div>
@@ -311,11 +313,11 @@ const Properties = () => {
                    <PropertyCard key={p.id} data={p} />
                ))}
 
-               {/* SKELETON LOADER (Carga inicial) */}
+               {/* SKELETON */}
                {loading && properties.length === 0 && !queen && [1,2,3,4].map(i => <div key={i} className="h-96 bg-gray-200 rounded-3xl animate-pulse"></div>)}
             </div>
 
-            {/* MENSAJE DE VACÍO REAL */}
+            {/* MENSAJE DE VACÍO */}
             {!loading && properties.length === 0 && !queen && !hasMore && (
                <div className="bg-white p-12 rounded-2xl text-center shadow-sm border border-gray-100 mt-8">
                   <Home size={48} className="mx-auto text-gray-300 mb-4"/>
@@ -324,7 +326,7 @@ const Properties = () => {
                </div>
             )}
 
-            {/* LOADER INFERIOR / FIN DE LISTA */}
+            {/* LOADER INFERIOR */}
             <div ref={observerTarget} className="h-24 w-full mt-8 flex items-center justify-center">
                  {loading && properties.length > 0 && (
                     <div className="flex items-center gap-2 text-green-600 font-bold bg-white px-4 py-2 rounded-full shadow-sm">

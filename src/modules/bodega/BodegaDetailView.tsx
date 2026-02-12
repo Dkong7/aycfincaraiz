@@ -5,7 +5,6 @@ import {
   Briefcase, Utensils, Bath, Car, Factory, Grid, Hash, CheckCircle2
 } from "lucide-react";
 import { useApp } from "../../context/AppContext"; 
-import { useTRM } from "../../hooks/useTRM";       
 import { formatCurrency } from "../../utils/formatters";
 import { translate } from "./bodega.config"; 
 
@@ -17,11 +16,9 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
   const mainPrice = showUsd ? (priceUsd ? `USD $${formatCurrency(priceUsd)}` : "USD --") : `$${formatCurrency(priceCop)}`;
   const secondaryPrice = showUsd ? `$${formatCurrency(priceCop)} COP` : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
 
-  // --- ADMIN FEE ROBUSTO ---
   const rawAdmin = adminFee || specs?.admin_fee || "0";
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
 
-  // Helper de UI
   const SpecRow = ({ label, val, icon: Icon }: any) => (
      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0 group hover:bg-amber-50/30 px-2 rounded transition-colors">
         <div className="flex items-center gap-3">
@@ -52,7 +49,7 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
           )}
        </div>
 
-       {/* SECCIÓN 1: DATOS CLAVE (BENTO GRID) */}
+       {/* SECCIÓN 1: DATOS CLAVE */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
            {/* Área Lote */}
            <div className="p-4 bg-white border border-gray-100 rounded-2xl text-center shadow-sm hover:shadow-md transition-shadow">
@@ -61,7 +58,7 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                <p className="text-[10px] font-bold text-gray-400 uppercase">m² Lote Total</p>
            </div>
            
-           {/* Área Construida (CORREGIDO para coincidir con el Form) */}
+           {/* Área Construida */}
            <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center relative overflow-hidden shadow-sm">
                <div className="absolute top-0 right-0 p-1 bg-amber-200 rounded-bl-lg"><Truck size={12} className="text-amber-800"/></div>
                <Container className="mx-auto text-amber-600 mb-2" size={24}/>
@@ -98,7 +95,6 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                     {tr(description)}
                  </p>
                  
-                 {/* Badge Locales */}
                  {Number(specs.locales_count) > 0 && (
                   <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-center gap-4">
                       <div className="p-3 bg-amber-100 rounded-full text-amber-700"><ShoppingBag size={20}/></div>
@@ -115,12 +111,13 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                  <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-blue-50 rounded-bl-full"></div>
                     <h3 className="font-black text-sm text-gray-800 uppercase mb-4 flex items-center gap-2">
-                        <Briefcase size={16} className="text-blue-500"/> Área Administrativa (Oficinas)
+                       <Briefcase size={16} className="text-blue-500"/> Área Administrativa (Oficinas)
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                        <div className="text-center p-3 bg-gray-50 rounded-xl">
-                          <p className="text-xs text-gray-400 font-bold uppercase mb-1">Área</p>
-                          <p className="font-black text-gray-800">{specs.office_area || 0} m²</p>
+                          {/* CAMBIO: Mostrar Nro. de Oficinas */}
+                          <p className="text-xs text-gray-400 font-bold uppercase mb-1"># Espacios</p>
+                          <p className="font-black text-gray-800">{specs.office_area || 0}</p>
                        </div>
                        <div className="text-center p-3 bg-gray-50 rounded-xl">
                           <p className="text-xs text-gray-400 font-bold uppercase mb-1">Baños</p>
@@ -142,7 +139,7 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
               {specs.has_mezzanine && (
                  <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                     <h3 className="font-black text-sm text-gray-800 uppercase mb-4 flex items-center gap-2">
-                        <Layers size={16} className="text-amber-500"/> Mezzanine de Carga
+                       <Layers size={16} className="text-amber-500"/> Mezzanine de Carga
                     </h3>
                     <div className="grid grid-cols-3 gap-4">
                        <div className="text-center">

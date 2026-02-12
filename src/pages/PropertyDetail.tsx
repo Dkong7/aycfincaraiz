@@ -32,7 +32,7 @@ const PropertyDetail = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   // --- URL FIJA AL SERVIDOR ---
-  const PB_URL = "http://209.126.77.41:8080";
+  const PB_URL = "https://www.aycfincaraiz.com";
 
   useEffect(() => {
     const fetchProp = async () => {

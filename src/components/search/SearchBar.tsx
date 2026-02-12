@@ -1,14 +1,21 @@
 ﻿import React, { useState } from 'react';
-import { X, ArrowRight, Search, MapPin, Loader2 } from 'lucide-react';
+import { X, ArrowRight, Search, MapPin, Loader2, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { pb } from '../../api';
+
+// CAMBIO CRÍTICO: URL SEGURA FIJA
+const PB_URL = "https://www.aycfincaraiz.com";
 
 export const SearchBar = () => {
   const { lang, translateDynamic } = useApp();
   
   const txt = {
     title: lang === 'ES' ? "¿Dónde quieres invertir?" : "Where do you want to invest?",
+    // NUEVO TEXTO SOLICITADO
+    subtitle: lang === 'ES' 
+        ? "Lo invitamos a conocer nuestras publicaciones por SECTORES SOCIOECONÓMICOS DE BOGOTÁ, para analizar posibilidades y potencialidades de inversión."
+        : "We invite you to explore our publications by SOCIO-ECONOMIC SECTORS OF BOGOTA to analyze investment possibilities and potential.",
     placeholder: lang === 'ES' ? "Ej: Rosales, Apartamento, Chía..." : "Ex: Rosales, Apartment, Chía...",
     btn: lang === 'ES' ? "BUSCAR" : "SEARCH",
     results_title: lang === 'ES' ? "Resultados para:" : "Results for:",
@@ -23,7 +30,6 @@ export const SearchBar = () => {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFallback, setIsFallback] = useState(false);
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL;
 
   // 1. Guardar intención (Silencioso)
   const saveUserIntent = async (term: string) => {
@@ -49,21 +55,19 @@ export const SearchBar = () => {
       // A. BÚSQUEDA ACTIVA
       if (query.trim()) {
          const q = query.replace(/["\\]/g, ""); 
-         // Filtro limpio: PocketBase se encarga de mostrar solo lo "publicado" según tu regla API
          const searchFilter = `title ~ "${q}" || municipality ~ "${q}" || property_type ~ "${q}"`;
          
          const result = await pb.collection('properties').getList(1, 20, {
-            sort: '-created',
-            filter: searchFilter,
-            requestKey: null 
+           sort: '-created',
+           filter: searchFilter,
+           requestKey: null 
          });
          resultItems = result.items;
       }
 
-      // B. FALLBACK (Si está vacío o no hubo resultados)
+      // B. FALLBACK
       if (resultItems.length === 0) {
           setIsFallback(true);
-          // Traemos 4 items (La regla API filtrará los no publicados automáticamente)
           const fallbackResult = await pb.collection('properties').getList(1, 4, {
               sort: '-created',
               requestKey: null
@@ -75,7 +79,6 @@ export const SearchBar = () => {
       
     } catch (err) {
       console.error("Error búsqueda:", err);
-      // Fallback de emergencia final
       try {
           const rescue = await pb.collection('properties').getList(1, 4, { sort: '-created', requestKey: null });
           setResults(rescue.items);
@@ -91,9 +94,18 @@ export const SearchBar = () => {
       {/* BARRA FLOTANTE */}
       <div className="relative z-30 -mt-24 px-4 pb-12">
         <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl p-6 md:p-8 border-t-4 border-[#15803d]">
-           <h2 className="text-2xl md:text-3xl font-black text-[#0A192F] text-center mb-6 uppercase tracking-tight">
+           
+           <h2 className="text-2xl md:text-3xl font-black text-[#0A192F] text-center mb-2 uppercase tracking-tight">
              {txt.title}
            </h2>
+           
+           {/* NUEVO SUBTÍTULO INFORMATIVO */}
+           <div className="flex items-start justify-center gap-2 mb-6 max-w-2xl mx-auto text-center">
+                <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                    {txt.subtitle}
+                </p>
+           </div>
+
            <form onSubmit={handleSearch} className="relative flex gap-2 shadow-sm rounded-xl bg-gray-50 border border-gray-200 p-1">
              <div className="relative flex-1 group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#15803d] transition-colors" size={20}/>
@@ -106,7 +118,7 @@ export const SearchBar = () => {
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* MODAL DE RESULTADOS */}
       {modalOpen && (
         <div className="fixed inset-0 z-[100] bg-[#0A192F]/95 backdrop-blur-sm flex items-start justify-center p-4 pt-16 animate-in fade-in duration-200">
            <div className="bg-white w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in zoom-in-95 border border-gray-200">
@@ -135,6 +147,7 @@ export const SearchBar = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                        {results.length > 0 ? (
                            results.map(p => {
+                               // URL DE IMAGEN CORREGIDA
                                const imgUrl = p.images && p.images.length > 0
                                 ? `${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.images[0]}`
                                 : null;
@@ -147,32 +160,32 @@ export const SearchBar = () => {
                                return (
                                 <Link to={`/inmuebles/${p.id}`} key={p.id} onClick={() => setModalOpen(false)} className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-[#15803d] hover:shadow-xl transition-all group h-full relative">
                                     <div className="h-56 bg-gray-200 relative overflow-hidden">
-                                        {imgUrl ? (
-                                            <img src={imgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={p.title}/>
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold">SIN FOTO</div>
-                                        )}
-                                        <div className="absolute top-3 right-3 bg-[#0A192F]/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">
-                                            {p.property_type || "Inmueble"}
-                                        </div>
-                                        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-12">
-                                            <p className="text-white font-bold text-lg truncate drop-shadow-md">{translateDynamic(p.title)}</p>
-                                        </div>
+                                            {imgUrl ? (
+                                                <img src={imgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={p.title}/>
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold">SIN FOTO</div>
+                                            )}
+                                            <div className="absolute top-3 right-3 bg-[#0A192F]/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">
+                                                {p.property_type || "Inmueble"}
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-12">
+                                                <p className="text-white font-bold text-lg truncate drop-shadow-md">{translateDynamic(p.title)}</p>
+                                            </div>
                                     </div>
                                     <div className="p-5 flex flex-col flex-1">
-                                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 font-medium">
-                                            <MapPin size={16} className="text-[#15803d]"/> 
-                                            <span className="uppercase tracking-wider">{translateDynamic(p.municipality)}</span>
-                                        </div>
-                                        <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-end">
-                                            <div>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Precio</p>
-                                                <p className="text-[#15803d] font-black text-2xl leading-none">{displayPrice}</p>
+                                            <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 font-medium">
+                                                <MapPin size={16} className="text-[#15803d]"/> 
+                                                <span className="uppercase tracking-wider">{translateDynamic(p.municipality)}</span>
                                             </div>
-                                            <div className="bg-gray-100 p-2 rounded-full text-[#0A192F] group-hover:bg-[#15803d] group-hover:text-white transition-colors duration-300">
-                                                <ArrowRight size={20} />
+                                            <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-end">
+                                                <div>
+                                                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Precio</p>
+                                                    <p className="text-[#15803d] font-black text-2xl leading-none">{displayPrice}</p>
+                                                </div>
+                                                <div className="bg-gray-100 p-2 rounded-full text-[#0A192F] group-hover:bg-[#15803d] group-hover:text-white transition-colors duration-300">
+                                                    <ArrowRight size={20} />
+                                                </div>
                                             </div>
-                                        </div>
                                     </div>
                                 </Link>
                                );

@@ -7,24 +7,37 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlane, faVrCardboard, faArrowRight as faArrowRightSolid } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import { useApp } from "../../context/AppContext"; // 1. CONTEXTO NUEVO
+import { useApp } from "../../context/AppContext";
 import { pb } from "../../api";
 
-const PB_URL = "http://209.126.77.41:8080";
+// URL SEGURA
+const PB_URL = "https://www.aycfincaraiz.com";
+
 // ==========================================
-// 1. PROPIEDADES DESTACADAS (Reina + Grid)
+// 1. PROPIEDADES DESTACADAS
 // ==========================================
 export const FeaturedProperties = () => {
-  const { t, lang } = useApp(); // Usamos el nuevo hook
+  const { lang } = useApp(); // Solo necesitamos saber el idioma, no t()
+  
+  // TEXTOS FIJOS (Respaldo seguro)
+  const txt = {
+      title: lang === 'ES' ? "PROPIEDADES DESTACADAS" : "FEATURED PROPERTIES",
+      view_all: lang === 'ES' ? "Ver todas" : "View all",
+      gold_opp: lang === 'ES' ? "Oportunidad Dorada" : "Golden Opportunity",
+      why: lang === 'ES' ? "Por qué la elegimos:" : "Why we chose it:",
+      price_title: lang === 'ES' ? "Precio de Venta" : "Sales Price",
+      btn_view: lang === 'ES' ? "VER EXCLUSIVA" : "VIEW EXCLUSIVE",
+      fav_title: lang === 'ES' ? "Favoritos AYC" : "AYC Favorites",
+      reasons: lang === 'ES' 
+        ? ["Precio por debajo del mercado.", "Ubicación de alta valorización.", "Espacios únicos y acabados premium."]
+        : ["Below market price.", "High appreciation location.", "Unique spaces and premium finishes."]
+  };
+
   const [opportunity, setOpportunity] = useState<any>(null);
   const [favorites, setFavorites] = useState<any[]>([]);
 
-  // Helpers locales
   const getSpecs = (p: any) => { try { return typeof p.specs === 'string' ? JSON.parse(p.specs) : p.specs || {}; } catch { return {}; } };
   const getPrice = (p: any) => new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(p.price_cop);
-  
-  // Texto dinámico simple (si existe traducción la usa, si no, usa el original)
-  const displayTitle = (txt: string) => txt || ""; 
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -46,22 +59,20 @@ export const FeaturedProperties = () => {
       <div className="max-w-7xl mx-auto px-6 space-y-20">
         <div className="flex flex-col md:flex-row justify-between items-end">
            <div>
-               <h2 className="text-3xl font-black text-[#0A192F] uppercase">{t('feat_title') || "PROPIEDADES DESTACADAS"}</h2>
+               <h2 className="text-3xl font-black text-[#0A192F] uppercase">{txt.title}</h2>
                <div className="h-1 w-20 bg-green-600 mt-4"></div>
            </div>
            <Link to="/inmuebles" className="hidden md:flex items-center gap-2 text-green-600 font-bold hover:underline">
-               {t('view_all') || "Ver todas"} <ArrowRight size={20}/>
+               {txt.view_all} <ArrowRight size={20}/>
            </Link>
         </div>
 
         {opportunity && (
             <div className="flex flex-col lg:flex-row gap-10 items-stretch relative">
-                
-                {/* BLOQUE DE TEXTO */}
                 <div className="w-full lg:w-[30%] flex flex-col justify-center space-y-6 z-20 order-1 lg:order-1">
                     <div className="animate-in fade-in slide-in-from-bottom-5 duration-700">
                         <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-yellow-300 mb-4 shadow-sm">
-                            <Crown size={16} fill="currentColor" className="text-yellow-600"/> Oportunidad Dorada
+                            <Crown size={16} fill="currentColor" className="text-yellow-600"/> {txt.gold_opp}
                         </span>
                         <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-[1.1]">{opportunity.title}</h2>
                         <p className="text-gray-500 mt-3 flex items-center gap-2 text-sm uppercase font-bold tracking-wide">
@@ -70,9 +81,9 @@ export const FeaturedProperties = () => {
                     </div>
                     <div className="bg-white p-6 rounded-2xl border border-yellow-100 shadow-xl shadow-yellow-100/50 relative overflow-hidden group transition-all hover:border-yellow-300">
                         <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-yellow-400 to-yellow-600"></div>
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Por qué la elegimos:</p>
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">{txt.why}</p>
                         <ul className="space-y-4">
-                            {["Precio por debajo del mercado.", "Ubicación de alta valorización.", "Espacios únicos y acabados premium."].map((item, idx) => (
+                            {txt.reasons.map((item, idx) => (
                                 <li key={idx} className="flex items-start gap-3 text-sm text-gray-700 font-medium animate-in slide-in-from-left-5 fade-in duration-500" style={{animationDelay: `${idx * 150}ms`}}>
                                     <div className="mt-0.5 bg-yellow-100 p-1 rounded-full text-yellow-600"><CheckCircle2 size={14} strokeWidth={3}/></div>{item}
                                 </li>
@@ -80,17 +91,16 @@ export const FeaturedProperties = () => {
                         </ul>
                     </div>
                     <div className="pt-2 animate-in fade-in duration-700 delay-300">
-                        <p className="text-xs text-gray-400 uppercase font-bold mb-1 tracking-wider">Precio de Venta</p>
+                        <p className="text-xs text-gray-400 uppercase font-bold mb-1 tracking-wider">{txt.price_title}</p>
                         <div className="text-4xl font-black text-green-600 mb-6 flex items-baseline gap-1">${getPrice(opportunity)} <span className="text-lg text-gray-400 font-medium">COP</span></div>
                         <Link to={`/inmuebles/${opportunity.id}`} className="group relative w-full overflow-hidden rounded-xl bg-[#0A192F] px-8 py-4 text-white shadow-xl transition-all hover:bg-black hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-3">
-                            <span className="font-black uppercase tracking-widest text-sm relative z-10">VER EXCLUSIVA</span>
+                            <span className="font-black uppercase tracking-widest text-sm relative z-10">{txt.btn_view}</span>
                             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform relative z-10"/>
                             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 z-0"></div>
                         </Link>
                     </div>
                 </div>
                 
-                {/* BLOQUE DE IMAGEN */}
                 <div className="w-full lg:w-[70%] relative group order-2 lg:order-2 min-h-[269px] lg:min-h-[500px]">
                     <div className="absolute top-0 left-0 right-0 h-[269px] lg:h-auto lg:-inset-3 bg-gradient-to-r from-yellow-400 via-orange-300 to-yellow-500 rounded-[2.5rem] blur-2xl opacity-60 group-hover:opacity-80 transition duration-1000 animate-pulse z-0"></div>
                     <div className="relative h-full w-full rounded-[2rem] overflow-hidden shadow-[0_0_60px_rgba(234,179,8,0.3)] border-[6px] border-white z-10 bg-white">
@@ -101,7 +111,6 @@ export const FeaturedProperties = () => {
                         )}
                         <div className="absolute top-8 left-8"><div className="bg-yellow-500 text-white px-5 py-2 rounded-lg font-black uppercase text-xs tracking-widest shadow-lg">{opportunity.property_type}</div></div>
                         
-                        {/* ICONOS FLOTANTES */}
                         <div className="absolute bottom-8 left-8 right-8 hidden md:block">
                             <div className="bg-black/70 backdrop-blur-xl rounded-2xl p-5 flex justify-around items-center border border-white/10 text-white shadow-2xl">
                                 {(() => { const s = getSpecs(opportunity); return ( <> 
@@ -122,10 +131,9 @@ export const FeaturedProperties = () => {
 
         {opportunity && favorites.length > 0 && <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>}
 
-        {/* FAVORITOS */}
         {favorites.length > 0 && (
             <div>
-                <div className="flex items-center gap-4 mb-10"><div className="h-10 w-1.5 bg-green-600 rounded-full"></div><h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight flex items-center gap-3">Favoritos AYC <Star className="text-green-500 fill-green-500" size={24}/></h3></div>
+                <div className="flex items-center gap-4 mb-10"><div className="h-10 w-1.5 bg-green-600 rounded-full"></div><h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight flex items-center gap-3">{txt.fav_title} <Star className="text-green-500 fill-green-500" size={24}/></h3></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {favorites.map((prop) => {
                         const s = getSpecs(prop);
@@ -166,22 +174,16 @@ export const FeaturedProperties = () => {
 };
 
 // ==========================================
-// 2. NUEVA SECCIÓN DE SERVICIOS INTEGRADOS
+// 2. SECCIÓN DE SERVICIOS (TEXTOS FIJOS)
 // ==========================================
 export const ServicesIntro = () => {
-  const { t } = useApp();
-
-  // Definimos las listas aquí para evitar errores si el diccionario falla
-  const appraisalItems = ["Valor comercial preciso", "Normativa vigente", "Entrega rápida y certificada", "Peritos certificados RAA"];
-
+  // TEXTOS FIJOS (Sin t())
+  const items = ["Valor comercial preciso", "Normativa vigente", "Entrega rápida y certificada", "Peritos certificados RAA"];
+  
   return (
     <div className="bg-gray-50">
-      
       {/* 2.1 AVALÚOS */}
       <section className="relative py-24 bg-[#F8FAFC] overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-            <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-green-200 to-transparent"></div>
-        </div>
         <div className="max-w-7xl mx-auto px-6 relative z-10">
             <div className="flex flex-col lg:flex-row items-center gap-16">
                 <div className="lg:w-1/2 space-y-8">
@@ -191,7 +193,7 @@ export const ServicesIntro = () => {
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Avalúos Comerciales <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-400">Certificados RAA</span></h2>
                     <p className="text-lg text-slate-500 leading-relaxed">Determinamos el valor real de su inmueble con precisión técnica y respaldo legal. Ideal para venta, renta, hipotecas o procesos judiciales.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {appraisalItems.map((item, i) => (
+                        {items.map((item, i) => (
                             <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-slate-100 hover:border-green-200 transition-colors"><CheckCircle2 className="text-green-500 shrink-0" size={18}/><span className="text-sm font-bold text-slate-700">{item}</span></div>
                         ))}
                     </div>
@@ -273,7 +275,11 @@ export const ServicesIntro = () => {
 // 3. BLOG RECIENTE
 // ==========================================
 export const LatestBlog = () => {
-  const { t } = useApp();
+  const { lang } = useApp();
+  const title = lang === 'ES' ? "BLOG & NOTICIAS" : "BLOG & NEWS";
+  const subtitle = lang === 'ES' ? "Conoce las últimas noticias del sector." : "Latest industry news.";
+  const empty = lang === 'ES' ? "No hay noticias recientes." : "No recent news.";
+
   const [posts, setPosts] = useState<any[]>([]);
 
   useEffect(() => {
@@ -289,8 +295,8 @@ export const LatestBlog = () => {
   return (
     <section className="py-24 bg-white text-center">
        <div className="max-w-6xl mx-auto px-6">
-           <h2 className="text-3xl font-black text-[#0A192F] uppercase mb-4">{t('nav_blog') || "BLOG & NOTICIAS"}</h2>
-           <p className="text-gray-500 mb-12">Conoce las últimas noticias del sector.</p>
+           <h2 className="text-3xl font-black text-[#0A192F] uppercase mb-4">{title}</h2>
+           <p className="text-gray-500 mb-12">{subtitle}</p>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                {posts.map(p => (
                    <Link to="/blog" key={p.id} className="group text-left block">
@@ -303,7 +309,7 @@ export const LatestBlog = () => {
                    </Link>
                ))}
            </div>
-           {posts.length === 0 && <p className="text-sm text-gray-400 italic">No hay noticias recientes.</p>}
+           {posts.length === 0 && <p className="text-sm text-gray-400 italic">{empty}</p>}
        </div>
     </section>
   );

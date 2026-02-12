@@ -26,11 +26,10 @@ const translations: Record<string, Record<string, string>> = {
     nav_about: "Nosotros", 
     nav_contact: "Contacto",
     
-    // *** CLAVES FALTANTES AGREGADAS ***
+    // --- SERVICIOS MENÚ ---
     srv_appraisals: "Avalúos Certificados",
     srv_legal: "Gestión Jurídica",
     srv_audio: "Producción Visual",
-    // **********************************
 
     hero_btn: "Ver Detalles", 
     feat_title: "Propiedades Destacadas", 
@@ -65,7 +64,7 @@ const translations: Record<string, Record<string, string>> = {
     ph_name: "Ej: Juan Pérez",
     ph_msg: "¿Cómo podemos ayudarte hoy?",
 
-    // --- BARRA LATERAL ---
+    // --- BARRA LATERAL (DETAIL VIEW) ---
     agent_title: "AGENTE RESPONSABLE",
     code: "Cód",
     btn_whatsapp: "Consultar por WhatsApp",
@@ -75,11 +74,75 @@ const translations: Record<string, Record<string, string>> = {
     view_allies: "Ver Aliados Financieros",
     location_priv_title: "Ubicación Privilegiada",
     location_priv_desc: "Esta propiedad cuenta con una excelente ubicación estratégica. Contáctanos para conocer el punto exacto.",
+
+    // --- SECCIÓN JURÍDICA ---
+    legal_badge: "Blindaje Total",
+    legal_title_1: "Seguridad",
+    legal_title_2: "Jurídica Inmobiliaria",
+    legal_desc: "Protegemos su patrimonio con estudios de títulos rigurosos, saneamiento predial y contratos blindados contra todo riesgo.",
+    legal_btn: "Consultar Caso",
+    legal_expertise_title: "Áreas de Práctica",
+    legal_card_1_t: "Estudio de Títulos",
+    legal_card_1_d: "Análisis profundo de la tradición del inmueble (20+ años) para detectar gravámenes o vicios ocultos.",
+    legal_card_2_t: "Saneamiento Predial",
+    legal_card_2_d: "Resolución de sucesiones ilíquidas, levantamiento de hipotecas, corrección de áreas.",
+    legal_card_3_t: "Contratos Blindados",
+    legal_card_3_d: "Elaboración de promesas de compraventa y contratos con cláusulas de protección robustas.",
+    legal_process_title: "Metodología Jurídica",
+    legal_final_cta: "¿Su inmueble tiene problemas legales?",
+    legal_final_btn: "Agendar Consulta Gratuita",
+
+    // --- SECCIÓN AVALÚOS ---
+    appraisal_badge: "Certificado RAA",
+    appraisal_title_1: "Avalúos",
+    appraisal_title_2: "Comerciales",
+    appraisal_desc: "Determinamos el valor real de su inmueble con precisión técnica, respaldo legal y certificación ante la Lonja.",
+    appraisal_btn: "Solicitar Cotización",
+    appraisal_why_title: "¿Por qué con nosotros?",
+    why_1_t: "Precisión Técnica", why_1_d: "Metodologías NIIF y ONAC.",
+    why_2_t: "Validez Legal", why_2_d: "Idóneo para trámites notariales y judiciales.",
+    why_3_t: "Visión de Mercado", why_3_d: "Análisis comparativo real.",
+    process_title: "Nuestro Proceso",
+    step_1_t: "Visita Técnica", step_1_d: "Inspección física detallada.",
+    step_2_t: "Estudio de Mercado", step_2_d: "Investigación de transacciones reales.",
+    step_3_t: "Entrega de Informe", step_3_d: "Informe firmado por perito RAA.",
+    appraisal_final_cta: "Conocer el valor real es el primer paso para un negocio exitoso.",
     
+    // --- SECCIÓN AUDIOVISUAL ---
+    media_badge: "CINEMATOGRAFÍA 4K",
+    media_title_1: "Marketing", media_title_2: "Audiovisual",
+    media_desc: "Elevamos el nivel de su propiedad con producción de video de alta gama, drones y recorridos inmersivos.",
+    feat_1_t: "Drones Profesionales", feat_1_d: "Perspectivas aéreas únicas.",
+    feat_2_t: "Tour Virtual 360", feat_2_d: "Recorridos desde cualquier lugar.",
+    feat_3_t: "Storytelling Visual", feat_3_d: "Contamos la historia de su propiedad.",
+    feat_4_t: "Edición Premium", feat_4_d: "Colorización y diseño sonoro.",
+    media_final_cta: "¿Listo para impactar?",
+    media_final_btn: "Agendar Producción",
+
     // Mapeo DB -> Label UI
     Casa: "Casa", Apartamento: "Apartamento", Bodega: "Bodega", Oficina: "Oficina", 
-    Local: "Local", Lote: "Lote", Finca: "Finca", Rural: "Rural", 
-    CasaCampo: "Casa Campestre", Terreno: "Terreno"
+    Local: "Local", Lote: "Lote", Finca: "Rural", Rural: "Rural", 
+    CasaCampo: "Casa Campestre", Terreno: "Terreno",
+
+    // --- PÁGINA ABOUT (NOSOTROS) ---
+    about_hero: "Más que una inmobiliaria, somos tus socios estratégicos en la construcción de patrimonio.",
+    about_story_title: "NUESTRA HISTORIA",
+    about_story_headline: "Excelencia inmobiliaria desde 2010",
+    about_story_desc: "Fundada con la visión de transformar el mercado inmobiliario en Bogotá, AyC ha crecido basándose en la confianza, la transparencia y resultados comprobables.",
+    about_stats_clients: "Clientes Felices",
+    about_stats_exp: "Años Exp.",
+    about_stats_sales: "En Ventas",
+    about_values_title: "Nuestros Valores",
+    val1_title: "Integridad", val1_desc: "Actuamos con honestidad y transparencia en cada negocio.",
+    val2_title: "Excelencia", val2_desc: "Buscamos superar las expectativas con resultados superiores.",
+    val3_title: "Pasión", val3_desc: "Amamos lo que hacemos y se nota en cada detalle.",
+    about_team_title: "Liderazgo",
+    role_founder1: "Cofundadora & Gerente Comercial",
+    desc_founder1: "Experta en negociación y relaciones públicas con más de 15 años liderando equipos comerciales de alto rendimiento.",
+    role_founder2: "Cofundador & Director Jurídico",
+    desc_founder2: "Abogado especialista en derecho inmobiliario y urbano. Garante de la seguridad jurídica en cada operación de la firma.",
+
+    //
   },
   EN: {
     // --- NAVEGACIÓN & HERO ---
@@ -90,11 +153,10 @@ const translations: Record<string, Record<string, string>> = {
     nav_about: "About Us", 
     nav_contact: "Contact",
 
-    // *** CLAVES FALTANTES AGREGADAS ***
+    // --- SERVICIOS MENÚ ---
     srv_appraisals: "Certified Appraisals",
     srv_legal: "Legal Management",
     srv_audio: "Visual Production",
-    // **********************************
 
     hero_btn: "View Details", 
     feat_title: "Featured Properties", 
@@ -140,10 +202,74 @@ const translations: Record<string, Record<string, string>> = {
     location_priv_title: "Prime Location",
     location_priv_desc: "This property boasts a strategic location. Contact us to reveal the exact spot.",
 
+    // --- LEGAL (NEW) ---
+    legal_badge: "Total Shield",
+    legal_title_1: "Real Estate",
+    legal_title_2: "Legal Security",
+    legal_desc: "We protect your assets with rigorous title searches, property sanitation, and ironclad contracts.",
+    legal_btn: "Consult Case",
+    legal_expertise_title: "Practice Areas",
+    legal_card_1_t: "Title Search",
+    legal_card_1_d: "Deep analysis of property tradition (20+ years) to detect liens or hidden defects.",
+    legal_card_2_t: "Property Sanitation",
+    legal_card_2_d: "Resolution of unliquidated successions, mortgage lifting, boundary corrections.",
+    legal_card_3_t: "Ironclad Contracts",
+    legal_card_3_d: "Drafting of purchase agreements and lease contracts with robust protection clauses.",
+    legal_process_title: "Legal Methodology",
+    legal_final_cta: "Does your property have legal issues?",
+    legal_final_btn: "Schedule Free Consultation",
+
+    // --- APPRAISALS (NEW) ---
+    appraisal_badge: "RAA Certified",
+    appraisal_title_1: "Commercial",
+    appraisal_title_2: "Appraisals",
+    appraisal_desc: "We determine the real value of your property with technical precision, legal backing, and Board certification.",
+    appraisal_btn: "Request Quote",
+    appraisal_why_title: "Why Us?",
+    why_1_t: "Technical Precision", why_1_d: "NIIF and ONAC methodologies.",
+    why_2_t: "Legal Validity", why_2_d: "Suitable for notary and judicial procedures.",
+    why_3_t: "Market Vision", why_3_d: "Real comparative analysis.",
+    process_title: "Our Process",
+    step_1_t: "Technical Visit", step_1_d: "Detailed physical inspection.",
+    step_2_t: "Market Study", step_2_d: "Research of real transactions.",
+    step_3_t: "Report Delivery", step_3_d: "Report signed by RAA appraiser.",
+    appraisal_final_cta: "Knowing the real value is the first step to a successful deal.",
+    
+    // --- AUDIOVISUAL (NEW) ---
+    media_badge: "4K CINEMATOGRAPHY",
+    media_title_1: "Audiovisual", media_title_2: "Marketing",
+    media_desc: "We elevate your property's level with high-end video production, drones, and immersive tours.",
+    feat_1_t: "Pro Drones", feat_1_d: "Unique aerial perspectives.",
+    feat_2_t: "360 VR Tour", feat_2_d: "Tours from anywhere.",
+    feat_3_t: "Visual Storytelling", feat_3_d: "We tell your property's story.",
+    feat_4_t: "Premium Editing", feat_4_d: "Color grading and sound design.",
+    media_final_cta: "Ready to make an impact?",
+    media_final_btn: "Schedule Production",
+
     // Mapeo DB -> Label UI
     Casa: "House", Apartamento: "Apartment", Bodega: "Warehouse", Oficina: "Office", 
     Local: "Retail Store", Lote: "Lot", Finca: "Farm", Rural: "Rural", 
-    CasaCampo: "Country House", Terreno: "Land"
+    CasaCampo: "Country House", Terreno: "Land",
+
+    // --- ABOUT PAGE ---
+    about_hero: "More than a real estate agency, we are your strategic partners in building heritage.",
+    about_story_title: "OUR STORY",
+    about_story_headline: "Real Estate Excellence since 2010",
+    about_story_desc: "Founded with the vision of transforming the real estate market in Bogota, AyC has grown based on trust, transparency, and proven results.",
+    about_stats_clients: "Happy Clients",
+    about_stats_exp: "Years Exp.",
+    about_stats_sales: "In Sales",
+    about_values_title: "Our Values",
+    val1_title: "Integrity", val1_desc: "We act with honesty and transparency in every deal.",
+    val2_title: "Excellence", val2_desc: "We seek to exceed expectations with superior results.",
+    val3_title: "Passion", val3_desc: "We love what we do, and it shows in every detail.",
+    about_team_title: "Leadership",
+    role_founder1: "Co-Founder & Sales Manager",
+    desc_founder1: "Expert in negotiation and public relations with over 15 years leading high-performance commercial teams.",
+    role_founder2: "Co-Founder & Legal Director",
+    desc_founder2: "Lawyer specializing in real estate and urban law. Guarantor of legal security in every firm operation.",
+
+    //
   }
 };
 
@@ -344,3 +470,5 @@ export const useApp = () => {
   if (!context) throw new Error("useApp must be used within AppProvider");
   return context;
 };
+
+export default AppContext;

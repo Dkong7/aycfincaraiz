@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Bed, Bath, Car, Ruler, MapPin, Play } from "lucide-react";
-import { useApp } from "../context/AppContext"; // 1. CAMBIO: CONTEXTO NUEVO
+import { useApp } from "../context/AppContext"; 
 
 // Interfaces
 interface PropertyDB {
@@ -34,11 +34,11 @@ interface MediaItem {
 }
 
 const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
-  // 2. USAR EL NUEVO CONTEXTO
-  // En lugar de translateDynamic, usamos 't' que ya viene conectado
   const { t } = useApp(); 
 
-  const PB_URL = "http://209.126.77.41:8080";  
+  // CAMBIO CRÍTICO: URL Segura
+  const PB_URL = "https://www.aycfincaraiz.com";  
+  
   const [propIndex, setPropIndex] = useState(0); 
   const [mediaIndex, setMediaIndex] = useState(0); 
 
@@ -65,16 +65,14 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
   let specs: any = {};
   try { specs = typeof activeProp.specs === "string" ? JSON.parse(activeProp.specs) : activeProp.specs || {}; } catch(e) { specs = {}; }
 
-  // --- DATOS VISUALES (TRADUCIDOS CON 't') ---
-  // Nota: Si el título viene de DB, se muestra directo. Si es una key fija, usamos t()
-  // Para datos dinámicos como 'property_type', usamos t() si queremos traducirlo (ej: Casa -> House)
+  // --- DATOS VISUALES ---
   const title = activeProp.title || "";
   const categoryType = t(activeProp.property_type) || activeProp.property_type; 
-  const categoryListing = activeProp.listing_type || "Venta"; // Esto podría necesitar traducción t() si tienes las keys
+  const categoryListing = activeProp.listing_type || "Venta"; 
   const price = activeProp.price_cop;
   
   const rawLocation = activeProp.neighborhood || activeProp.municipality || "Ubicación";
-  const location = rawLocation; // Nombres propios no se suelen traducir
+  const location = rawLocation; 
 
   const usdPrice = activeProp.price_usd || 0;
   const displayPrice = currency === "USD" ? (usdPrice > 0 ? usdPrice : price / exchangeRate) : price;

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Upload, CheckCircle, Trash2, Youtube, Video, RotateCw, Image as ImageIcon } from "lucide-react";
 
-// URL DEL SERVIDOR
-const PB_URL = "http://209.126.77.41:8080";
+// CAMBIO CRÍTICO: URL SEGURA
+const PB_URL = "https://www.aycfincaraiz.com";
 
 export default function GalleryUpload({ setImages, setDeletedImages, initialData, register, watch, onPreviewChange }: any) {
   // Estado local de previsualización
@@ -12,32 +12,26 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   
-  // --- FIX: RASTREO DE ID PARA LIMPIEZA FORZOSA ---
-  // Guardamos el último ID procesado. Si cambia, sabemos que cambiamos de inmueble.
   const lastProcessedId = useRef<string | null>(null);
 
-  // 1. CARGA Y SINCRONIZACIÓN INICIAL (NUCLEAR FIX)
+  // 1. CARGA Y SINCRONIZACIÓN INICIAL
   useEffect(() => {
     const currentPropId = initialData?.id || "new-entry";
     const incomingImages = initialData?.images || [];
 
-    // A) DETECTAR CAMBIO DE PROPIEDAD (Evita acumulación)
+    // A) DETECTAR CAMBIO DE PROPIEDAD
     if (lastProcessedId.current !== currentPropId) {
-        // Si el ID cambió, limpiamos todo inmediatamente antes de procesar nada más
         setPreviews([]);
         if (setDeletedImages) setDeletedImages([]); 
         if (setImages) setImages([]); 
         lastProcessedId.current = currentPropId;
     }
 
-    // B) PROCESAR IMÁGENES DEL SERVIDOR (Si existen)
+    // B) PROCESAR IMÁGENES DEL SERVIDOR
     if (incomingImages.length > 0) {
-       // Generamos un string único de las imágenes entrantes para comparar
        const incomingIdsString = incomingImages.join(",");
-       // Generamos un string de lo que ya tenemos en pantalla (solo las existentes)
        const currentIdsString = previews.filter(p => p.isExisting).map(p => p.id).join(",");
 
-       // Solo actualizamos si hay diferencia real (evita loops infinitos)
        if (currentIdsString !== incomingIdsString) {
            const existing = incomingImages.map((img: string) => ({
              // Timestamp para evitar caché del navegador (?t=...)
@@ -46,40 +40,30 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
              isExisting: true,
              id: img 
            }));
-           // Usamos una función de actualización para asegurar que no sobrescribimos si el usuario ya subió algo en milisegundos
            setPreviews(prev => {
-               // Si es el mismo ID, mantenemos las locales (files) y actualizamos las remotas.
-               // Si el ID cambió (detectado arriba), el estado ya estará limpio.
                const localFiles = prev.filter(p => !p.isExisting);
                return [...existing, ...localFiles];
            });
        }
     } else {
-        // Si no hay imágenes entrantes y no tenemos archivos locales nuevos, limpiar.
-        // Esto cubre el caso de "Borrador nuevo" o propiedad sin fotos.
-        setPreviews(prev => prev.filter(p => !p.isExisting));
+       setPreviews(prev => prev.filter(p => !p.isExisting));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData?.id, initialData?.images]); 
 
-  // 2. COMUNICACIÓN CON EL PADRE (Sincronización de estado hacia arriba)
+  // 2. COMUNICACIÓN CON EL PADRE
   useEffect(() => {
-     // Filtramos solo los archivos NUEVOS (File objects) para enviar al servidor
      const newFilesOnly = previews.filter(p => !p.isExisting && p.file).map(p => p.file as File);
-     
-     // Actualizamos el estado del padre
      setImages(newFilesOnly);
      
-     // Notificamos al preview general (Modal de confirmación)
      if (onPreviewChange) {
          onPreviewChange(previews.map(p => p.url));
      }
      
-     // Cleanup: Liberar memoria de blobs locales
      return () => {
         previews.forEach(p => {
             if (!p.isExisting && p.url.startsWith('blob:')) {
-                URL.revokeObjectURL(p.url);
+               URL.revokeObjectURL(p.url);
             }
         });
      };
@@ -94,11 +78,9 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
           rotate: 0, 
           file: f, 
           isExisting: false,
-          id: `temp-${Date.now()}-${f.name}` // ID único temporal para keys de React
+          id: `temp-${Date.now()}-${f.name}`
       }));
       setPreviews(prev => [...prev, ...newPreviews]);
-      
-      // Limpiar el input para permitir subir el mismo archivo si se borró por error
       e.target.value = ''; 
     }
   };
@@ -110,7 +92,6 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
   const removeImg = (index: number) => {
     const itemToDelete = previews[index];
     
-    // Si es imagen del servidor, la agregamos a la lista de "Deleted" del padre
     if (itemToDelete.isExisting && itemToDelete.id && setDeletedImages) {
         setDeletedImages((prev: string[]) => {
             if (prev.includes(itemToDelete.id!)) return prev;
@@ -118,12 +99,10 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
         });
     }
     
-    // Si era un blob local, liberamos memoria inmediatamente
     if (!itemToDelete.isExisting && itemToDelete.url) {
-        URL.revokeObjectURL(itemToDelete.url);
+       URL.revokeObjectURL(itemToDelete.url);
     }
     
-    // Eliminar del estado visual local
     setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -182,7 +161,6 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
              {previews.map((img, index) => (
                  <div 
-                   // KEY ÚNICA: Usamos la URL + ID para que React sepa distinguir elementos al reordenar
                    key={img.id || img.url} 
                    className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-100 cursor-grab active:cursor-grabbing hover:shadow-lg transition-all"
                    draggable
@@ -225,7 +203,7 @@ export default function GalleryUpload({ setImages, setDeletedImages, initialData
                     {/* INDICADOR DE PORTADA */}
                     {index === 0 && (
                         <div className="absolute bottom-0 w-full bg-blue-600/90 backdrop-blur text-white text-[8px] font-black text-center py-1 uppercase tracking-widest border-t border-blue-400">
-                            PORTADA
+                           PORTADA
                         </div>
                     )}
                  </div>

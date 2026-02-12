@@ -3,10 +3,10 @@ import {
   Maximize, ArrowUpFromLine, Building, Bed, Bath, 
   Car, Flame, Calendar, Eye, ShieldCheck, Coffee, Dumbbell, Waves, 
   Trophy, Trees, Zap, Heater, Tv, Dog, LandPlot, MonitorPlay, Mountain, 
-  User, ChefHat, Layers, Utensils, Shirt, DoorOpen
+  User, ChefHat, Layers, Utensils, Shirt, DoorOpen, Wifi, Box
 } from "lucide-react";
 
-// --- LISTAS MAESTRAS (Sincronizadas con apartment.config) ---
+// --- LISTAS MAESTRAS (Sincronizadas con las nuevas claves de traducción) ---
 const EXTRAS_APTO = [
    { label: "Ascensor Privado", icon: ArrowUpFromLine },
    { label: "Ascensor Servicio", icon: ArrowUpFromLine },
@@ -15,7 +15,14 @@ const EXTRAS_APTO = [
    { label: "CBS (Cuarto Servicio)", icon: User },
    { label: "Puerta Seguridad", icon: ShieldCheck },
    { label: "Duplex", icon: Layers }, 
-   { label: "Penthouse", icon: Mountain }
+   { label: "Penthouse", icon: Mountain },
+   { label: "Balcón", icon: DoorOpen },
+   { label: "Terraza Privada", icon: Trees },
+   { label: "Chimenea", icon: Flame },
+   { label: "Depósito", icon: Box },
+   { label: "Domótica", icon: Wifi },
+   { label: "Cocina Abierta", icon: ChefHat },
+   { label: "Vista Exterior", icon: Eye }
 ];
 
 const CLUB_HOUSE = [
@@ -67,9 +74,7 @@ export default function ApartmentForm({ register, watch, s }: any) {
            <InputIcon register={register} name="specs.area_built" label="Área m²" icon={Maximize} s={s} type="number" />
            <InputIcon register={register} name="specs.floor_level" label="Piso N°" icon={ArrowUpFromLine} s={s} type="number" />
            <InputIcon register={register} name="specs.total_floors" label="Pisos Ed." icon={Building} s={s} type="number" />
-           <SelectIcon register={register} name="specs.antiquity" label="Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 9 años", "10 a 20 años", "Más de 20 años"]} />
-           
-           {/* NOTA: 'admin_fee' se gestiona en FinancialInfo */}
+           <SelectIcon register={register} name="specs.antiquity" label="Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 5 años", "5 a 9 años", "10 a 20 años", "Más de 20 años"]} />
         </div>
 
         {/* BLOQUE 2: DISTRIBUCIÓN */}
@@ -77,11 +82,12 @@ export default function ApartmentForm({ register, watch, s }: any) {
            <InputIcon register={register} name="specs.habs" label="Habs" icon={Bed} s={s} type="number" />
            <InputIcon register={register} name="specs.baths" label="Baños" icon={Bath} s={s} type="number" />
            <InputIcon register={register} name="specs.garages" label="# Garajes" icon={Car} s={s} type="number" />
-           <SelectIcon register={register} name="specs.garage_type" label="Tipo Garaje" icon={Car} s={s} options={["Cubierto", "Descubierto", "Doble Lineal", "Doble Paralelo", "Sencillo", "Servidumbre"]} />
+           {/* Opción "Comunal" disponible gracias a la sincronización con el config */}
+           <SelectIcon register={register} name="specs.garage_type" label="Tipo Garaje" icon={Car} s={s} options={["Cubierto", "Descubierto", "Doble Lineal", "Doble Paralelo", "Sencillo", "Servidumbre", "Comunal"]} />
            <SelectIcon register={register} name="specs.gas_type" label="Gas" icon={Flame} s={s} options={["Natural", "Propano", "Eléctrico", "Ninguno"]} />
         </div>
 
-        {/* BLOQUE 3: ACABADOS */}
+        {/* BLOQUE 3: ACABADOS (Sincronizado con claves de traducción) */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50/50 p-3 rounded-xl border border-gray-100">
            <SelectIcon register={register} name="specs.kitchen" label="Cocina" icon={ChefHat} s={s} options={["Integral", "Americana (Abierta)", "Tipo Isla", "Cerrada (Indep.)", "Para Remodelar"]} />
            <SelectIcon register={register} name="specs.floors" label="Pisos" icon={Layers} s={s} options={["Madera Maciza", "Madera Laminada", "Madera Granadillo", "Laminado", "Porcelanato", "Mármol", "Cerámica", "Alfombra", "PVC / Vinilo"]} />
@@ -91,7 +97,7 @@ export default function ApartmentForm({ register, watch, s }: any) {
 
         {/* BLOQUE 4: VISTA & BALCÓN */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-            <SelectIcon register={register} name="specs.view_type" label="Vista" icon={Eye} s={s} options={["Exterior", "Interior", "Panorámica"]} />
+            <SelectIcon register={register} name="specs.view_type" label="Vista" icon={Eye} s={s} options={["Exterior", "Interior", "Panorámica", "Parque"]} />
             <div className="flex items-center h-full pt-4 col-span-2">
               <label className="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-700 hover:text-blue-600 transition-colors bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 shadow-sm w-full md:w-auto justify-center">
                  <input type="checkbox" {...register("specs.has_balcony")} className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300" /> 
@@ -122,7 +128,7 @@ export default function ApartmentForm({ register, watch, s }: any) {
            <div className="grid grid-cols-2 md:grid-cols-5 gap-y-3 gap-x-2">
               {CLUB_HOUSE.map((item) => (
                  <label key={item.label} className="flex items-center gap-1.5 text-[10px] font-bold text-gray-600 cursor-pointer select-none hover:text-blue-600 transition-colors">
-                    <input type="checkbox" value={item.label} {...register("specs.club_features")} className="rounded w-3.5 h-3.5 border-gray-300 text-blue-600"/> 
+                    <input type="checkbox" value={item.label} {...register("specs.social")} className="rounded w-3.5 h-3.5 border-gray-300 text-blue-600"/> 
                     <div className="flex items-center gap-1.5">
                        <item.icon size={12} className="text-gray-400"/> {item.label}
                     </div>

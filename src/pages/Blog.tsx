@@ -1,18 +1,18 @@
 ﻿import React, { useEffect, useState } from "react";
 import { Calendar, User, ArrowRight, X } from "lucide-react";
 import { pb } from "../api";
-import { useApp } from "../context/AppContext"; // 1. CAMBIO: NUEVO CONTEXTO
+import { useApp } from "../context/AppContext"; 
 import Navbar from "../components/Navbar";
-// Footer eliminado para evitar duplicidad
 import type { RecordModel } from "pocketbase";
 
 const Blog = () => {
-  // 2. USAR EL NUEVO HOOK
   const { t } = useApp();
   const [posts, setPosts] = useState<RecordModel[]>([]);
   const [selectedPost, setSelectedPost] = useState<RecordModel | null>(null);
   const [loading, setLoading] = useState(true);
-  const PB_URL = import.meta.env.VITE_POCKETBASE_URL || "http://127.0.0.1:8090";
+  
+  // CAMBIO CRÍTICO: URL SEGURA FIJA
+  const PB_URL = "https://www.aycfincaraiz.com";
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -29,8 +29,8 @@ const Blog = () => {
   }, []);
 
   const formatDate = (dateStr: string) => {
-     if(!dateStr) return "";
-     return new Date(dateStr).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
+      if(!dateStr) return "";
+      return new Date(dateStr).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
   };
 
   return (
@@ -55,7 +55,11 @@ const Blog = () => {
              return (
                <article key={post.id} onClick={() => setSelectedPost(post)} className="group cursor-pointer flex flex-col h-full hover:-translate-y-2 transition-all duration-300">
                   <div className="h-60 rounded-2xl overflow-hidden mb-5 bg-gray-100 relative shadow-md">
-                     {imgUrl && <img src={imgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>}
+                     {imgUrl ? (
+                        <img src={imgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+                     ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold bg-gray-200">SIN FOTO</div>
+                     )}
                   </div>
                   
                   <div className="flex gap-4 text-[10px] font-bold text-green-600 mb-3 uppercase tracking-widest border-b border-gray-100 pb-3">
@@ -116,8 +120,6 @@ const Blog = () => {
             </div>
          </div>
        )}
-
-       {/* Footer eliminado */}
     </div>
   );
 };

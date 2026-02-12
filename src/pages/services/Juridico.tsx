@@ -1,11 +1,10 @@
 ﻿import React from "react";
 import { Scale, Shield, FileSearch, Gavel, Scroll, Landmark, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useApp } from "../../context/AppContext"; // 1. CAMBIO: NUEVO CONTEXTO
+import { useApp } from "../../context/AppContext"; 
 import Navbar from "../../components/Navbar";
 
 const Juridico = () => {
-  // 2. USAR EL NUEVO HOOK
   const { t } = useApp();
 
   return (
@@ -26,23 +25,23 @@ const Juridico = () => {
           <div className="max-w-7xl mx-auto px-6 relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-12">
              <div className="md:w-3/5 space-y-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-900/50 border border-blue-500/30 text-blue-400 text-xs font-black uppercase tracking-widest">
-                   <Shield size={16} /> {t('legal_badge') || "Blindaje Total"}
+                   <Shield size={16} /> {t('legal_badge')}
                 </div>
                 
                 <h1 className="text-5xl md:text-7xl font-black text-white leading-tight">
-                   {t('legal_title_1') || "Seguridad"} <br />
+                   {t('legal_title_1')} <br />
                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-200">
-                      {t('legal_title_2') || "Jurídica Inmobiliaria"}
+                      {t('legal_title_2')}
                    </span>
                 </h1>
                 
                 <p className="text-xl text-slate-300 max-w-xl leading-relaxed border-l-4 border-blue-600 pl-6">
-                   {t('legal_desc') || "Protegemos su patrimonio con estudios de títulos rigurosos, saneamiento predial y contratos blindados contra todo riesgo."}
+                   {t('legal_desc')}
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-4">
                    <Link to="/contacto" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-900/50 hover:-translate-y-1">
-                      {t('legal_btn') || "Consultar Caso"}
+                      {t('legal_btn')}
                    </Link>
                 </div>
              </div>
@@ -66,7 +65,7 @@ const Juridico = () => {
           <div className="max-w-7xl mx-auto px-6">
              <div className="text-center mb-20">
                 <Scale className="mx-auto text-blue-600 mb-4" size={48}/>
-                <h2 className="text-4xl font-black text-[#0A192F] uppercase">{t('legal_expertise_title') || "Áreas de Práctica"}</h2>
+                <h2 className="text-4xl font-black text-[#0A192F] uppercase">{t('legal_expertise_title')}</h2>
                 <div className="h-1 w-24 bg-blue-600 mx-auto mt-6 rounded-full"></div>
              </div>
 
@@ -80,8 +79,8 @@ const Juridico = () => {
                       <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
                          <FileSearch size={28}/>
                       </div>
-                      <h3 className="text-xl font-black text-slate-900 mb-3">{t('legal_card_1_t') || "Estudio de Títulos"}</h3>
-                      <p className="text-slate-500 leading-relaxed text-sm">{t('legal_card_1_d') || "Análisis profundo de la tradición del inmueble (20+ años) para detectar gravámenes, embargos o vicios ocultos."}</p>
+                      <h3 className="text-xl font-black text-slate-900 mb-3">{t('legal_card_1_t')}</h3>
+                      <p className="text-slate-500 leading-relaxed text-sm">{t('legal_card_1_d')}</p>
                    </div>
                 </div>
 
@@ -94,8 +93,8 @@ const Juridico = () => {
                       <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
                          <Landmark size={28}/>
                       </div>
-                      <h3 className="text-xl font-black text-slate-900 mb-3">{t('legal_card_2_t') || "Saneamiento Predial"}</h3>
-                      <p className="text-slate-500 leading-relaxed text-sm">{t('legal_card_2_d') || "Resolución de sucesiones ilíquidas, levantamiento de hipotecas, corrección de áreas y linderos."}</p>
+                      <h3 className="text-xl font-black text-slate-900 mb-3">{t('legal_card_2_t')}</h3>
+                      <p className="text-slate-500 leading-relaxed text-sm">{t('legal_card_2_d')}</p>
                    </div>
                 </div>
 
@@ -108,8 +107,8 @@ const Juridico = () => {
                       <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
                          <Gavel size={28}/>
                       </div>
-                      <h3 className="text-xl font-black text-slate-900 mb-3">{t('legal_card_3_t') || "Contratos Blindados"}</h3>
-                      <p className="text-slate-500 leading-relaxed text-sm">{t('legal_card_3_d') || "Elaboración de promesas de compraventa y contratos de arrendamiento con cláusulas de protección robustas."}</p>
+                      <h3 className="text-xl font-black text-slate-900 mb-3">{t('legal_card_3_t')}</h3>
+                      <p className="text-slate-500 leading-relaxed text-sm">{t('legal_card_3_d')}</p>
                    </div>
                 </div>
              </div>
@@ -137,7 +136,7 @@ const Juridico = () => {
        <div className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6">
              <div className="flex flex-col md:flex-row justify-between items-end mb-16">
-                <h2 className="text-3xl font-black text-[#0A192F] max-w-md">{t('legal_process_title') || "Metodología Jurídica"}</h2>
+                <h2 className="text-3xl font-black text-[#0A192F] max-w-md">{t('legal_process_title')}</h2>
                 <p className="text-slate-400 font-medium">Transparencia y rigor en cada paso.</p>
              </div>
 
@@ -169,10 +168,10 @@ const Juridico = () => {
        <div className="bg-[#0A192F] py-20 border-t border-white/10 relative overflow-hidden">
           <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
              <h2 className="text-3xl md:text-5xl font-black text-white mb-8 tracking-tight">
-                {t('legal_final_cta') || "¿Su inmueble tiene problemas legales?"}
+                {t('legal_final_cta')}
              </h2>
              <Link to="/contacto" className="inline-flex items-center gap-2 px-10 py-5 bg-white text-[#0A192F] font-black uppercase tracking-widest rounded-full hover:bg-blue-50 transition-all transform hover:scale-105 shadow-2xl">
-                {t('legal_final_btn') || "Agendar Consulta Gratuita"} <ChevronRight size={18}/>
+                {t('legal_final_btn')} <ChevronRight size={18}/>
              </Link>
           </div>
           {/* Decoración */}

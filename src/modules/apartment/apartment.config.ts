@@ -2,12 +2,12 @@ import {
   Building2, ArrowUpFromLine, Calendar, MonitorPlay, User, ShieldCheck, 
   Layers, Mountain, Coffee, Dumbbell, Waves, Trophy, Trees, Flame, Zap, 
   Heater, Tv, LandPlot, Dog, ChefHat, Utensils, Eye, Maximize,
-  DoorOpen, Car, Sun, DollarSign
+  DoorOpen, Car, Sun, DollarSign, Wifi, Box, Shield
 } from "lucide-react";
 
-// Mapeo de Iconos
+// 1. MAPEO DE ICONOS
 export const APARTMENT_ICONS: Record<string, any> = {
-  // Características Internas
+  // Características Internas (Extras)
   "Ascensor": ArrowUpFromLine,
   "Ascensor Privado": ArrowUpFromLine, 
   "Ascensor Servicio": ArrowUpFromLine,
@@ -18,8 +18,12 @@ export const APARTMENT_ICONS: Record<string, any> = {
   "Duplex": Layers, 
   "Penthouse": Mountain,
   "Balcón": DoorOpen,
-  "Terraza": Sun,
+  "Terraza Privada": Sun,
   "Chimenea": Flame,
+  "Depósito": Box,
+  "Domótica": Wifi,
+  "Cocina Abierta": ChefHat,
+  "Vista Exterior": Eye,
   
   // Zonas Comunes (Club House)
   "Vigilancia 24h": ShieldCheck, 
@@ -53,7 +57,7 @@ export const APARTMENT_ICONS: Record<string, any> = {
   "Zona Ropas": Utensils
 };
 
-// DICCIONARIO DE TRADUCCIÓN LOCAL
+// 2. DICCIONARIO DE TRADUCCIÓN LOCAL (Base de Datos -> UI)
 export const TRANSLATIONS: Record<string, string> = {
   // Cocina
   "Integral": "Cocina Integral",
@@ -73,21 +77,20 @@ export const TRANSLATIONS: Record<string, string> = {
   "Alfombra": "Alfombra",
   "PVC / Vinilo": "PVC / Vinilo",
 
-  // Zona de Ropas & Espacios (Unificados para evitar error TS1117)
+  // Zona de Ropas & Espacios
   "En Cocina": "Zona Ropas en Cocina",
   "Cuarto de Ropas": "Cuarto de Ropas",
   "No tiene": "Sin Zona Ropas",
-  
-  // SOLUCIÓN: Usamos una clave genérica para evitar duplicados
   "Independiente": "Independiente", 
 
-  // Garaje
+  // Garaje (AGREGADO COMUNAL)
   "Cubierto": "Cubierto",
   "Descubierto": "Descubierto",
   "Doble Lineal": "Doble Lineal",
   "Doble Paralelo": "Doble Paralelo",
   "Sencillo": "Sencillo",
   "Servidumbre": "Servidumbre",
+  "Comunal": "Parqueadero Comunal",
 
   // Gas
   "Natural": "Gas Natural",
@@ -99,11 +102,22 @@ export const TRANSLATIONS: Record<string, string> = {
   "Exterior": "Vista Exterior",
   "Interior": "Vista Interior",
   "Panorámica": "Vista Panorámica",
+  "Parque": "Vista al Parque",
 
   // Sala/Comedor
   "Un solo ambiente": "Sala-Comedor",
   "Con Chimenea": "Con Chimenea",
-  "Con Balcón": "Con Balcón"
+  "Con Balcón": "Con Balcón",
+
+  // Antigüedad
+  "Estrenar": "Para Estrenar",
+  "Menos de 1 año": "< 1 Año",
+  "1 a 5 años": "1 a 5 Años",
+  "5 a 10 años": "5 a 10 Años",
+  "1 a 9 años": "1 a 9 Años",
+  "10 a 20 años": "10 a 20 Años",
+  "Más de 20 años": "> 20 Años"
 };
 
+// Función Helper para traducir
 export const translate = (val: string) => TRANSLATIONS[val] || val;

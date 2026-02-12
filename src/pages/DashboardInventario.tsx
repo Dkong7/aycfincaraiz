@@ -30,7 +30,7 @@ export default function DashboardInventario() {
   });
   
   const navigate = useNavigate();
-  const PB_URL = "http://209.126.77.41:8080";
+  const PB_URL = "https://www.aycfincaraiz.com";
   const currentUser = pb.authStore.model;
   const isManager = ["Alfonso", "Claudia", "admin"].includes(currentUser?.role || "");
 
