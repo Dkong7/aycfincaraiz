@@ -17,11 +17,17 @@ const LOCAL_FEATURES = [
    {label: "Esquinero", icon: MapPin}
 ];
 
-const InputIcon = ({ icon: Icon, label, register, name, s, type="text" }: any) => (
+// --- AÑADIDO: step="any" para permitir decimales en type="number" ---
+const InputIcon = ({ icon: Icon, label, register, name, s, type="text", step }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icon size={14}/></div>
-    <input {...register(name)} type={type} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
+    <input 
+        {...register(name)} 
+        type={type} 
+        step={step} 
+        className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} 
+    />
   </div>
 );
 
@@ -47,11 +53,11 @@ export default function LocalForm({ register, s }: any) {
 
        {/* 1. DIMENSIONES Y EDAD */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <InputIcon register={register} name="specs.area_total" label="Área Total m²" icon={Maximize} s={s} type="number" />
-          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" />
-          <InputIcon register={register} name="specs.height" label="Altura (m)" icon={ArrowUpFromLine} s={s} type="number" />
+          <InputIcon register={register} name="specs.area_total" label="Área Total m²" icon={Maximize} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.height" label="Altura (m)" icon={ArrowUpFromLine} s={s} type="number" step="any" />
           
-          {/* NUEVO CAMPO: ANTIGÜEDAD */}
+          {/* CAMPO: ANTIGÜEDAD */}
           <SelectIcon 
             register={register} 
             name="specs.antiquity" 

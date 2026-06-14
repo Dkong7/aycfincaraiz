@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { pb } from "../api";
 import { 
   LayoutGrid, PlusCircle, LogOut, Edit, Trash, Image as ImageIcon, 
-  Save, ArrowLeft, BookOpen, Loader2, X, CheckCircle, Menu
+  Save, ArrowLeft, BookOpen, Loader2, X, CheckCircle, Menu, Users, MapIcon, MessageCircle
 } from "lucide-react";
 import type { RecordModel } from "pocketbase";
 
@@ -33,22 +33,24 @@ export default function DashboardBlog() {
   const navigate = useNavigate();
   
   const theme = localStorage.getItem("ayc_theme") || "agent";
+  const currentUser = pb.authStore.model;
+  const isManager = ["Alfonso", "Claudia", "admin"].includes(currentUser?.role || "");
 
-  // CAMBIO CRÍTICO: URL SEGURA FIJA (Ignoramos variables de entorno por seguridad)
-  const PB_URL = "https://www.aycfincaraiz.com";
+  // CAMBIO CRÍTICO: URL SEGURA FIJA
+  const PB_URL = window.location.origin;
 
   // Estilos
   const s = ((t) => {
       if (t === "alfonso") return { 
-          mainBg: "bg-[#F4F1EA]", sidebar: "bg-[#2C1B18] border-[#3E2723]", sidebarText: "text-[#D7CCC8]", 
-          activeBtn: "bg-[#3E2723] text-[#FFB74D] border border-[#5D4037]", 
+          mainBg: "bg-[#F4F1EA]", sidebar: "bg-[#1F1612] border-[#3E2C20]", sidebarText: "text-[#E8DCCA]", 
+          activeBtn: "bg-[#3E2C20] text-[#D97706] shadow-inner border border-[#5D4037]", 
           card: "bg-[#FDFBF7] border-[#8D6E63] text-[#3E2723]", 
           input: "bg-white border-[#D7CCC8] text-[#3E2723] focus:border-[#8D6E63]",
           btnPrimary: "bg-[#3E2723] hover:bg-[#5D4037] text-[#FFB74D]"
       };
       if (t === "claudia") return {
           mainBg: "bg-[#FFF0F5]", sidebar: "bg-white border-pink-100", sidebarText: "text-pink-600",
-          activeBtn: "bg-pink-100 text-pink-700",
+          activeBtn: "bg-pink-100 text-pink-700 shadow-inner",
           card: "bg-white border-pink-100 text-gray-800",
           input: "bg-pink-50/30 border-pink-200 text-gray-800 focus:border-pink-400",
           btnPrimary: "bg-pink-600 hover:bg-pink-700 text-white"
@@ -201,6 +203,8 @@ export default function DashboardBlog() {
       if (targetView === "LIST") setCurrentPost(null);
       setIsMobileMenuOpen(false);
   };
+  
+  const handleLogout = () => { pb.authStore.clear(); localStorage.removeItem("ayc_theme"); navigate("/agentes"); };
 
   return (
     <div className={`flex flex-col md:flex-row font-sans transition-colors duration-500 ${s.mainBg} min-h-screen md:h-screen md:overflow-hidden`}>
@@ -221,7 +225,7 @@ export default function DashboardBlog() {
           <div className="fixed inset-0 bg-black/50 z-[60] md:hidden backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
-      {/* --- SIDEBAR (DRAWER EN MOBILE) --- */}
+      {/* --- SIDEBAR --- */}
       <aside className={`
           fixed md:relative inset-y-0 left-0 z-[70] 
           w-72 md:w-64 flex flex-col py-6 border-r shadow-2xl md:shadow-none
@@ -236,22 +240,38 @@ export default function DashboardBlog() {
             </button>
          </div>
 
-         <div className="px-6 mb-10 mt-2 md:mt-0">
-            <h1 className={`font-black text-2xl tracking-tighter ${s.sidebarText}`}>AYC BLOG</h1>
-            <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest mt-1 text-gray-400">PANEL DE CONTROL</p>
+         <div className="px-6 mb-8 mt-2 md:mt-0">
+            <h1 className={`font-black text-2xl tracking-tighter ${s.sidebarText}`}>AYC PANEL</h1>
+            <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest mt-1 text-gray-400">{theme}</p>
          </div>
-         <nav className="px-3 space-y-1 flex-1">
-            <button onClick={() => navigate("/dashboard/inventario")} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}>
-               <ArrowLeft size={18}/> Volver a Inventario
-            </button>
-            <div className="h-px bg-white/10 my-2 mx-4"></div>
+         
+         <nav className="px-3 space-y-2 flex-1">
+            <button onClick={() => { navigate("/dashboard/mapa"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><MapIcon size={18}/> Centro de Mando</button>
+            <button onClick={() => { navigate("/dashboard/crm"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><MessageCircle size={18}/> Requerimientos</button>
+            <button onClick={() => { navigate("/dashboard/inventario"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><LayoutGrid size={18}/> Inventario</button>
+            
+            <div className="h-px bg-gray-500/20 my-2 mx-4"></div>
+            
             <button onClick={() => handleNav("LIST")} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "LIST" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
-               <LayoutGrid size={18}/> Todos los Artículos
+               <BookOpen size={18}/> Todos los Artículos
             </button>
             <button onClick={() => openEditor()} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "EDITOR" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}>
                <PlusCircle size={18}/> Escribir Nuevo
             </button>
+            
+            {isManager && (
+              <>
+                 <div className="h-px bg-gray-500/20 my-2 mx-4"></div>
+                 <button onClick={() => { navigate("/dashboard/equipo"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><Users size={18}/> Equipo</button>
+              </>
+            )}
          </nav>
+
+         <div className="px-6 mt-auto">
+            <button onClick={handleLogout} className="flex items-center gap-2 text-xs font-bold text-red-500 hover:text-red-400 transition-colors w-full p-4 bg-red-50 md:bg-transparent rounded-xl justify-center md:justify-start">
+               <LogOut size={16}/> SALIR
+            </button>
+         </div>
       </aside>
 
       {/* --- CONTENIDO PRINCIPAL --- */}

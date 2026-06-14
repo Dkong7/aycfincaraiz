@@ -2,7 +2,7 @@ import React from "react";
 import { 
   Maximize, Map, Route, Droplets, Fence, Home, 
   CheckCircle2, Ruler, DollarSign, TrendingUp, RefreshCw,
-  Mountain, Trees, Shovel, Zap, Warehouse, Calendar, MapPin
+  Mountain, Trees, Shovel, Zap, Warehouse, Calendar, MapPin, ShieldCheck
 } from "lucide-react";
 
 // Imports de Lógica
@@ -33,16 +33,17 @@ export default function RuralDetailView({ specs, description, adminFee, priceCop
       ? `$${formatCurrency(priceCop)} COP`
       : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
 
-  // --- MAPA ÚNICO (CORREGIDO) ---
+  // --- MAPA ÚNICO SEGURO ---
   const locCity = municipality || "Colombia";
   const locHood = neighborhood || "";
   const query = `${locHood}, ${locCity}, Colombia`;
   const encodedQuery = encodeURIComponent(query);
-  // Zoom 14 es ideal para zonas rurales (menos detalle de calles, más contexto)
-  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=14&output=embed`;
+  
+  // URL corregida: HTTPS y formato nativo de Google para evitar bloqueos
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=14&output=embed&iwloc=near`;
 
   // --- ADMIN FEE ROBUSTO ---
-  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const rawAdmin = adminFee || specs?.admin_fee || 0;
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
   const hasAdmin = cleanAdmin > 0;
 
@@ -128,14 +129,14 @@ export default function RuralDetailView({ specs, description, adminFee, priceCop
 
                  {/* Badge Casa Principal */}
                  {Number(specs.built_area) > 0 && (
-                   <div className="mt-8 p-5 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-4 items-start">
+                   <div className="mt-8 p-5 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-4 items-start relative z-10">
                       <div className="p-3 bg-purple-100 rounded-full text-purple-700"><Home size={20}/></div>
                       <div>
                          <h4 className="font-bold text-purple-800 text-sm uppercase mb-1">{translateDynamic("Casa Principal")}</h4>
                          <p className="text-purple-900 font-bold text-lg">
-                            {specs.built_area} m² <span className="text-xs font-normal opacity-70">/ {specs.bedrooms} Habs - {specs.bathrooms} Baños</span>
+                            {specs.built_area} m² <span className="text-xs font-normal opacity-70">/ {specs.bedrooms || 0} Habs - {specs.bathrooms || 0} Baños</span>
                          </p>
-                         <p className="text-xs text-purple-700 italic mt-1">{translateDynamic("Incluye casa de mayordomo si aplica")}</p>
+                         <p className="text-xs text-purple-700 italic mt-1">{translateDynamic("Área construida total reportada.")}</p>
                       </div>
                    </div>
                  )}
@@ -154,30 +155,30 @@ export default function RuralDetailView({ specs, description, adminFee, priceCop
                     <SpecRow label="Energía" val={specs.energy_source || "Red Eléctrica"} icon={Zap} />
                     <SpecRow label="Tipo Gas" val={specs.gas_type} icon={TrendingUp} />
                     
-                    {/* ANTIGÜEDAD */}
                     {specs.antiquity && <SpecRow label="Edad Casa" val={specs.antiquity} icon={Calendar} />}
-                    
-                    {/* NIVELES */}
                     {specs.levels && <SpecRow label="Niveles Casa" val={specs.levels} icon={Ruler} />}
                     
-                    {/* ADMIN FEE */}
+                    {/* ADMINISTRACIÓN CORREGIDA */}
                     <SpecRow 
                         label="Administración" 
-                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)} COP` : "No aplica"} 
                         icon={DollarSign} 
                         isCurrency={true}
                     />
                  </div>
               </div>
 
-              {/* MAPA ÚNICO (Si hay ubicación) */}
+              {/* MAPA ÚNICO (Si hay municipio) */}
               {municipality && (
-                  <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                  <div className="bg-purple-600 p-6 rounded-[2rem] text-white shadow-lg shadow-purple-200 border border-purple-700">
                       <div className="flex items-center gap-2 mb-4">
-                          <MapPin className="text-purple-500" size={20}/>
-                          <h3 className="font-black text-sm text-gray-800 uppercase tracking-widest">{translateDynamic("Ubicación Aproximada")}</h3>
+                          <MapPin className="opacity-80" size={24}/>
+                          <h3 className="font-black text-lg leading-tight">{translateDynamic("Ubicación Rural")}</h3>
                       </div>
-                      <div className="w-full h-80 rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-gray-200">
+                      <p className="text-xs opacity-90 leading-relaxed mb-4">
+                          {translateDynamic("Ubicación aproximada:")} {neighborhood}, {municipality}.
+                      </p>
+                      <div className="w-full h-80 rounded-2xl overflow-hidden bg-black/10 relative border border-white/20">
                           <iframe 
                               width="100%" 
                               height="100%" 
@@ -185,6 +186,7 @@ export default function RuralDetailView({ specs, description, adminFee, priceCop
                               loading="lazy" 
                               src={mapUrl} 
                               title="Mapa Rural"
+                              className="absolute inset-0"
                           ></iframe>
                       </div>
                   </div>
@@ -211,7 +213,6 @@ export default function RuralDetailView({ specs, description, adminFee, priceCop
             </div>
          </section>
        )}
-
     </div>
   );
 }

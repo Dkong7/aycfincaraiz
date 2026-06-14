@@ -4,7 +4,8 @@ import { useForm } from "react-hook-form";
 import { pb } from "../api";
 import { 
   LayoutGrid, Users, Shield, PlusCircle, Trash, Edit, 
-  Home, PenTool, Search, LogOut, ArrowLeft, Save, X, Lock, Menu, BookOpen
+  Home, PenTool, Search, LogOut, ArrowLeft, Save, X, Lock, Menu, BookOpen,
+  MapIcon, MessageCircle // <-- NUEVOS ICONOS IMPORTADOS
 } from "lucide-react";
 
 export default function DashboardTeam() {
@@ -23,7 +24,7 @@ export default function DashboardTeam() {
   const currentUser = pb.authStore.model;
   
   // CAMBIO CRÍTICO: URL SEGURA FIJA
-  const PB_URL = "https://www.aycfincaraiz.com";
+  const PB_URL = window.location.origin;
 
   // --- SEGURIDAD: SOLO ADMINS ---
   useEffect(() => {
@@ -72,18 +73,18 @@ export default function DashboardTeam() {
   // --- ESTILOS VISUALES (TEMA) ---
   const s = ((t) => {
       if (t === "alfonso") return { 
-          mainBg: "bg-[#F4F1EA]", sidebar: "bg-[#2C1B18] border-[#3E2723]", sidebarText: "text-[#D7CCC8]", 
-          activeBtn: "bg-[#3E2C20] text-[#FFB74D] border border-[#5D4037]", 
+          mainBg: "bg-[#F4F1EA]", sidebar: "bg-[#1F1612] border-[#3E2C20]", sidebarText: "text-[#E8DCCA]", 
+          activeBtn: "bg-[#3E2C20] text-[#D97706] shadow-inner border border-[#5D4037]", 
           card: "bg-[#FDFBF7] border-[#8D6E63] text-[#3E2723]", 
           btn: "bg-[#5D4037] hover:bg-[#3E2723] text-white"
       };
       if (t === "claudia") return {
           mainBg: "bg-[#FFF0F5]", sidebar: "bg-white border-pink-100", sidebarText: "text-pink-600",
-          activeBtn: "bg-pink-100 text-pink-700",
+          activeBtn: "bg-pink-100 text-pink-700 shadow-inner",
           card: "bg-white border-pink-100 text-gray-800",
           btn: "bg-pink-600 hover:bg-pink-700 text-white"
       };
-      return { mainBg: "bg-gray-100", sidebar: "bg-[#0A192F]", sidebarText: "text-white", activeBtn: "bg-blue-600", card: "bg-white", btn: "bg-blue-600 text-white" };
+      return { mainBg: "bg-gray-100", sidebar: "bg-[#0A192F]", sidebarText: "text-white", activeBtn: "bg-blue-600 shadow-lg", card: "bg-white", btn: "bg-blue-600 text-white" };
   })(theme);
 
   // --- ACCIONES ---
@@ -185,11 +186,16 @@ export default function DashboardTeam() {
             <h1 className={`font-black text-2xl tracking-tighter ${s.sidebarText}`}>AYC GESTIÓN</h1>
             <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest mt-1 text-gray-400">GERENCIA</p>
          </div>
-         <nav className="px-3 space-y-1 flex-1">
-            <button onClick={() => navigate("/dashboard/inventario")} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}>
-               <ArrowLeft size={18}/> Volver a Inventario
-            </button>
-            <div className="h-px bg-white/10 my-2 mx-4"></div>
+         
+         <nav className="px-3 space-y-2 flex-1">
+            {/* NUEVOS BOTONES DEL MENÚ UNIVERSAL */}
+            <button onClick={() => { navigate("/dashboard/mapa"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><MapIcon size={18}/> Centro de Mando</button>
+            <button onClick={() => { navigate("/dashboard/crm"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><MessageCircle size={18}/> Requerimientos</button>
+            <button onClick={() => { navigate("/dashboard/inventario"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><LayoutGrid size={18}/> Inventario</button>
+            <button onClick={() => { navigate("/dashboard/blog"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><BookOpen size={18}/> Blog</button>
+            
+            <div className="h-px bg-gray-500/20 my-2 mx-4"></div>
+            
             <button className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${s.activeBtn}`}>
                <Users size={18}/> Gestión de Equipo
             </button>

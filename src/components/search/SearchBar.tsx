@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { pb } from '../../api';
 
 // CAMBIO CRÍTICO: URL SEGURA FIJA
-const PB_URL = "https://www.aycfincaraiz.com";
+const PB_URL = window.location.origin;
 
 export const SearchBar = () => {
   const { lang, translateDynamic } = useApp();

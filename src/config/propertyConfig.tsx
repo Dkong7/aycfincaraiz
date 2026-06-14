@@ -1,138 +1,112 @@
-import React from 'react';
-import { 
-  Bed, Bath, Car, Ruler, Layers, Utensils, Receipt, 
-  Maximize, AlignJustify, MapPin, Building2, Warehouse, 
-  Store, Briefcase, Mountain, Layout, Home, Calendar,
-  Shield, Key, FileText, Droplet, Zap, Flame, Eye, 
-  ArrowUpFromLine, TreePine
+import React from "react";
+import {
+  Maximize, Bed, Bath,
+  Car as _CarSpec, Layers as _LayersSpec, Calendar as _CalSpec,
+  ArrowUp, Ruler as _RulerSpec, DollarSign as _DollarSpec,
+  Home as _HomeSpec, MapPin as _MapSpec, CheckSquare as _CheckSpec,
+  Hash as _HashSpec, Zap as _ZapSpec2, Droplets as _DropletsSpec2,
+  ChefHat as _ChefSpec, Grid as _GridSpec2, Flame as _FlameSpec2,
+  Shield as _ShieldSpec2, Truck as _TruckSpec2, Package as _PackageSpec2,
+  Users as _UsersSpec2, Wind as _WindSpec2, Wifi as _WifiSpec2,
+  Trees as _TreesSpec2, Building as _BuildingSpec2,
 } from "lucide-react";
 
-// 1. CONFIGURACIÓN DE TIPOS (PALETA DE COLORES OFICIAL)
-export const PROPERTY_TYPES_THEME: any = {
-  "Casa": { 
-      icon: <Home/>, 
-      color: "bg-yellow-500", 
-      text: "text-yellow-700", 
-      border: "border-yellow-300", 
-      bgLight: "bg-yellow-50" 
-  },
-  "Apartamento": { 
-      icon: <Building2/>, 
-      color: "bg-blue-600", 
-      text: "text-blue-600", 
-      border: "border-blue-500", 
-      bgLight: "bg-blue-50" 
-  },
-  "Bodega": { // Tema Industrial (Ámbar)
-      icon: <Warehouse/>, 
-      color: "bg-amber-700", 
-      text: "text-amber-800", 
-      border: "border-amber-600", 
-      bgLight: "bg-amber-50" 
-  },
-  "CasaCampo": { 
-      icon: <TreePine/>, 
-      color: "bg-purple-600", 
-      text: "text-purple-600", 
-      border: "border-purple-500", 
-      bgLight: "bg-purple-50" 
-  },
-  "Casa Campestre": { // Alias
-      icon: <TreePine/>, 
-      color: "bg-purple-600", 
-      text: "text-purple-600", 
-      border: "border-purple-500", 
-      bgLight: "bg-purple-50" 
-  },
-  "Finca": { 
-      icon: <Mountain/>, 
-      color: "bg-purple-600", 
-      text: "text-purple-600", 
-      border: "border-purple-500", 
-      bgLight: "bg-purple-50" 
-  },
-  "Rural": { 
-      icon: <Mountain/>, 
-      color: "bg-purple-600", 
-      text: "text-purple-600", 
-      border: "border-purple-500", 
-      bgLight: "bg-purple-50" 
-  },
-  "Lote": { 
-      icon: <Layout/>, 
-      color: "bg-green-600", 
-      text: "text-green-700", 
-      border: "border-green-500", 
-      bgLight: "bg-green-50" 
-  },
-  "Terreno": { 
-      icon: <Layout/>, 
-      color: "bg-green-600", 
-      text: "text-green-700", 
-      border: "border-green-500", 
-      bgLight: "bg-green-50" 
-  },
-  "Local": { 
-      icon: <Store/>, 
-      color: "bg-pink-500", 
-      text: "text-pink-600", 
-      border: "border-pink-400", 
-      bgLight: "bg-pink-50" 
-  },
-  "Oficina": { // Tema Corporativo (Esmeralda)
-      icon: <Briefcase/>, 
-      color: "bg-emerald-600", 
-      text: "text-emerald-700", 
-      border: "border-emerald-500", 
-      bgLight: "bg-emerald-50" 
-  },
-  // Default fallback
-  "default": { 
-      icon: <AlignJustify/>, 
-      color: "bg-gray-500", 
-      text: "text-gray-600", 
-      border: "border-gray-400", 
-      bgLight: "bg-gray-50" 
-  }
+const _FIELD_ICONS: Record<string, React.ReactElement> = {
+  area_built:   React.createElement(Maximize,       { size: 22 }),
+  area_lot:     React.createElement(Maximize,       { size: 22 }),
+  area_total:   React.createElement(Maximize,       { size: 22 }),
+  area_private: React.createElement(_RulerSpec,     { size: 22 }),
+  habs:         React.createElement(Bed,            { size: 22 }),
+  rooms:        React.createElement(Bed,            { size: 22 }),
+  baths:        React.createElement(Bath,           { size: 22 }),
+  bathrooms:    React.createElement(Bath,           { size: 22 }),
+  garages:      React.createElement(_CarSpec,       { size: 22 }),
+  garage_type:  React.createElement(_CarSpec,       { size: 22 }),
+  stratum:      React.createElement(_LayersSpec,    { size: 22 }),
+  antiquity:    React.createElement(_CalSpec,       { size: 22 }),
+  building_age: React.createElement(_CalSpec,       { size: 22 }),
+  height:       React.createElement(ArrowUp,        { size: 22 }),
+  clear_height: React.createElement(ArrowUp,        { size: 22 }),
+  levels:       React.createElement(_LayersSpec,    { size: 22 }),
+  levels_qty:   React.createElement(_LayersSpec,    { size: 22 }),
+  admin_fee:    React.createElement(_DollarSpec,    { size: 22 }),
+  front:        React.createElement(_RulerSpec,     { size: 22 }),
+  depth:        React.createElement(_RulerSpec,     { size: 22 }),
+  address:      React.createElement(_MapSpec,       { size: 22 }),
+  kitchen:      React.createElement(_ChefSpec,      { size: 22 }),
+  floors:       React.createElement(_GridSpec2,     { size: 22 }),
+  gas_type:     React.createElement(_FlameSpec2,    { size: 22 }),
+  energy:       React.createElement(_ZapSpec2,      { size: 22 }),
+  water:        React.createElement(_DropletsSpec2, { size: 22 }),
+  security:     React.createElement(_ShieldSpec2,   { size: 22 }),
+  loading_dock: React.createElement(_TruckSpec2,    { size: 22 }),
+  cargo_area:   React.createElement(_PackageSpec2,  { size: 22 }),
+  offices:      React.createElement(_BuildingSpec2, { size: 22 }),
+  capacity:     React.createElement(_UsersSpec2,    { size: 22 }),
+  ac:           React.createElement(_WindSpec2,     { size: 22 }),
+  internet:     React.createElement(_WifiSpec2,     { size: 22 }),
+  trees:        React.createElement(_TreesSpec2,    { size: 22 }),
+  zoning:       React.createElement(_HashSpec,      { size: 22 }),
+  listing_type: React.createElement(_HomeSpec,      { size: 22 }),
+  has_rent:     React.createElement(_CheckSpec,     { size: 22 }),
 };
 
-// 2. DICCIONARIO DE METADATA (Mapeo de iconos para fallback)
-export const FIELD_METADATA: any = {
-  rooms: { labelKey: "det_rooms", icon: <Bed size={18}/> },
-  habs: { labelKey: "det_rooms", icon: <Bed size={18}/> },
-  bathrooms: { labelKey: "det_baths", icon: <Bath size={18}/> },
-  baths: { labelKey: "det_baths", icon: <Bath size={18}/> },
-  garages: { labelKey: "garages", icon: <Car size={18}/> },
-  garage_type: { labelKey: "garage_type", icon: <Car size={18}/> },
-  area_built: { labelKey: "det_area", icon: <Ruler size={18}/> },
-  area_private: { labelKey: "area_private", icon: <Maximize size={18}/> },
-  area_total: { labelKey: "area_total", icon: <Maximize size={18}/> },
-  area_lot: { labelKey: "area_lot", icon: <Maximize size={18}/> },
-  balcony_area: { labelKey: "balcony_area", icon: <Maximize size={18}/> },
-  front: { labelKey: "front", icon: <Maximize size={18}/> },
-  depth: { labelKey: "depth", icon: <Maximize size={18}/> },
-  kitchen: { labelKey: "kitchen", icon: <Utensils size={18}/> },
-  kitchen_type: { labelKey: "kitchen_type", icon: <Utensils size={18}/> },
-  admin: { labelKey: "det_admin", icon: <Receipt size={18}/> },
-  maintenance_fee: { labelKey: "det_admin", icon: <Receipt size={18}/> },
-  stratum: { labelKey: "stratum", icon: <Layers size={18}/> },
-  levels_list: { labelKey: "levels_list", icon: <Layers size={18}/> },
-  floor_number: { labelKey: "floor_number", icon: <ArrowUpFromLine size={18}/> },
-  total_floors: { labelKey: "total_floors", icon: <Building2 size={18}/> },
-  height: { labelKey: "height", icon: <ArrowUpFromLine size={18}/> },
-  antiquity: { labelKey: "antiquity", icon: <Calendar size={18}/> },
-  building_age: { labelKey: "antiquity", icon: <Calendar size={18}/> },
-  has_surveillance: { labelKey: "has_surveillance", icon: <Shield size={18}/> },
-  has_rent: { labelKey: "has_rent", icon: <Key size={18}/> },
-  legal_status: { labelKey: "legal_status", icon: <FileText size={18}/> },
-  water: { labelKey: "water", icon: <Droplet size={18}/> },
-  energy: { labelKey: "energy", icon: <Zap size={18}/> },
-  industrial_gas: { labelKey: "industrial_gas", icon: <Flame size={18}/> },
-  gas_type: { labelKey: "gas_type", icon: <Flame size={18}/> },
-  view_type: { labelKey: "view_type", icon: <Eye size={18}/> },
-  garden: { labelKey: "garden", icon: <TreePine size={18}/> },
-  default: { labelKey: "det_features", icon: <AlignJustify size={18}/> }
+const _DEFAULT_ICON = React.createElement(_HashSpec, { size: 22 });
+
+export function getFieldIcon(key: string): React.ReactElement {
+  return _FIELD_ICONS[key] ?? _DEFAULT_ICON;
+}
+
+const _FIELD_KEYS: Record<string, string> = {
+  area_built:   "Área Construida",
+  area_lot:     "Área Lote",
+  area_total:   "Área Total",
+  area_private: "Área Privada",
+  habs:         "Habitaciones",
+  rooms:        "Habitaciones",
+  baths:        "Baños",
+  bathrooms:    "Baños",
+  garages:      "Garajes",
+  garage_type:  "Tipo Garaje",
+  stratum:      "Estrato",
+  antiquity:    "Antigüedad",
+  building_age: "Antigüedad",
+  height:       "Altura",
+  clear_height: "Altura Libre",
+  levels:       "Niveles",
+  levels_qty:   "Niveles",
+  admin_fee:    "Administración",
+  front:        "Frente",
+  depth:        "Fondo",
+  kitchen:      "Cocina",
+  floors:       "Pisos",
+  gas_type:     "Tipo Gas",
+  energy:       "Energía",
+  water:        "Agua",
+  listing_type: "Tipo Negocio",
+  has_rent:     "Con Renta",
+  rent_value:   "Canon Renta",
+  rent_type:    "Tipo Renta",
+  zoning:       "Uso Suelo",
+  capacity:     "Capacidad",
+  ac:           "Aire Acond.",
+  dining:       "Comedor",
 };
 
-export const getFieldKey = (key: string) => FIELD_METADATA[key]?.labelKey || key;
-export const getFieldIcon = (key: string) => FIELD_METADATA[key]?.icon || FIELD_METADATA.default.icon;
+export function getFieldKey(key: string): string {
+  return _FIELD_KEYS[key] ?? key.replace(/_/g, " ");
+}
+
+export const PROPERTY_TYPES_THEME: Record<string, { color: string; label: string }> = {
+  "Casa":        { color: "bg-yellow-500",  label: "Casa" },
+  "Apartamento": { color: "bg-blue-500",    label: "Apartamento" },
+  "Bodega":      { color: "bg-amber-600",   label: "Bodega" },
+  "Local":       { color: "bg-pink-500",    label: "Local" },
+  "Oficina":     { color: "bg-emerald-500", label: "Oficina" },
+  "Lote":        { color: "bg-gray-500",    label: "Lote" },
+  "Terreno":     { color: "bg-gray-600",    label: "Terreno" },
+  "Finca":       { color: "bg-purple-500",  label: "Finca" },
+  "Rural":       { color: "bg-purple-600",  label: "Rural" },
+  "CasaCampo":   { color: "bg-purple-400",  label: "Casa de Campo" },
+  "default":     { color: "bg-gray-400",    label: "Inmueble" },
+};

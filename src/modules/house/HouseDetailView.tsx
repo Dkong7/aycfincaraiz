@@ -29,15 +29,17 @@ export default function HouseDetailView({ specs, description, adminFee, priceCop
       ? `$${formatCurrency(priceCop)} COP`
       : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
 
-  // --- MAPA ÚNICO (CORREGIDO) ---
+  // --- MAPA ÚNICO (CORREGIDO Y SEGURO) ---
   const locCity = municipality || "Bogotá";
   const locHood = neighborhood || "";
   const query = `${locHood}, ${locCity}, Colombia`;
   const encodedQuery = encodeURIComponent(query);
-  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed`;
+  
+  // URL de Google Maps corregida (HTTPS y formato embed nativo)
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed&iwloc=near`;
 
   // --- ADMIN FEE ROBUSTO ---
-  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const rawAdmin = adminFee || specs?.admin_fee || 0;
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
   const hasAdmin = cleanAdmin > 0;
 
@@ -102,11 +104,14 @@ export default function HouseDetailView({ specs, description, adminFee, priceCop
           </div>
           <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200">
               <div className={`p-2 rounded-full ${trm > 0 ? "bg-green-100 text-green-600" : "bg-gray-200 text-gray-400"}`}>
-                  {trm > 0 ? <TrendingUp size={18}/> : <RefreshCw size={18} className="animate-spin"/>}
+                 {trm > 0 ? <TrendingUp size={18}/> : <RefreshCw size={18} className="animate-spin"/>}
               </div>
               <div>
                   <p className="text-[10px] uppercase font-bold text-gray-400">TRM {lang === "EN" ? "Rate" : "Hoy"}</p>
-                  <p className="font-bold text-gray-700">{trm > 0 ? `$${formatCurrency(Math.round(trm))} COP` : "Cargando..."}</p>
+                  <p className="font-bold text-gray-700">
+                     {/* Se usa toLocaleString para forzar los decimales exactos de la TRM oficial */}
+                     {trm > 0 ? `$${trm.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} COP` : "Cargando..."}
+                  </p>
               </div>
           </div>
        </div>
@@ -171,10 +176,9 @@ export default function HouseDetailView({ specs, description, adminFee, priceCop
                     <SpecRow label="Baños Totales" val={specs.baths} icon={Bath} />
                     <SpecRow label="Estrato" val={stratum} icon={Layers} />
                     <SpecRow label="Antigüedad" val={specs.antiquity} icon={Calendar} />
-                    {/* ADMINISTRACIÓN VISIBLE */}
                     <SpecRow 
                         label="Administración" 
-                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)} COP` : "No aplica"} 
                         icon={DollarSign} 
                         isCurrency={true}
                     />
@@ -192,26 +196,6 @@ export default function HouseDetailView({ specs, description, adminFee, priceCop
                     <SpecRow label="Zona Comedor" val={specs.dining} icon={Utensils} />
                  </div>
               </div>
-
-              {municipality && (
-                  <div className="bg-yellow-500 p-6 rounded-3xl text-white shadow-lg shadow-yellow-200">
-                      <MapPin size={24} className="mb-3 opacity-80"/>
-                      <h4 className="font-bold text-lg leading-tight mb-2">{translateDynamic("Ubicación Privilegiada")}</h4>
-                      <p className="text-xs opacity-90 leading-relaxed mb-4">
-                          {translateDynamic("Ubicación aproximada:")} {neighborhood}, {municipality}.
-                      </p>
-                      <div className="rounded-xl overflow-hidden border border-white/20 h-40 bg-black/10">
-                          <iframe 
-                              width="100%" 
-                              height="100%" 
-                              style={{border:0}} 
-                              loading="lazy" 
-                              src={mapUrl} 
-                              title="Mapa Casa"
-                          ></iframe>
-                      </div>
-                  </div>
-              )}
           </div>
        </div>
 
@@ -258,6 +242,43 @@ export default function HouseDetailView({ specs, description, adminFee, priceCop
                  </div>
               </div>
           </section>
+       )}
+
+       {/* MAPA RESTAURADO: Identidad visual amarilla + Ancho completo */}
+       {(municipality) && (
+           <section className="bg-yellow-500 p-8 rounded-[2.5rem] text-white shadow-xl shadow-yellow-200/50 relative overflow-hidden">
+               {/* Decoración de fondo */}
+               <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400 rounded-full blur-[80px] -mr-10 -mt-10 pointer-events-none"></div>
+
+               <div className="relative z-10">
+                   <div className="flex items-center gap-2 mb-4">
+                       <MapPin size={24} className="text-yellow-100"/>
+                       <h3 className="font-black text-xl text-white uppercase tracking-tight">{translateDynamic("Ubicación Privilegiada")}</h3>
+                   </div>
+                   
+                   <div className="w-full h-[400px] rounded-2xl overflow-hidden bg-black/10 relative shadow-inner border border-yellow-400/50">
+                       <iframe 
+                           width="100%" 
+                           height="100%" 
+                           style={{border:0}} 
+                           loading="lazy" 
+                           src={mapUrl} 
+                           title="Ubicación General"
+                           className="absolute inset-0"
+                       ></iframe>
+                       
+                       <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg text-xs text-gray-700 flex items-start gap-3 border border-yellow-100">
+                           <ShieldCheck size={20} className="text-green-500 shrink-0 mt-0.5" />
+                           <p className="leading-relaxed">
+                               <strong className="text-gray-900 block mb-1">{translateDynamic("Ubicación Aproximada")}</strong> 
+                               {translateDynamic("El mapa muestra la zona aproximada del")} 
+                               <span className="font-black mx-1 text-yellow-600 uppercase">{locHood}, {locCity}</span>
+                               {translateDynamic("para proteger la privacidad.")}
+                           </p>
+                       </div>
+                   </div>
+               </div>
+           </section>
        )}
     </div>
   );

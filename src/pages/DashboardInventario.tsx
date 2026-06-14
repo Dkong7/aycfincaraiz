@@ -1,9 +1,10 @@
-﻿import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { pb } from "../api"; 
 import { 
   LayoutGrid, PlusCircle, LogOut, Edit, Trash, Star, Crown, Zap, 
-  BookOpen, Users, Menu, X, AlertCircle, FilePlus, Eye, Loader2
+  BookOpen, Users, Menu, X, AlertCircle, FilePlus, Eye, Loader2,
+  MapIcon, MessageCircle, Search, RefreshCw
 } from "lucide-react";
 import CreatePropertyForm from "../components/dashboard/CreatePropertyForm";
 import SmartModal, { ModalConfig } from "../components/ui/SmartModal"; 
@@ -17,20 +18,20 @@ export default function DashboardInventario() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingEditor, setIsLoadingEditor] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); 
   
-  // Control de ciclo de vida del formulario
   const [formKey, setFormKey] = useState(Date.now()); 
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const storedTheme = localStorage.getItem("ayc_theme") || "agent";
   const modalTheme = (storedTheme && storedTheme.includes("claudia")) ? "pink" : "blue";
 
   const [modalState, setModalState] = useState<{ isOpen: boolean; config: ModalConfig }>({
-    isOpen: false,
-    config: { type: 'info', title: '', msg: '' }
+    isOpen: false, config: { type: 'info', title: '', msg: '' }
   });
   
-  const navigate = useNavigate();
-  const PB_URL = "https://www.aycfincaraiz.com";
+  const PB_URL = window.location.origin;
   const currentUser = pb.authStore.model;
   const isManager = ["Alfonso", "Claudia", "admin"].includes(currentUser?.role || "");
 
@@ -49,18 +50,42 @@ export default function DashboardInventario() {
       return { mainBg: "bg-gray-100", sidebar: "bg-[#0A192F] border-white/10", sidebarText: "text-gray-300", activeBtn: "bg-[#009B4D] text-white shadow-lg", tableHeader: "bg-[#0A192F] text-gray-400" };
    })(storedTheme);
 
-  useEffect(() => { loadInventory(); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadInventory(searchQuery);
+    }, 400); 
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  const loadInventory = async () => {
+  useEffect(() => {
+    if (location.state?.editPropertyId) {
+        handleEdit(location.state.editPropertyId);
+        navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate]);
+
+  const loadInventory = async (query = "") => {
     try {
        setIsLoading(true);
-       // $autoCancel: false es vital para que no cancele peticiones rápidas
-       const res = await pb.collection("properties").getList(1, 100, { sort: "-created", $cancelKey: "inventory-list" });
        
-       // Parseamos specs una sola vez aquí para tener el gallery_order disponible
+       let filterString = "";
+       if (query) {
+           const numMatch = query.match(/\d+/);
+           if (numMatch) {
+               filterString = `ayc_id ~ "${numMatch[0]}"`;
+           } else {
+               filterString = `title ~ "${query}" || municipality ~ "${query}" || neighborhood ~ "${query}"`;
+           }
+       }
+
+       const res = await pb.collection("properties").getList(1, 100, { 
+           sort: "-created", 
+           filter: filterString,
+           $cancelKey: "inventory-list" 
+       });
+       
        const processedItems = res.items.map((p: any) => ({
-           ...p,
-           specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || {})
+           ...p, specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || {})
        }));
 
        const sorted = processedItems.sort((a, b) => {
@@ -84,7 +109,6 @@ export default function DashboardInventario() {
       setIsLoadingEditor(true);
       try {
           const freshProp = await pb.collection("properties").getOne(propId, { $autoCancel: false });
-          // Importante: parsear specs al editar también
           if (typeof freshProp.specs === 'string') freshProp.specs = JSON.parse(freshProp.specs);
           
           setEditingProp(freshProp);
@@ -111,14 +135,14 @@ export default function DashboardInventario() {
   };
 
   const toggle = async (id: string, field: string, currentVal: boolean) => {
-      try { await pb.collection("properties").update(id, { [field]: !currentVal }); await loadInventory(); } catch (e) { showModal({ type: 'error', title: "Error", msg: "No se pudo actualizar." }); }
+      try { await pb.collection("properties").update(id, { [field]: !currentVal }); await loadInventory(searchQuery); } catch (e) { showModal({ type: 'error', title: "Error", msg: "No se pudo actualizar." }); }
   };
 
   const handleLogout = () => { pb.authStore.clear(); localStorage.removeItem("ayc_theme"); navigate("/agentes"); };
 
   const handleNavClick = (viewName: string) => {
       if (viewName === "NEW") handleOpenNewForm(); 
-      else { setView(viewName); setEditingProp(null); loadInventory(); }
+      else { setView(viewName); setEditingProp(null); loadInventory(); setSearchQuery(""); }
       setIsMobileMenuOpen(false);
   };
 
@@ -126,12 +150,12 @@ export default function DashboardInventario() {
       showModal({ type: 'success', title: "Guardado", msg: "Propiedad publicada exitosamente." });
       setView("INVENTORY");
       setEditingProp(null);
-      await loadInventory(); // Recargar para ver la nueva portada
+      await loadInventory(searchQuery); 
   };
 
   return (
     <div className={`flex flex-col md:flex-row font-sans transition-colors duration-500 ${s.mainBg} min-h-screen md:h-screen md:overflow-hidden`}>
-      {isLoadingEditor && <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center text-white flex-col gap-3"><Loader2 size={40} className="animate-spin text-emerald-400"/><p className="font-bold">Cargando datos frescos...</p></div>}
+      {isLoadingEditor && <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center text-white flex-col gap-3"><Loader2 size={40} className="animate-spin text-emerald-400"/><p className="font-bold">Abriendo Inmueble...</p></div>}
       <SmartModal isOpen={modalState.isOpen} onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))} config={modalState.config} />
 
       <header className={`md:hidden flex justify-between items-center p-4 border-b transition-colors duration-500 bg-white/95 backdrop-blur shadow-sm sticky top-0 z-50`}>
@@ -142,50 +166,81 @@ export default function DashboardInventario() {
 
       <aside className={`fixed md:relative inset-y-0 left-0 z-[70] w-72 md:w-64 flex flex-col py-6 border-r shadow-2xl md:shadow-none transition-transform duration-300 ease-out transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 ${s.sidebar}`}>
          <div className="md:hidden absolute top-4 right-4"><button onClick={() => setIsMobileMenuOpen(false)} className={`${s.sidebarText} opacity-70 hover:opacity-100 p-2`}><X size={24}/></button></div>
-         <div className="px-6 mb-8 mt-2 md:mt-0"><h1 className={`font-black text-2xl tracking-tighter ${s.sidebarText}`}>AYC PANEL</h1><p className="text-[10px] font-bold opacity-50 uppercase tracking-widest mt-1 text-gray-400">{storedTheme}</p></div>
+         <div className="px-6 mb-8 mt-2 md:mt-0"><h1 className={`font-black text-2xl tracking-tighter ${s.sidebarText}`}>AYC PANEL</h1></div>
+         
          <nav className="px-3 space-y-2 flex-1">
+            <button onClick={() => { navigate("/dashboard/mapa"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><MapIcon size={18}/> Centro de Mando</button>
+            <button onClick={() => { navigate("/dashboard/crm"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><MessageCircle size={18}/> Requerimientos</button>
+            
+            <div className="h-px bg-gray-500/20 my-2 mx-4"></div>
+            
             <button onClick={() => handleNavClick("INVENTORY")} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "INVENTORY" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}><LayoutGrid size={18}/> Inventario</button>
             <button onClick={() => handleOpenNewForm()} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all ${view === "NEW" ? s.activeBtn : `hover:opacity-80 ${s.sidebarText}`}`}><PlusCircle size={18}/> {editingProp ? "Editando..." : "Nuevo Inmueble"}</button>
             <button onClick={() => { navigate("/dashboard/blog"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><BookOpen size={18}/> Blog</button>
             {isManager && (<button onClick={() => { navigate("/dashboard/equipo"); setIsMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-3 transition-all hover:opacity-80 ${s.sidebarText}`}><Users size={18}/> Equipo</button>)}
          </nav>
+         
          <div className="px-6 mt-auto"><button onClick={handleLogout} className="flex items-center gap-2 text-xs font-bold text-red-500 hover:text-red-400 transition-colors w-full p-4 bg-red-50 md:bg-transparent rounded-xl justify-center md:justify-start"><LogOut size={16}/> SALIR</button></div>
       </aside>
 
       <main className="flex-1 p-4 md:p-8 w-full relative z-0 md:overflow-y-auto">
          {view === "INVENTORY" ? (
             <div className="bg-white md:rounded-xl shadow-none md:shadow-lg border-t md:border border-gray-100 overflow-hidden flex flex-col h-auto md:h-full -mx-4 md:mx-0 rounded-none">
+               
+               {/* BUSCADOR SUPERIOR */}
                <div className="p-4 md:p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white">
-                  <h2 className="font-black text-lg md:text-xl text-gray-800 uppercase flex items-center gap-2"><LayoutGrid className="md:hidden" size={20}/> Inventario</h2>
-                  <div className="flex gap-2"><span className="text-xs font-bold bg-gray-100 px-3 py-1 rounded-full text-gray-500">{properties.length} Props</span><span className="text-xs font-bold bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">{properties.filter(p => p.status === 'borrador').length} Borradores</span></div>
+                  <div className="w-full md:w-1/2 relative flex items-center">
+                      <Search size={18} className="absolute left-3 text-gray-400"/>
+                      <input 
+                          type="text"
+                          placeholder="Buscar código AYC, ciudad o título..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
+                      />
+                      {searchQuery && (
+                          <button onClick={() => setSearchQuery("")} className="absolute right-3 text-gray-400 hover:text-red-500">
+                              <X size={16}/>
+                          </button>
+                      )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 w-full md:w-auto">
+                      <button onClick={() => loadInventory(searchQuery)} className="p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+                          <RefreshCw size={18} className={isLoading ? "animate-spin" : ""}/>
+                      </button>
+                      <span className="text-xs font-bold bg-blue-50 text-blue-700 px-3 py-2 rounded-lg whitespace-nowrap">{properties.length} Props</span>
+                      <span className="text-xs font-bold bg-yellow-50 text-yellow-700 px-3 py-2 rounded-lg whitespace-nowrap">{properties.filter(p => p.status === 'borrador').length} Borradores</span>
+                  </div>
                </div>
                
                <div className="flex-1 bg-gray-50 md:bg-white p-4 md:p-0 overflow-y-auto">
                   <div className="hidden md:block overflow-x-auto">
                       <table className="w-full text-left border-collapse">
                          <thead className={`${s.tableHeader} text-[10px] font-bold uppercase transition-colors sticky top-0 z-10 shadow-sm`}>
-                           <tr><th className="p-4">Propiedad</th><th className="p-4 text-center">Tipo</th><th className="p-4 text-center">Estado</th><th className="p-4 text-center">Precio</th><th className={`p-4 text-center ${remaining.hero === 0 ? "text-red-400" : "text-blue-400"}`}>Hero ({remaining.hero})</th><th className={`p-4 text-center ${remaining.reina === 0 ? "text-red-400" : "text-yellow-400"}`}>Reina ({remaining.reina})</th><th className={`p-4 text-center ${remaining.fav === 0 ? "text-red-400" : "text-green-400"}`}>Fav ({remaining.fav})</th><th className="p-4 text-right">Acciones</th></tr>
+                           <tr><th className="p-4">Código AYC</th><th className="p-4">Propiedad</th><th className="p-4 text-center">Tipo</th><th className="p-4 text-center">Estado</th><th className="p-4 text-center">Precio</th><th className={`p-4 text-center ${remaining.hero === 0 ? "text-red-400" : "text-blue-400"}`}>Hero ({remaining.hero})</th><th className={`p-4 text-center ${remaining.reina === 0 ? "text-red-400" : "text-yellow-400"}`}>Reina ({remaining.reina})</th><th className={`p-4 text-center ${remaining.fav === 0 ? "text-red-400" : "text-green-400"}`}>Fav ({remaining.fav})</th><th className="p-4 text-right">Acciones</th></tr>
                          </thead>
                          <tbody className="divide-y divide-gray-100 text-gray-600">
                             {properties.map((p) => {
                                const heroOrder = getHeroIndex(p.id); 
                                const themeConfig = PROPERTY_TYPES_THEME[p.property_type] || PROPERTY_TYPES_THEME["default"];
                                const isDraft = p.status === "borrador" || !p.title;
-                               
-                               // --- LOGICA DE PORTADA (FIX) ---
-                               // 1. Buscamos si hay un orden personalizado en specs.gallery_order
-                               // 2. Si no, usamos la primera imagen física (p.images[0])
                                const galleryOrder = p.specs?.gallery_order;
                                const coverImgId = (galleryOrder && galleryOrder.length > 0) ? galleryOrder[0] : p.images?.[0];
 
                                return (
-                               <tr key={p.id} className={`hover:bg-gray-50 transition-colors ${isDraft ? "bg-yellow-50/60" : ""}`}>
+                               <tr key={p.id} className={`hover:bg-gray-50 transition-colors ${isDraft ? "bg-yellow-50/60 opacity-60 grayscale-[20%]" : ""}`}>
+                                  <td className="p-4">
+                                     <div className="inline-flex items-center justify-center whitespace-nowrap font-mono text-xs font-black text-gray-700 bg-gray-100 px-2.5 py-1.5 rounded-md border border-gray-200">
+                                         {p.ayc_id || "DRAFT"}
+                                     </div>
+                                  </td>
+                                  
                                   <td className="p-4 flex items-center gap-3">
                                      <div className={`w-12 h-12 rounded-lg overflow-hidden shrink-0 border relative ${isDraft ? "border-yellow-300 bg-yellow-100" : "border-gray-100 bg-gray-200"}`}>
-                                        {/* Agregamos ?t=${p.updated} para romper el caché del navegador si la imagen cambia */}
                                         {coverImgId ? (<img src={`${PB_URL}/api/files/${p.collectionId}/${p.id}/${coverImgId}?t=${p.updated}`} className={`w-full h-full object-cover ${isDraft ? "grayscale opacity-60" : ""}`}/>) : (<div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-[8px] font-bold"><AlertCircle size={14}/></div>)}
                                      </div>
-                                     <div className="min-w-[180px]"><div className={`font-bold text-sm whitespace-normal break-words ${isDraft ? "text-yellow-800 italic" : "text-gray-800"}`}>{p.title || "Nuevo Borrador..."}</div><div className="text-[10px] text-gray-400 font-mono">{p.ayc_id || "..."}</div></div>
+                                     <div className="min-w-[180px]"><div className={`font-bold text-sm whitespace-normal break-words ${isDraft ? "text-yellow-800 italic" : "text-gray-800"}`}>{p.title || "Nuevo Borrador..."}</div></div>
                                   </td>
                                   <td className="p-4 text-center"><span className={`px-2 py-1 rounded border text-[10px] font-bold uppercase whitespace-nowrap flex items-center justify-center gap-1 w-fit mx-auto ${themeConfig.bgLight} ${themeConfig.text} ${themeConfig.border}`}>{getFieldIcon(p.property_type)} {p.property_type || "N/A"}</span></td>
                                   <td className="p-4 text-center">{isDraft ? (<span className="text-[10px] bg-yellow-200 border border-yellow-300 text-yellow-800 font-black px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1 animate-pulse"><FilePlus size={10} /> Borrador</span>) : (<span className="text-[10px] bg-green-100 border border-green-200 text-green-700 font-bold px-2 py-1 rounded-full uppercase flex items-center justify-center gap-1"><Zap size={10} /> Publicado</span>)}</td>
@@ -204,18 +259,23 @@ export default function DashboardInventario() {
                       {properties.map(p => {
                           const themeConfig = PROPERTY_TYPES_THEME[p.property_type] || PROPERTY_TYPES_THEME["default"];
                           const isDraft = p.status === "borrador" || !p.title;
-                          // FIX PORTADA MÓVIL TAMBIÉN
                           const coverImgId = p.specs?.gallery_order?.[0] || p.images?.[0];
 
                           return (
-                            <div key={p.id} className={`rounded-2xl p-4 shadow-sm border relative ${isDraft ? "bg-yellow-50 border-yellow-200" : "bg-white border-gray-100"}`}>
+                            <div key={p.id} className={`rounded-2xl p-4 shadow-sm border relative ${isDraft ? "bg-yellow-50 border-yellow-200 opacity-60 grayscale-[20%]" : "bg-white border-gray-100"}`}>
+                                <div className="flex justify-between items-center mb-3">
+                                   <div className="inline-flex items-center justify-center whitespace-nowrap font-mono text-[10px] font-black text-gray-700 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200">
+                                       {p.ayc_id || "DRAFT"}
+                                   </div>
+                                   {isDraft && <span className="text-[9px] bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded font-black uppercase">Borrador</span>}
+                                </div>
                                 <div className="flex gap-4">
-                                   <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-gray-100">
+                                   <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100 border border-gray-200 shadow-sm">
                                       {coverImgId && <img src={`${PB_URL}/api/files/${p.collectionId}/${p.id}/${coverImgId}?t=${p.updated}`} className={`w-full h-full object-cover ${isDraft ? "grayscale opacity-50" : ""}`}/>}
                                    </div>
-                                   <div>{isDraft && <span className="mb-1 inline-block text-[8px] bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded font-black uppercase">Borrador</span>}<span className={`block text-[10px] font-bold px-2 py-0.5 rounded w-fit ${themeConfig.bgLight} ${themeConfig.text}`}>{p.property_type || "N/A"}</span><h3 className={`font-bold text-sm mt-1 whitespace-normal ${isDraft ? "text-gray-400 italic" : ""}`}>{p.title || "Sin Título"}</h3><p className="text-green-600 font-bold text-xs">{p.price_cop ? formatCurrency(p.price_cop) : "--"}</p></div>
+                                   <div><span className={`block text-[10px] font-bold px-2 py-0.5 rounded w-fit ${themeConfig.bgLight} ${themeConfig.text}`}>{p.property_type || "N/A"}</span><h3 className={`font-bold text-sm mt-1 whitespace-normal ${isDraft ? "text-gray-400 italic" : ""}`}>{p.title || "Sin Título"}</h3><p className="text-green-600 font-bold text-sm mt-1">{p.price_cop ? formatCurrency(p.price_cop) : "--"}</p></div>
                                 </div>
-                                <div className="flex justify-between items-center gap-2 mt-4 border-t pt-3"><Link to={`/inmuebles/${p.ayc_id || p.id}`} target="_blank" className={`text-xs font-bold flex items-center gap-1 ${isDraft ? "text-gray-300 pointer-events-none" : "text-gray-600"}`}><Eye size={14}/> VER WEB</Link><div className="flex gap-3"><button onClick={() => handleEdit(p.id)} className="text-xs font-bold text-blue-600 flex items-center gap-1"><Edit size={14}/> EDITAR</button><button onClick={() => confirmDelete(p.id)} className="text-xs font-bold text-red-600 flex items-center gap-1"><Trash size={14}/> BORRAR</button></div></div>
+                                <div className="flex justify-between items-center gap-2 mt-4 border-t pt-3"><Link to={`/inmuebles/${p.ayc_id || p.id}`} target="_blank" className={`text-xs font-bold flex items-center gap-1 ${isDraft ? "text-gray-300 pointer-events-none" : "text-gray-600"}`}><Eye size={14}/> VER WEB</Link><div className="flex gap-3"><button onClick={() => handleEdit(p.id)} className="text-xs font-bold text-blue-600 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded"><Edit size={14}/> EDITAR</button><button onClick={() => confirmDelete(p.id)} className="text-xs font-bold text-red-600 flex items-center gap-1 bg-red-50 px-2 py-1 rounded"><Trash size={14}/> BORRAR</button></div></div>
                             </div>
                           )
                       })}

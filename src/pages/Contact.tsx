@@ -1,200 +1,125 @@
-﻿import React, { useState, useEffect } from "react";
-import { Mail, Phone, Instagram, Facebook, Linkedin, ShieldCheck, AlertTriangle, Lock } from "lucide-react";
+﻿import React, { useState } from "react";
+import { Mail, Phone, ShieldCheck, ArrowRight, Instagram, Youtube, MapPin, MessageCircle } from "lucide-react";
 import { useApp } from "../context/AppContext"; 
 import Navbar from "../components/Navbar";
 
+const TikTokIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+);
+
 const Contact = () => {
   const { t } = useApp();
-  
-  // --- INICIO BLOQUE SEGURIDAD ---
   const [formData, setFormData] = useState({ name: "", phone: "", email: "", msg: "" });
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // 1. BLOQUEO DE F12, INSPECTOR Y CLICK DERECHO
-  useEffect(() => {
-    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
-        (e.ctrlKey && e.key === "U")
-      ) {
-        e.preventDefault();
-      }
-    };
-    document.addEventListener("contextmenu", handleContextMenu);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("contextmenu", handleContextMenu);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
-  // 2. SANITIZACIÓN
-  const sanitizeInput = (value: string) => {
-    return value.replace(/[<>;'"\\]/g, "").replace(/--/g, "");
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const cleanValue = sanitizeInput(value);
-    setFormData(prev => ({ ...prev, [name]: cleanValue }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
-  };
-
-  const validateForm = () => {
-      const newErrors: Record<string, string> = {};
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const phoneRegex = /^[0-9+ ]{7,15}$/; 
-
-      if (!formData.name.trim()) newErrors.name = t('req_field');
-      if (!formData.phone.trim() || !phoneRegex.test(formData.phone)) newErrors.phone = t('inv_phone');
-      if (!formData.email.trim() || !emailRegex.test(formData.email)) newErrors.email = t('inv_email');
-      if (!formData.msg.trim()) newErrors.msg = t('req_field');
-
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
+    setFormData(prev => ({ ...prev, [name]: value.replace(/[<>;'"\\]/g, "") }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!validateForm()) return;
-      setIsSubmitting(true);
-      setTimeout(() => {
-          alert(t('msg_sent'));
-          setFormData({ name: "", phone: "", email: "", msg: "" });
-          setIsSubmitting(false);
-      }, 1500);
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => setIsSubmitting(false), 1500);
   };
-  // --- FIN BLOQUE SEGURIDAD ---
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans selection:bg-green-100 selection:text-green-900">
        <Navbar />
        
-       <div className="pt-40 pb-24 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
-          
-          {/* COLUMNA IZQUIERDA */}
-          <div className="animate-fade-in-up">
-              
-              {/* Badge Seguro */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-100 border border-green-500/50 rounded-full text-green-700 text-xs font-black uppercase tracking-widest mb-8">
-                 <ShieldCheck size={14}/> {t('contact_secure_badge')}
-              </div>
-              
-              {/* TÍTULO */}
-              <h1 className="text-5xl md:text-7xl font-black uppercase mb-8 leading-none tracking-tight text-[#0A192F]">
-                 {t('contact_title')}
-              </h1>
-              
-              {/* DESCRIPCIÓN */}
-              <p className="text-slate-600 text-lg md:text-xl mb-12 leading-relaxed border-l-4 border-green-500 pl-6 max-w-lg font-medium">
-                 {t('contact_hero_desc')}
-              </p>
-              
-              <div className="space-y-10 mb-16">
-                 {/* Teléfono */}
-                 <div className="flex items-center gap-6 group">
-                    <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center text-green-600 shadow-sm group-hover:bg-green-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
-                       <Phone size={28}/>
-                    </div>
-                    <div>
-                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{t('contact_call')}</p>
-                       <p className="text-3xl font-black text-[#0A192F] group-hover:text-green-600 transition-colors tracking-tight">+57 313 466 3832</p>
-                    </div>
-                 </div>
-                 
-                 {/* Email */}
-                 <div className="flex items-center gap-6 group">
-                    <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
-                       <Mail size={28}/>
-                    </div>
-                    <div>
-                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{t('contact_write')}</p>
-                       <p className="text-2xl font-bold text-[#0A192F] group-hover:text-blue-600 transition-colors">info@aycfincaraiz.com</p>
-                    </div>
-                 </div>
-              </div>
-
-              {/* Redes Sociales */}
-              <div className="flex gap-4">
-                 <a href="#" className="w-12 h-12 flex items-center justify-center bg-slate-200 rounded-full hover:bg-green-600 text-[#0A192F] hover:text-white transition-all hover:-translate-y-1"><Instagram size={20}/></a>
-                 <a href="#" className="w-12 h-12 flex items-center justify-center bg-slate-200 rounded-full hover:bg-blue-600 text-[#0A192F] hover:text-white transition-all hover:-translate-y-1"><Facebook size={20}/></a>
-                 <a href="#" className="w-12 h-12 flex items-center justify-center bg-slate-200 rounded-full hover:bg-blue-700 text-[#0A192F] hover:text-white transition-all hover:-translate-y-1"><Linkedin size={20}/></a>
-              </div>
+       <div className="pt-32 pb-24 max-w-7xl mx-auto px-6">
+          <div className="text-center mb-20">
+             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-black uppercase tracking-widest mb-6">
+                <ShieldCheck size={14}/> {t('contact_secure_badge')}
+             </div>
+             <h1 className="text-5xl md:text-6xl font-black text-[#0A192F] mb-6 tracking-tight uppercase">Hablemos de negocios.</h1>
+             <p className="text-slate-500 text-lg max-w-2xl mx-auto">Tu patrimonio merece una gestión de alto nivel.</p>
           </div>
 
-          {/* COLUMNA DERECHA: FORMULARIO */}
-          <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-slate-200 relative overflow-hidden animate-fade-in-up delay-200">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 via-blue-500 to-green-400"></div>
-              
-              <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                 <div className="flex justify-between items-center mb-8">
-                     <h3 className="text-3xl font-black text-[#0A192F]">{t('form_title')}</h3>
-                     {Object.keys(errors).length > 0 && <AlertTriangle size={24} className="text-red-500 animate-bounce"/>}
-                 </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+             
+             {/* COLUMNA IZQUIERDA: DATOS + CTA WHATSAPP */}
+             <div className="lg:col-span-4 space-y-8">
+                <div className="bg-[#0A192F] p-8 rounded-3xl text-white shadow-2xl">
+                   <h3 className="text-xl font-bold mb-8 flex items-center gap-2"><MapPin className="text-green-500" /> Información Directa</h3>
+                   
+                   <div className="space-y-6">
+                      <div className="flex items-center gap-4">
+                         <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-green-500 border border-slate-700">
+                            <Phone size={20} />
+                         </div>
+                         <div>
+                            <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">WhatsApp</p>
+                            <p className="font-bold">+57 322 482 2840</p>
+                         </div>
+                      </div>
 
-                 <div>
-                    <label className="block text-xs font-extrabold text-slate-400 mb-2 uppercase tracking-wide ml-1">{t('form_name')}</label>
-                    <input 
-                      type="text" name="name" value={formData.name} onChange={handleChange}
-                      className={`w-full p-4 bg-slate-50 border ${errors.name ? 'border-red-300 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'} rounded-2xl outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all font-bold placeholder:text-slate-300`}
-                      placeholder={t('ph_name')} autoComplete="off"
-                    />
-                    {errors.name && <p className="text-red-500 text-xs font-bold mt-2 ml-1 flex items-center gap-1"><AlertTriangle size={10}/> {errors.name}</p>}
-                 </div>
+                      <div className="flex items-center gap-4">
+                         <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-blue-500 border border-slate-700">
+                            <Mail size={20} />
+                         </div>
+                         <div>
+                            <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Email</p>
+                            <p className="font-bold">fincaraizayc@gmail.com</p>
+                         </div>
+                      </div>
+                   </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                       <label className="block text-xs font-extrabold text-slate-400 mb-2 uppercase tracking-wide ml-1">{t('form_phone')}</label>
-                       <input 
-                         type="text" name="phone" value={formData.phone} onChange={handleChange}
-                         className={`w-full p-4 bg-slate-50 border ${errors.phone ? 'border-red-300 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'} rounded-2xl outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all font-bold placeholder:text-slate-300`}
-                         placeholder="Ej: 300 123 4567" autoComplete="off"
-                       />
-                       {errors.phone && <p className="text-red-500 text-xs font-bold mt-2 ml-1">{errors.phone}</p>}
-                    </div>
-                    <div>
-                       <label className="block text-xs font-extrabold text-slate-400 mb-2 uppercase tracking-wide ml-1">{t('form_email')}</label>
-                       <input 
-                         type="email" name="email" value={formData.email} onChange={handleChange}
-                         className={`w-full p-4 bg-slate-50 border ${errors.email ? 'border-red-300 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'} rounded-2xl outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all font-bold placeholder:text-slate-300`}
-                         placeholder="tu@email.com" autoComplete="off"
-                       />
-                       {errors.email && <p className="text-red-500 text-xs font-bold mt-2 ml-1">{errors.email}</p>}
-                    </div>
-                 </div>
+                   {/* CTA INTEGRADO */}
+                   <a 
+                      href="https://wa.me/573224822840?text=Hola,%20quisiera%20pedir%20información%20sobre%20sus%20servicios." 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="mt-10 flex items-center justify-center gap-3 w-full py-4 bg-green-500 hover:bg-green-400 text-[#0A192F] font-black rounded-2xl transition-all shadow-lg hover:shadow-green-500/20 active:scale-95"
+                   >
+                      <MessageCircle size={18} /> Iniciar Chat WhatsApp
+                   </a>
 
-                 <div>
-                    <label className="block text-xs font-extrabold text-slate-400 mb-2 uppercase tracking-wide ml-1">{t('form_msg')}</label>
-                    <textarea 
-                      rows={4} name="msg" value={formData.msg} onChange={handleChange}
-                      className={`w-full p-4 bg-slate-50 border ${errors.msg ? 'border-red-300 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'} rounded-2xl outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all font-bold placeholder:text-slate-300 resize-none`}
-                      placeholder={t('ph_msg')}
-                    ></textarea>
-                    {errors.msg && <p className="text-red-500 text-xs font-bold mt-2 ml-1">{errors.msg}</p>}
-                 </div>
+                   <div className="mt-12 pt-8 border-t border-slate-700">
+                      <p className="text-xs text-slate-400 mb-4 uppercase tracking-widest">Síguenos en redes</p>
+                      <div className="flex gap-4">
+                         {[
+                            { icon: Instagram, link: "https://www.instagram.com/aycfincaraiz_/" },
+                            { icon: TikTokIcon, link: "https://www.tiktok.com/@aycfincaraiz" },
+                            { icon: Youtube, link: "https://www.youtube.com/@AyCFincaRaiz" }
+                         ].map((s, i) => (
+                            <a key={i} href={s.link} target="_blank" rel="noreferrer" className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center hover:bg-green-600 transition-colors">
+                               <s.icon size={20} />
+                            </a>
+                         ))}
+                      </div>
+                   </div>
+                </div>
+             </div>
 
-                 <button 
-                   disabled={isSubmitting}
-                   className={`w-full py-5 bg-[#0A192F] text-white font-black rounded-2xl hover:bg-green-600 transition-all uppercase tracking-widest shadow-xl hover:shadow-2xl hover:-translate-y-1 flex justify-center items-center gap-3 ${isSubmitting ? 'opacity-80 cursor-wait' : ''}`}
-                 >
-                   {isSubmitting ? (
-                       <>{t('form_sending')} <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div></>
-                   ) : (
-                       t('form_btn')
-                   )}
-                 </button>
-                 
-                 <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-6 flex items-center justify-center gap-1.5">
-                     <Lock size={10} /> {t('security_note')}
-                 </p>
-              </form>
+             {/* COLUMNA DERECHA: FORMULARIO */}
+             <div className="lg:col-span-8 bg-white p-10 md:p-16 rounded-[2.5rem] shadow-xl border border-slate-100">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="space-y-2 md:col-span-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Nombre completo</label>
+                      <input name="name" onChange={handleChange} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 font-bold transition-all" placeholder="Juan Pérez"/>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1">WhatsApp</label>
+                      <input name="phone" onChange={handleChange} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 font-bold transition-all" placeholder="300 000 0000"/>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Correo electrónico</label>
+                      <input name="email" onChange={handleChange} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 font-bold transition-all" placeholder="tu@email.com"/>
+                   </div>
+                   <div className="space-y-2 md:col-span-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Mensaje</label>
+                      <textarea name="msg" onChange={handleChange} rows={4} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 font-bold transition-all resize-none" placeholder="¿Cómo podemos ayudarte hoy?"/>
+                   </div>
+                   <button disabled={isSubmitting} className="md:col-span-2 flex items-center justify-center gap-3 w-full py-5 bg-[#0A192F] text-white font-black rounded-2xl hover:bg-green-600 transition-all shadow-lg active:scale-95 uppercase tracking-widest text-sm">
+                      {isSubmitting ? "Enviando..." : <>Enviar solicitud <ArrowRight size={18}/></>}
+                   </button>
+                </form>
+             </div>
           </div>
-
        </div>
     </div>
   );
 };
+
 export default Contact;

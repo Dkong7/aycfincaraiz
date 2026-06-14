@@ -11,6 +11,10 @@ import {
 export default function BodegaPreview({ data }: any) {
   const s = data.specs || {};
 
+  // --- LÓGICA DE ADMIN FEE ROBUSTA ---
+  const rawAdmin = data.admin_fee || s.admin_fee || 0;
+  const adminVal = Number(String(rawAdmin).replace(/\D/g, ""));
+
   // 1. Helper para Secciones
   const Section = ({ title, icon: Icon, children }: any) => (
     <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -42,19 +46,19 @@ export default function BodegaPreview({ data }: any) {
       <Section title="Resumen Ejecutivo" icon={Factory}>
          <Row 
             label="Precio Venta" 
-            val={data.price_cop ? formatCurrency(data.price_cop) : "$0"} 
+            val={data.price_cop ? `$${formatCurrency(data.price_cop)}` : "$0"} 
             icon={DollarSign} 
             valClass="text-green-600 font-black text-sm" 
          />
          {data.price_usd && Number(data.price_usd) > 0 && (
-            <Row label="Precio USD" val={`$${data.price_usd}`} icon={DollarSign} valClass="text-green-600 font-bold" />
+            <Row label="Precio USD" val={`$${formatCurrency(data.price_usd)}`} icon={DollarSign} valClass="text-green-600 font-bold" />
          )}
          
          <Row label="Estrato" val={data.stratum || s.stratum} icon={Hash} />
          
          <Row 
             label="Administración" 
-            val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} 
+            val={adminVal > 0 ? `$${formatCurrency(adminVal)}` : "N/A"} 
             icon={Building} 
          />
          <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
@@ -63,6 +67,7 @@ export default function BodegaPreview({ data }: any) {
 
       {/* 2. DIMENSIONES & ESTRUCTURA */}
       <Section title="Dimensiones & Estructura" icon={Maximize}>
+         {/* FIX: Se mantiene el valor decimal tal cual se escribió */}
          <Row label="Área Lote Total" val={`${s.area_total || 0} m²`} icon={Maximize} valClass="text-amber-700 font-bold" />
          <Row label="Área Construida" val={`${s.area_built || 0} m²`} icon={Maximize} />
          <Row label="Frente x Fondo" val={`${s.front || 0} x ${s.depth || 0} m`} icon={Ruler} />
@@ -72,8 +77,8 @@ export default function BodegaPreview({ data }: any) {
 
       {/* 3. CAPACIDAD TÉCNICA */}
       <Section title="Capacidad Técnica" icon={Zap}>
-         <Row label="Energía" val={`${s.energy_kva || 0} KVA`} icon={Zap} />
-         <Row label="Resistencia Piso" val={s.floor_resistance} icon={Layers} />
+         <Row label="Energía" val={s.energy_kva ? `${s.energy_kva} KVA` : "--"} icon={Zap} />
+         <Row label="Resistencia Piso" val={s.floor_resistance ? `${s.floor_resistance} Ton/m²` : "--"} icon={Layers} />
          <Row label="Tipo de Piso" val={s.floor_type} icon={Layers} />
          <Row label="Tipo Portón" val={translate(s.gate_type)} icon={Container} />
          <Row label="Entradas Camión" val={s.entry_count} icon={Truck} />
@@ -94,7 +99,6 @@ export default function BodegaPreview({ data }: any) {
          <div className="col-span-1 md:col-span-2">
             <Section title="Área Administrativa (Oficinas)" icon={Briefcase}>
                <div className="grid grid-cols-2 gap-4">
-                  {/* CAMBIO: # Espacios */}
                   <Row label="# Espacios" val={`${s.office_area || 0}`} icon={Maximize} />
                   <Row label="Baños Admin." val={s.office_bathrooms} icon={Bath} />
                   <Row label="Estado" val={s.office_condition} icon={CheckCircle2} />
@@ -113,7 +117,7 @@ export default function BodegaPreview({ data }: any) {
             <Section title="Mezzanine de Carga" icon={Layers}>
                <div className="grid grid-cols-3 gap-2">
                   <Row label="Área Mez." val={`${s.mezzanine_area || 0} m²`} icon={Maximize} />
-                  <Row label="Carga" val={s.mezzanine_load} icon={Zap} />
+                  <Row label="Carga" val={s.mezzanine_load ? `${s.mezzanine_load} kg/m²` : "--"} icon={Zap} />
                   <Row label="Material" val={s.mezzanine_material} icon={Factory} />
                </div>
             </Section>

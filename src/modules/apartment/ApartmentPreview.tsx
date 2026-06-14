@@ -4,19 +4,17 @@ import { translate } from "./apartment.config";
 import { 
   Building2, Maximize, ArrowUpFromLine, Receipt, 
   Car, CheckCircle2, DollarSign,
-  Calendar, Layers, Eye, ChefHat, Grid, Shirt, Trees, Bed, Bath, Hash, MapPin
+  Calendar, Layers, Eye, ChefHat, Grid, Shirt, Trees, Bed, Bath
 } from "lucide-react";
 
 export default function ApartmentPreview({ data }: any) {
   const s = data.specs || {};
 
   // --- LÓGICA DE ADMIN FEE ROBUSTA ---
-  // Limpiamos cualquier carácter no numérico para validar el valor real
   const rawAdmin = data.admin_fee || s.admin_fee || 0;
   const adminVal = Number(String(rawAdmin).replace(/\D/g, ""));
 
   // --- COMBINACIÓN DE AMENIDADES ---
-  // Unimos features (interno) y social/club_features (externo) en una sola lista visual
   const internalFeatures = Array.isArray(s.features) ? s.features : [];
   const clubFeatures = Array.isArray(s.social) ? s.social : (Array.isArray(s.club_features) ? s.club_features : []);
   const hasAmenities = internalFeatures.length > 0 || clubFeatures.length > 0;
@@ -55,41 +53,34 @@ export default function ApartmentPreview({ data }: any) {
             icon={DollarSign} 
             valClass="text-green-600 font-black text-sm" 
          />
-         {/* Precio USD si existe */}
          {data.price_usd && Number(data.price_usd) > 0 && (
-            <Row label="Precio USD" val={`$${data.price_usd}`} icon={DollarSign} valClass="text-green-600 font-bold" />
+            <Row label="Precio USD" val={`$${formatCurrency(data.price_usd)}`} icon={DollarSign} valClass="text-green-600 font-bold" />
          )}
-         
          <Row label="Estrato" val={data.stratum || s.stratum} icon={Layers} />
-         
-         {/* CORRECCIÓN: Valor Administración validado */}
          <Row 
             label="Administración" 
             val={adminVal > 0 ? `$${formatCurrency(adminVal)}` : "No Aplica"} 
             icon={Receipt} 
          />
-         
          <Row label="Antigüedad" val={translate(s.antiquity)} icon={Calendar} />
       </Section>
 
       {/* 2. UBICACIÓN & ESPACIO */}
       <Section title="Dimensiones" icon={Maximize}>
+         {/* FIX: Se mantiene el valor decimal tal cual se escribió */}
          <Row label="Área Construida" val={`${s.area_built || 0} m²`} icon={Maximize} />
          <Row label="Piso N°" val={s.floor_level || s.floor_num} icon={ArrowUpFromLine} />
          <Row label="Pisos Edificio" val={s.total_floors} icon={Building2} />
-         
-         {/* CORRECCIÓN: Traducción de Vista */}
          <Row label="Vista" val={translate(s.view_type)} icon={Eye} />
-         
-         {/* CORRECCIÓN: Traducción de Garaje (Incluye Comunal) */}
          <Row label="Garajes" val={`${s.garages || 0} (${translate(s.garage_type) || "-"})`} icon={Car} />
       </Section>
 
-      {/* 3. INTERIORES (Con Traducciones Aplicadas) */}
+      {/* 3. INTERIORES */}
       <div className="col-span-1 md:col-span-2">
           <Section title="Detalles Interiores" icon={ChefHat}>
              <div className="grid grid-cols-2 gap-x-4">
                  <Row label="Habitaciones" val={s.habs || s.rooms} icon={Bed} />
+                 {/* FIX: Baños soporta decimales (ej 2.5) */}
                  <Row label="Baños" val={s.baths || s.bathrooms} icon={Bath} />
                  <Row label="Cocina" val={translate(s.kitchen)} icon={ChefHat} />
                  <Row label="Pisos" val={translate(s.floors)} icon={Grid} />
@@ -106,13 +97,11 @@ export default function ApartmentPreview({ data }: any) {
                 <p className="text-xs text-gray-400 italic px-2">Sin amenidades seleccionadas</p>
             ) : (
                 <div className="flex flex-wrap gap-2 p-1">
-                    {/* Internas (Azul) */}
                     {internalFeatures.map((feat: string, i: number) => (
                         <span key={`int-${i}`} className="text-[10px] bg-blue-100 text-blue-800 px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-blue-200">
                            <CheckCircle2 size={10}/> {feat}
                         </span>
                     ))}
-                    {/* Externas/Club (Verde/Indigo) */}
                     {clubFeatures.map((feat: string, i: number) => (
                         <span key={`club-${i}`} className="text-[10px] bg-green-100 text-green-800 px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200">
                            <Trees size={10}/> {feat}

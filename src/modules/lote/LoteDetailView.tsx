@@ -1,7 +1,7 @@
 import React from "react";
 import { 
   Maximize, Ruler, Map, ScrollText, Zap, 
-  Briefcase, MapPin, CheckCircle2, TrendingUp, RefreshCw, DollarSign
+  Briefcase, MapPin, CheckCircle2, TrendingUp, RefreshCw, DollarSign, ShieldCheck
 } from "lucide-react";
 import { useApp } from "../../context/AppContext"; 
 import { useTRM } from "../../hooks/useTRM";       
@@ -26,15 +26,15 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
 
   const featuresList = Array.isArray(specs.features) ? specs.features : [];
 
-  // --- MAPA ÚNICO (ESTÁNDAR) ---
+  // --- MAPA ÚNICO SEGURO ---
   const locCity = municipality || "Bogotá";
   const locHood = neighborhood || "";
   const query = `${locHood}, ${locCity}, Colombia`;
   const encodedQuery = encodeURIComponent(query);
-  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed`;
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed&iwloc=near`;
 
   // --- ADMIN FEE ---
-  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const rawAdmin = adminFee || specs?.admin_fee || 0;
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
   const hasAdmin = cleanAdmin > 0;
 
@@ -127,15 +127,15 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
                      <Ruler size={16} className="text-green-600"/> {translateDynamic("Normativa & Usos")}
                  </h3>
                  <div className="flex flex-col">
-                    <SpecRow label="Uso Complementario" val={specs.soil_use_secondary} icon={Briefcase} />
+                    <SpecRow label="Uso Secundario" val={specs.soil_use_secondary} icon={Briefcase} />
                     <SpecRow label="Altura Máxima" val={specs.max_height ? `${specs.max_height} Pisos` : "N/A"} icon={Maximize} />
                     <SpecRow label="Frente" val={`${specs.front || 0} m`} icon={Ruler} />
                     <SpecRow label="Fondo" val={`${specs.depth || 0} m`} icon={Ruler} />
                     
-                    {/* ADMIN FEE (A veces aplica en condominios campestres) */}
+                    {/* ADMIN FEE CORRECTO */}
                     <SpecRow 
                         label="Administración" 
-                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)} COP` : "No aplica"} 
                         icon={DollarSign} 
                         isCurrency={true}
                     />
@@ -164,15 +164,17 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
          </section>
        )}
 
-       {/* MAPA ÚNICO (Solo si hay municipio) */}
+       {/* MAPA ÚNICO */}
        {(municipality) && (
-           <section className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+           <section className="bg-green-600 p-6 rounded-[2rem] text-white shadow-lg shadow-green-200 border border-green-700">
                <div className="flex items-center gap-2 mb-4">
-                   <MapPin className="text-green-500" size={20}/>
-                   <h3 className="font-black text-sm text-gray-800 uppercase tracking-widest">{translateDynamic("Ubicación Lote")}</h3>
+                   <MapPin className="opacity-80" size={24}/>
+                   <h3 className="font-black text-lg leading-tight">{translateDynamic("Ubicación del Terreno")}</h3>
                </div>
-               
-               <div className="w-full h-80 rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-gray-200">
+               <p className="text-xs opacity-90 leading-relaxed mb-4">
+                   {translateDynamic("Ubicación aproximada:")} {neighborhood}, {municipality}.
+               </p>
+               <div className="w-full h-80 rounded-2xl overflow-hidden bg-black/10 relative border border-white/20">
                    <iframe 
                        width="100%" 
                        height="100%" 
@@ -180,6 +182,7 @@ export default function LoteDetailView({ specs, description, adminFee, priceCop,
                        loading="lazy" 
                        src={mapUrl} 
                        title="Ubicación Lote"
+                       className="absolute inset-0"
                    ></iframe>
                </div>
            </section>

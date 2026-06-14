@@ -2,37 +2,50 @@ import React from "react";
 import { 
   Maximize, Warehouse, Truck, Weight, Bolt, Ruler, 
   Container, DollarSign, ShoppingBag, Layers, ArrowUpFromLine,
-  Briefcase, Utensils, Bath, Car, Factory, Grid, Hash, CheckCircle2
+  Briefcase, Utensils, Bath, Car, Factory, Grid, Hash, CheckCircle2,
+  TrendingUp, RefreshCw, MapPin, ShieldCheck
 } from "lucide-react";
 import { useApp } from "../../context/AppContext"; 
+import { useTRM } from "../../hooks/useTRM"; 
 import { formatCurrency } from "../../utils/formatters";
 import { translate } from "./bodega.config"; 
 
-export default function BodegaDetailView({ specs, description, adminFee, priceCop, priceUsd, stratum }: any) {
-  const { translateDynamic, currency } = useApp();
+export default function BodegaDetailView({ specs, description, adminFee, priceCop, priceUsd, stratum, neighborhood, municipality }: any) {
+  const { translateDynamic, currency, lang } = useApp();
+  const trm = useTRM();
   const tr = (key: string) => translateDynamic(key);
 
   const showUsd = currency === "USD";
   const mainPrice = showUsd ? (priceUsd ? `USD $${formatCurrency(priceUsd)}` : "USD --") : `$${formatCurrency(priceCop)}`;
   const secondaryPrice = showUsd ? `$${formatCurrency(priceCop)} COP` : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
 
-  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const rawAdmin = adminFee || specs?.admin_fee || 0;
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
+  const hasAdmin = cleanAdmin > 0;
 
-  const SpecRow = ({ label, val, icon: Icon }: any) => (
+  // --- MAPA ÚNICO SEGURO ---
+  const locCity = municipality || "Bogotá";
+  const locHood = neighborhood || "";
+  const query = `${locHood}, ${locCity}, Colombia`;
+  const encodedQuery = encodeURIComponent(query);
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed&iwloc=near`;
+
+  const SpecRow = ({ label, val, icon: Icon, isCurrency = false }: any) => (
      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0 group hover:bg-amber-50/30 px-2 rounded transition-colors">
         <div className="flex items-center gap-3">
            <div className="text-gray-300 group-hover:text-amber-500 transition-colors"><Icon size={16}/></div>
            <span className="text-sm font-bold text-gray-600">{tr(label)}</span>
         </div>
-        <span className="text-sm font-medium text-gray-800 text-right capitalize">{val ? tr(val) : "N/A"}</span>
+        <span className="text-sm font-medium text-gray-800 text-right capitalize">
+           {val ? (isCurrency ? val : tr(val)) : "N/A"}
+        </span>
      </div>
   );
 
   return (
     <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-700 font-sans">
        
-       {/* SECCIÓN 0: PRECIO */}
+       {/* SECCIÓN 0: PRECIO Y TRM */}
        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{tr("Valor Venta")}</p>
@@ -41,12 +54,15 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                  {secondaryPrice && <span className="text-sm font-medium text-gray-400">{secondaryPrice}</span>}
               </div>
           </div>
-          {cleanAdmin > 0 && (
-             <div className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl">
-                 <p className="text-[10px] font-bold uppercase text-gray-400">Administración</p>
-                 <p className="font-bold text-gray-700">${formatCurrency(cleanAdmin)}</p>
-             </div>
-          )}
+          <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200">
+              <div className={`p-2 rounded-full ${trm > 0 ? "bg-amber-100 text-amber-600" : "bg-gray-200 text-gray-400"}`}>
+                  {trm > 0 ? <TrendingUp size={18}/> : <RefreshCw size={18} className="animate-spin"/>}
+              </div>
+              <div>
+                  <p className="text-[10px] uppercase font-bold text-gray-400">TRM {lang === "EN" ? "Rate" : "Hoy"}</p>
+                  <p className="font-bold text-gray-700">{trm > 0 ? `$${formatCurrency(Math.round(trm))} COP` : "Cargando..."}</p>
+              </div>
+          </div>
        </div>
 
        {/* SECCIÓN 1: DATOS CLAVE */}
@@ -87,16 +103,17 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
           <div className="lg:col-span-2 space-y-8">
               
               {/* Descripción */}
-              <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-                 <h3 className="font-black text-xl text-gray-800 mb-4 flex items-center gap-2">
+              <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-amber-100 to-transparent rounded-full opacity-50 blur-2xl"></div>
+                 <h3 className="font-black text-xl text-gray-800 mb-4 flex items-center gap-2 relative z-10">
                     <Warehouse size={20} className="text-amber-600"/> {tr("Descripción")}
                  </h3>
-                 <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base text-justify">
+                 <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base text-justify relative z-10">
                     {tr(description)}
                  </p>
                  
                  {Number(specs.locales_count) > 0 && (
-                  <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-center gap-4">
+                  <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-center gap-4 relative z-10">
                       <div className="p-3 bg-amber-100 rounded-full text-amber-700"><ShoppingBag size={20}/></div>
                       <div>
                           <p className="text-sm font-bold text-amber-900 uppercase">Incluye Locales Comerciales</p>
@@ -115,9 +132,8 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                        <div className="text-center p-3 bg-gray-50 rounded-xl">
-                          {/* CAMBIO: Mostrar Nro. de Oficinas */}
-                          <p className="text-xs text-gray-400 font-bold uppercase mb-1"># Espacios</p>
-                          <p className="font-black text-gray-800">{specs.office_area || 0}</p>
+                          <p className="text-xs text-gray-400 font-bold uppercase mb-1">Área Total</p>
+                          <p className="font-black text-gray-800">{specs.office_area || 0} m²</p>
                        </div>
                        <div className="text-center p-3 bg-gray-50 rounded-xl">
                           <p className="text-xs text-gray-400 font-bold uppercase mb-1">Baños</p>
@@ -173,6 +189,13 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                     <SpecRow label="Niveles Totales" val={specs.levels_qty} icon={Layers} />
                     <SpecRow label="Altura Libre" val={specs.height ? `${specs.height} m` : null} icon={ArrowUpFromLine} />
                     <SpecRow label="Frente x Fondo" val={specs.front && specs.depth ? `${specs.front} x ${specs.depth} m` : null} icon={Ruler} />
+                    {/* ADMINISTRACIÓN CORREGIDA Y CLARA */}
+                    <SpecRow 
+                        label="Administración" 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)} COP` : "No aplica"} 
+                        icon={DollarSign} 
+                        isCurrency={true}
+                    />
                  </div>
               </div>
 
@@ -184,23 +207,46 @@ export default function BodegaDetailView({ specs, description, adminFee, priceCo
                     <SpecRow label="Entradas Camión" val={specs.entry_count} icon={Warehouse} />
                     <SpecRow label="Tipo Portón" val={translate(specs.gate_type)} icon={Container} />
                     <SpecRow label="Acceso Tractomulas" val={specs.has_truck_access ? "Sí" : "No"} icon={Truck} />
-                    <SpecRow label="Parqueaderos" val={specs.parking_qty} icon={Car} />
+                    <SpecRow label="Parqueaderos Totales" val={specs.parking_qty} icon={Car} />
                     <SpecRow label="Baños Operativos" val={specs.bathrooms} icon={Bath} />
                     <SpecRow label="Cocina / Casino" val={translate(specs.kitchen_type)} icon={Utensils} />
                  </div>
               </div>
+
+              {/* MAPA CORREGIDO Y SEGURO */}
+              {municipality && (
+                  <div className="bg-amber-600 p-6 rounded-3xl text-white shadow-lg shadow-amber-200">
+                      <MapPin size={24} className="mb-3 opacity-80"/>
+                      <h4 className="font-bold text-lg leading-tight mb-2">{translateDynamic("Ubicación Privilegiada")}</h4>
+                      <p className="text-xs opacity-90 leading-relaxed mb-4">
+                          {translateDynamic("Ubicación aproximada:")} {neighborhood}, {municipality}.
+                      </p>
+                      <div className="rounded-xl overflow-hidden border border-white/20 h-40 bg-black/10 relative">
+                          <iframe 
+                              width="100%" 
+                              height="100%" 
+                              style={{border:0}} 
+                              loading="lazy" 
+                              src={mapUrl} 
+                              title="Mapa Bodega"
+                              className="absolute inset-0"
+                          ></iframe>
+                      </div>
+                  </div>
+              )}
+
           </div>
        </div>
        
        {/* SECCIÓN 3: INFRAESTRUCTURA */}
        {specs.features && specs.features.length > 0 && (
          <div className="bg-gray-900 p-8 rounded-3xl text-gray-300 shadow-xl">
-            <h3 className="font-black text-sm text-amber-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+            <h3 className="font-black text-sm text-amber-500 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-gray-800 pb-2">
                <Factory size={16}/> {tr("Infraestructura Industrial & Dotación")}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                {specs.features.map((feat: string) => (
-                  <div key={feat} className="flex items-center gap-2 text-sm font-bold bg-gray-800/50 p-2 rounded-lg border border-gray-700">
+                  <div key={feat} className="flex items-center gap-2 text-sm font-bold bg-gray-800/50 p-2 rounded-lg border border-gray-700 hover:border-amber-500 transition-colors cursor-default">
                      <CheckCircle2 size={16} className="text-amber-500 shrink-0"/> {tr(feat)}
                   </div>
                ))}

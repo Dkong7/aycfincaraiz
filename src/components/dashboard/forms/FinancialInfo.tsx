@@ -22,12 +22,11 @@ export default function FinancialInfo({ register, setValue, watch, s }: any) {
   const watchedAvaluo = watch("specs.avaluo");
   const watchedAdmin = watch("admin_fee"); 
 
-  // 1. REGISTRO MANUAL DE CAMPOS (Incluyendo admin_fee)
+  // 1. REGISTRO MANUAL DE CAMPOS (admin_fee se omite porque lo controlamos con setValue)
   useEffect(() => {
     register("price_cop");
     register("price_usd");
     register("specs.avaluo");
-    register("admin_fee", { valueAsNumber: true }); // Forzar número
   }, [register]);
 
   // 2. SINCRONIZACIÓN INICIAL (Carga de datos al editar)
@@ -46,11 +45,14 @@ export default function FinancialInfo({ register, setValue, watch, s }: any) {
     }
 
     // Avalúo
-    if (watchedAvaluo) setDisplayAvaluo(formatCurrency(watchedAvaluo));
-    else setDisplayAvaluo("");
+    if (watchedAvaluo) {
+        setDisplayAvaluo(formatCurrency(watchedAvaluo));
+    } else {
+        setDisplayAvaluo("");
+    }
 
-    // Administración (FIX: Asegurar que se muestre si existe)
-    if (watchedAdmin) {
+    // Administración: Garantizar que toma el valor de la memoria
+    if (watchedAdmin !== undefined && watchedAdmin !== null) {
         setDisplayAdmin(formatCurrency(watchedAdmin));
     } else {
         setDisplayAdmin("");
@@ -81,18 +83,17 @@ export default function FinancialInfo({ register, setValue, watch, s }: any) {
   const handleAdminChange = (e: any) => {
       const raw = e.target.value.replace(/\D/g, "");
       setDisplayAdmin(formatCurrency(raw));
-      // FIX: Guardar explícitamente en el formulario y forzar validación
+      // Guardar el número exacto en la variable admin_fee
       setValue("admin_fee", raw ? Number(raw) : 0, { shouldDirty: true, shouldValidate: true });
   };
 
   return (
     <div className="animate-in fade-in space-y-4">
-       {/* HEADER TRM */}
        <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-widest text-green-300/70 border-b border-green-800/50 pb-2">
           <span className="flex items-center gap-2"><DollarSign size={12}/> Información Financiera</span>
           <div className="flex items-center gap-2 bg-green-900/50 px-2 py-1 rounded">
              {trm > 0 ? (
-               <><TrendingUp size={12} className="text-green-400"/><span>TRM: ${formatCurrency(Math.round(trm))}</span></>
+               <><TrendingUp size={12} className="text-green-400"/><span>TRM: ${trm.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>
              ) : (
                <><RefreshCw size={12} className="animate-spin text-green-400"/><span>Cargando...</span></>
              )}
@@ -100,7 +101,6 @@ export default function FinancialInfo({ register, setValue, watch, s }: any) {
        </div>
 
        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
-          {/* Precio COP */}
           <div className="w-full">
              <label className="text-[10px] font-bold uppercase mb-1 block opacity-70 text-green-300">Precio Venta (COP)</label>
              <div className="relative group">
@@ -109,7 +109,6 @@ export default function FinancialInfo({ register, setValue, watch, s }: any) {
              </div>
           </div>
 
-          {/* Precio USD */}
           <div className="w-full">
              <label className="text-[10px] font-bold uppercase mb-1 block opacity-70 text-green-300 flex justify-between"><span>Precio USD</span><span className="text-[8px] bg-green-800 px-1 rounded text-white">AUTO</span></label>
              <div className="relative group">
@@ -118,7 +117,6 @@ export default function FinancialInfo({ register, setValue, watch, s }: any) {
              </div>
           </div>
 
-          {/* Avalúo */}
           <div className="w-full">
              <label className="text-[10px] font-bold uppercase mb-1 block opacity-70 text-green-300">Avalúo Catastral</label>
              <div className="relative group">
@@ -127,7 +125,6 @@ export default function FinancialInfo({ register, setValue, watch, s }: any) {
              </div>
           </div>
 
-          {/* Administración (PROBLEMA SOLUCIONADO) */}
           <div className="w-full">
              <label className="text-[10px] font-bold uppercase mb-1 block opacity-70 text-green-300">Valor Administración</label>
              <div className="relative group">

@@ -33,23 +33,22 @@ export default function ApartmentDetailView({
   // --- FIX: Unificar todas las amenidades ---
   const allFeatures = [
       ...(Array.isArray(specs.features) ? specs.features : []),
-      ...(Array.isArray(specs.social) ? specs.social : []), // Importante: 'social' es Club House
-      ...(Array.isArray(specs.club_features) ? specs.club_features : []) // Legacy support
+      ...(Array.isArray(specs.social) ? specs.social : []), 
+      ...(Array.isArray(specs.club_features) ? specs.club_features : []) 
   ];
-  // Filtrar duplicados y vacíos
   const uniqueFeatures = [...new Set(allFeatures)].filter(Boolean);
 
-  // --- MAPA ÚNICO ---
+  // --- FIX: MAPA ÚNICO SEGURO ---
   const locCity = municipality || "Bogotá";
   const locHood = neighborhood || "";
   const query = `${locHood}, ${locCity}, Colombia`;
   const encodedQuery = encodeURIComponent(query);
   
-  // Usamos HTTPS para evitar mixed content
-  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed`;
+  // URL de Google Maps corregida y segura (HTTPS y formato embed nativo)
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed&iwloc=near`;
 
   // --- ADMIN FEE ROBUSTO ---
-  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const rawAdmin = adminFee || specs?.admin_fee || 0;
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
   const hasAdmin = cleanAdmin > 0;
 
@@ -149,10 +148,10 @@ export default function ApartmentDetailView({
                     <SpecRow label="Habitaciones" val={specs.habs || specs.rooms} icon={Bed} />
                     <SpecRow label="Baños" val={specs.baths || specs.bathrooms} icon={Bath} />
                     <SpecRow label="Estrato" val={stratum} icon={Layers} />
-                    {/* ADMINISTRACIÓN CORREGIDA */}
+                    {/* ADMINISTRACIÓN CORREGIDA Y CLARA */}
                     <SpecRow 
                         label="Administración" 
-                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)} COP` : "No aplica"} 
                         icon={DollarSign} 
                         isCurrency={true} 
                     />
@@ -173,7 +172,6 @@ export default function ApartmentDetailView({
           </div>
        </div>
 
-       {/* COMODIDADES (AMENIDADES UNIFICADAS) */}
        {uniqueFeatures.length > 0 && (
           <section>
               <h3 className="font-black text-sm text-blue-600 uppercase tracking-widest mb-5 flex items-center gap-2 border-b border-blue-100 pb-2">
@@ -193,7 +191,6 @@ export default function ApartmentDetailView({
           </section>
        )}
 
-       {/* MAPA */}
        {(municipality) && (
            <section className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                <div className="flex items-center gap-2 mb-4">

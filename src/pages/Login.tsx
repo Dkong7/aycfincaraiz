@@ -75,7 +75,10 @@ export default function Login() {
         await pb.collection("users").authWithPassword(userToAuth, secretWord);
         localStorage.setItem("ayc_theme", config.theme);
         setAttempts(0);
-        navigate("/dashboard/inventario");
+        
+        // --- AQUÍ ESTÁ EL CAMBIO: Redirección al Mapa ---
+        navigate("/dashboard/mapa");
+        
     } catch (error) {
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);
@@ -95,12 +98,12 @@ export default function Login() {
 
        {/* MODAL DE SEGURIDAD */}
        <SecurityModal 
-          msg={modalMsg} 
-          type={modalType} 
-          theme={config.theme} 
-          mode={config.mode} 
-          onClose={() => setModalMsg("")} 
-          attempts={attempts}
+         msg={modalMsg} 
+         type={modalType} 
+         theme={config.theme} 
+         mode={config.mode} 
+         onClose={() => setModalMsg("")} 
+         attempts={attempts}
        />
 
        {/* TARJETA DE LOGIN */}

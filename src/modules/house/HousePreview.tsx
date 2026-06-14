@@ -11,6 +11,10 @@ import {
 export default function HousePreview({ data }: any) {
   const s = data.specs || {};
 
+  // --- LÓGICA DE ADMIN FEE ROBUSTA ---
+  const rawAdmin = data.admin_fee || s.admin_fee || 0;
+  const adminVal = Number(String(rawAdmin).replace(/\D/g, ""));
+
   const Section = ({ title, icon: Icon, children }: any) => (
     <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center gap-2 mb-2 border-b border-yellow-100 pb-1">
@@ -36,21 +40,21 @@ export default function HousePreview({ data }: any) {
       
       {/* 1. BÁSICOS & PRECIO */}
       <Section title="Resumen General" icon={Home}>
-         <Row label="Precio Venta" val={data.price_cop ? formatCurrency(data.price_cop) : "$0"} icon={DollarSign} valClass="text-green-600 font-black text-sm" />
+         <Row label="Precio Venta" val={data.price_cop ? `$${formatCurrency(data.price_cop)}` : "$0"} icon={DollarSign} valClass="text-green-600 font-black text-sm" />
          {data.price_usd && Number(data.price_usd) > 0 && (
-            <Row label="Precio USD" val={`$${data.price_usd}`} icon={DollarSign} valClass="text-green-600 font-bold" />
+            <Row label="Precio USD" val={`$${formatCurrency(data.price_usd)}`} icon={DollarSign} valClass="text-green-600 font-bold" />
          )}
          
-         {/* CORRECCIÓN: Leemos data.stratum (Primer nivel) */}
          <Row label="Estrato" val={data.stratum} icon={Hash} />
          
-         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
+         {/* CORRECCIÓN ADMIN */}
+         <Row label="Administración" val={adminVal > 0 ? `$${formatCurrency(adminVal)}` : "No aplica"} icon={Building} />
          <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
       </Section>
 
       <Section title="Dimensiones" icon={Maximize}>
+         {/* Valores leídos directamente para respetar decimales */}
          <Row label="Área Lote" val={`${s.area_lot || 0} m²`} icon={Maximize} />
-         {/* CORRECCIÓN: area_built */}
          <Row label="Área Construida" val={`${s.area_built || 0} m²`} icon={Ruler} />
          {s.area_private && <Row label="Área Privada" val={`${s.area_private || 0} m²`} icon={Ruler} />}
          <Row label="Frente x Fondo" val={`${s.front || 0} x ${s.depth || 0} m`} icon={Grid} />
@@ -59,7 +63,7 @@ export default function HousePreview({ data }: any) {
       <Section title="Distribución" icon={LayoutDashboard}>
          <Row label="Habitaciones" val={s.habs} icon={Bed} />
          <Row label="Baños" val={s.baths} icon={Bath} />
-         <Row label="Garajes" val={`${s.garages} (${translate(s.garage_type)})`} icon={Car} />
+         <Row label="Garajes" val={`${s.garages || 0} (${translate(s.garage_type) || "-"})`} icon={Car} />
          <Row label="Niveles" val={s.levels_qty || s.levels_list?.length || 1} icon={Layers} />
       </Section>
 
@@ -91,7 +95,7 @@ export default function HousePreview({ data }: any) {
             </div>
             <div className="grid grid-cols-2 gap-4 text-xs">
                <Row label="Tipo" val={s.rent_type} icon={Banknote} />
-               <Row label="Canon" val={formatCurrency(s.rent_value)} icon={DollarSign} valClass="text-blue-700 font-bold" />
+               <Row label="Canon" val={s.rent_value ? `$${formatCurrency(s.rent_value)}` : "$0"} icon={DollarSign} valClass="text-blue-700 font-bold" />
                <div className="col-span-2 pt-2 border-t border-blue-200">
                   <span className="font-bold text-blue-400 block mb-1 text-[10px] uppercase">Descripción Renta:</span>
                   <p className="italic text-blue-800 text-xs">{s.rent_desc || "Sin descripción"}</p>

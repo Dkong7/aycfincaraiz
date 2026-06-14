@@ -11,7 +11,7 @@ import { useApp } from "../../context/AppContext";
 import { pb } from "../../api";
 
 // URL SEGURA
-const PB_URL = "https://www.aycfincaraiz.com";
+const PB_URL = window.location.origin;
 
 // ==========================================
 // 1. PROPIEDADES DESTACADAS

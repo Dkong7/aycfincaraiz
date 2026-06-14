@@ -6,7 +6,7 @@ import {
   User, ChefHat, Layers, Utensils, Shirt, DoorOpen, Wifi, Box
 } from "lucide-react";
 
-// --- LISTAS MAESTRAS (Sincronizadas con las nuevas claves de traducción) ---
+// --- LISTAS MAESTRAS ---
 const EXTRAS_APTO = [
    { label: "Ascensor Privado", icon: ArrowUpFromLine },
    { label: "Ascensor Servicio", icon: ArrowUpFromLine },
@@ -44,11 +44,16 @@ const CLUB_HOUSE = [
 ];
 
 // --- HELPERS UI ---
-const InputIcon = ({ icon: Icon, label, register, name, s, type="text" }: any) => (
+const InputIcon = ({ icon: Icon, label, register, name, s, type="text", step }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icon size={14}/></div>
-    <input {...register(name)} type={type} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
+    <input 
+        {...register(name)} 
+        type={type} 
+        step={step} // Clave para permitir decimales en type="number"
+        className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} 
+    />
   </div>
 );
 
@@ -71,7 +76,8 @@ export default function ApartmentForm({ register, watch, s }: any) {
         
         {/* BLOQUE 1: DATOS BÁSICOS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-           <InputIcon register={register} name="specs.area_built" label="Área m²" icon={Maximize} s={s} type="number" />
+           {/* FIX: Se añade step="any" y type="number" para permitir decimales (ej. 120.5) */}
+           <InputIcon register={register} name="specs.area_built" label="Área m²" icon={Maximize} s={s} type="number" step="any" />
            <InputIcon register={register} name="specs.floor_level" label="Piso N°" icon={ArrowUpFromLine} s={s} type="number" />
            <InputIcon register={register} name="specs.total_floors" label="Pisos Ed." icon={Building} s={s} type="number" />
            <SelectIcon register={register} name="specs.antiquity" label="Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 5 años", "5 a 9 años", "10 a 20 años", "Más de 20 años"]} />
@@ -80,14 +86,13 @@ export default function ApartmentForm({ register, watch, s }: any) {
         {/* BLOQUE 2: DISTRIBUCIÓN */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
            <InputIcon register={register} name="specs.habs" label="Habs" icon={Bed} s={s} type="number" />
-           <InputIcon register={register} name="specs.baths" label="Baños" icon={Bath} s={s} type="number" />
+           <InputIcon register={register} name="specs.baths" label="Baños" icon={Bath} s={s} type="number" step="any" />
            <InputIcon register={register} name="specs.garages" label="# Garajes" icon={Car} s={s} type="number" />
-           {/* Opción "Comunal" disponible gracias a la sincronización con el config */}
            <SelectIcon register={register} name="specs.garage_type" label="Tipo Garaje" icon={Car} s={s} options={["Cubierto", "Descubierto", "Doble Lineal", "Doble Paralelo", "Sencillo", "Servidumbre", "Comunal"]} />
            <SelectIcon register={register} name="specs.gas_type" label="Gas" icon={Flame} s={s} options={["Natural", "Propano", "Eléctrico", "Ninguno"]} />
         </div>
 
-        {/* BLOQUE 3: ACABADOS (Sincronizado con claves de traducción) */}
+        {/* BLOQUE 3: ACABADOS */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50/50 p-3 rounded-xl border border-gray-100">
            <SelectIcon register={register} name="specs.kitchen" label="Cocina" icon={ChefHat} s={s} options={["Integral", "Americana (Abierta)", "Tipo Isla", "Cerrada (Indep.)", "Para Remodelar"]} />
            <SelectIcon register={register} name="specs.floors" label="Pisos" icon={Layers} s={s} options={["Madera Maciza", "Madera Laminada", "Madera Granadillo", "Laminado", "Porcelanato", "Mármol", "Cerámica", "Alfombra", "PVC / Vinilo"]} />

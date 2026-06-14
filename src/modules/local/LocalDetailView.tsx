@@ -1,7 +1,7 @@
 import React from "react";
 import { 
   Store, ShoppingBag, Flame, Layers, Maximize, 
-  MapPin, Utensils, Zap, Eye,
+  MapPin, Utensils, Zap, Eye, ShieldCheck,
   DollarSign, TrendingUp, RefreshCw, Star, Calendar, ArrowUpFromLine
 } from "lucide-react";
 import { useApp } from "../../context/AppContext"; 
@@ -24,15 +24,15 @@ export default function LocalDetailView({ specs, description, adminFee, priceCop
       ? `$${formatCurrency(priceCop)} COP`
       : (priceUsd ? `USD $${formatCurrency(priceUsd)}` : null);
 
-  // --- MAPA ÚNICO (ESTÁNDAR) ---
+  // --- MAPA ÚNICO (CORREGIDO Y SEGURO) ---
   const locCity = municipality || "Bogotá";
   const locHood = neighborhood || "";
   const query = `${locHood}, ${locCity}, Colombia`;
   const encodedQuery = encodeURIComponent(query);
-  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed`;
+  const mapUrl = `https://maps.google.com/maps?q=${encodedQuery}&t=m&z=15&output=embed&iwloc=near`;
 
   // --- ADMIN FEE ROBUSTO ---
-  const rawAdmin = adminFee || specs?.admin_fee || "0";
+  const rawAdmin = adminFee || specs?.admin_fee || 0;
   const cleanAdmin = Number(String(rawAdmin).replace(/\D/g, ""));
   const hasAdmin = cleanAdmin > 0;
 
@@ -106,6 +106,19 @@ export default function LocalDetailView({ specs, description, adminFee, priceCop
                  <p className="whitespace-pre-line text-gray-600 leading-7 text-sm md:text-base relative z-10 text-justify">
                     {translateDynamic(description)}
                  </p>
+                 
+                 {specs.has_rent && (
+                   <div className="mt-8 p-5 bg-green-50/50 rounded-2xl border border-green-100 flex gap-4 items-start relative z-10">
+                      <div className="p-3 bg-green-100 rounded-full text-green-600"><ShieldCheck size={20}/></div>
+                      <div>
+                         <h4 className="font-bold text-green-800 text-sm uppercase mb-1">{translateDynamic("Local con Renta")}</h4>
+                         <p className="text-green-900 font-black text-lg">
+                            {formatCurrency(specs.rent_value)} <span className="text-xs font-normal opacity-70">/ {tr(specs.rent_type)}</span>
+                         </p>
+                         {specs.rent_desc && <p className="text-xs text-green-700 italic mt-1">{translateDynamic(specs.rent_desc)}</p>}
+                      </div>
+                   </div>
+                 )}
               </div>
           </div>
 
@@ -117,16 +130,13 @@ export default function LocalDetailView({ specs, description, adminFee, priceCop
                  <div className="flex flex-col">
                     <SpecRow label="Estrato" val={stratum} icon={Layers} />
                     <SpecRow label="Altura Libre" val={`${specs.height || 0} m`} icon={ArrowUpFromLine} />
-                    <SpecRow label="Pisos" val={specs.floors} icon={Layers} />
+                    <SpecRow label="Pisos Totales" val={specs.floors} icon={Layers} />
                     <SpecRow label="Gas" val={specs.gas_type} icon={Flame} />
-                    
-                    {/* ANTIGÜEDAD AGREGADA */}
                     <SpecRow label="Antigüedad" val={specs.antiquity} icon={Calendar} />
-                    
                     {/* ADMIN FEE ROBUSTO */}
                     <SpecRow 
                         label="Administración" 
-                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)}` : "No aplica"} 
+                        val={hasAdmin ? `$${formatCurrency(cleanAdmin)} COP` : "No aplica"} 
                         icon={DollarSign} 
                         isCurrency={true}
                     />
@@ -154,15 +164,17 @@ export default function LocalDetailView({ specs, description, adminFee, priceCop
          </section>
        )}
 
-       {/* MAPA ÚNICO (Solo si hay municipio) */}
+       {/* MAPA CORREGIDO Y SEGURO */}
        {(municipality) && (
-           <section className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+           <section className="bg-pink-600 p-6 rounded-[2rem] text-white shadow-lg shadow-pink-200">
                <div className="flex items-center gap-2 mb-4">
-                   <MapPin className="text-pink-500" size={20}/>
-                   <h3 className="font-black text-sm text-gray-800 uppercase tracking-widest">{translateDynamic("Ubicación Comercial")}</h3>
+                   <MapPin className="opacity-80" size={24}/>
+                   <h3 className="font-black text-lg leading-tight">{translateDynamic("Ubicación Comercial")}</h3>
                </div>
-               
-               <div className="w-full h-80 rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-gray-200">
+               <p className="text-xs opacity-90 leading-relaxed mb-4">
+                   {translateDynamic("Ubicación aproximada:")} {neighborhood}, {municipality}.
+               </p>
+               <div className="w-full h-80 rounded-2xl overflow-hidden bg-black/10 relative border border-white/20">
                    <iframe 
                        width="100%" 
                        height="100%" 
@@ -170,6 +182,7 @@ export default function LocalDetailView({ specs, description, adminFee, priceCop
                        loading="lazy" 
                        src={mapUrl} 
                        title="Ubicación Local"
+                       className="absolute inset-0"
                    ></iframe>
                </div>
            </section>

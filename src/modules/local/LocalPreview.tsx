@@ -12,6 +12,10 @@ export default function LocalPreview({ data }: any) {
   // VALIDACIÓN DEFENSIVA: Aseguramos que sea un array antes de usarlo
   const featuresList = Array.isArray(s.features) ? s.features : [];
 
+  // --- LÓGICA DE ADMIN FEE ROBUSTA ---
+  const rawAdmin = data.admin_fee || s.admin_fee || 0;
+  const adminVal = Number(String(rawAdmin).replace(/\D/g, ""));
+
   const Section = ({ title, icon: Icon, children }: any) => (
     <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center gap-2 mb-2 border-b border-pink-100 pb-1">
@@ -39,19 +43,32 @@ export default function LocalPreview({ data }: any) {
       
       {/* 1. RESUMEN FINANCIERO & LEGAL */}
       <Section title="Resumen Ejecutivo" icon={Store}>
-         <Row label="Precio Venta" val={data.price_cop ? formatCurrency(data.price_cop) : "$0"} icon={DollarSign} valClass="text-green-600 font-black text-sm" />
+         <Row 
+            label="Precio Venta" 
+            val={data.price_cop ? `$${formatCurrency(data.price_cop)}` : "$0"} 
+            icon={DollarSign} 
+            valClass="text-green-600 font-black text-sm" 
+         />
          {data.price_usd && Number(data.price_usd) > 0 && (
-            <Row label="Precio USD" val={`$${data.price_usd}`} icon={DollarSign} valClass="text-green-600 font-bold" />
+            <Row label="Precio USD" val={`$${formatCurrency(data.price_usd)}`} icon={DollarSign} valClass="text-green-600 font-bold" />
          )}
          
          <Row label="Estrato" val={data.stratum} icon={Hash} />
-         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
+         
+         {/* CORRECCIÓN ADMIN */}
+         <Row 
+            label="Administración" 
+            val={adminVal > 0 ? `$${formatCurrency(adminVal)}` : "No aplica"} 
+            icon={Building} 
+         />
+         
          <Row label="Antigüedad" val={s.antiquity} icon={Calendar} />
          <Row label="Ubicación" val={translate(s.location_type)} icon={MapPin} />
       </Section>
 
       {/* 2. DETALLES TÉCNICOS */}
       <Section title="Dimensiones & Técnica" icon={Maximize}>
+         {/* FIX: Se mantiene el valor decimal tal cual se escribió */}
          <Row label="Área Total" val={`${s.area_total || 0} m²`} icon={Maximize} valClass="text-pink-700 font-bold" />
          <Row label="Frente / Vitrina" val={`${s.front || 0} m`} icon={Ruler} />
          <Row label="Altura Libre" val={`${s.height || 0} m`} icon={Ruler} />

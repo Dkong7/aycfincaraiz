@@ -1,50 +1,46 @@
 import React from "react";
-import { Calendar, MessageCircle } from "lucide-react";
+import { Calendar, MessageCircle, Hash } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 
 export default function ContactSidebar({ prop }: any) {
   const { t } = useApp();
   
-  // Datos del Agente y Propiedad
-  const agentName = prop?.owner_name || "AyC Inmobiliaria";
   const propertyCode = prop?.ayc_id || prop?.id || "N/A";
   const propertyTitle = prop?.title || "Propiedad";
   
-  // Teléfono Central (Oculto en la UI, solo para el link)
-  const mainPhone = "573134663832";
+  // Teléfono actualizado
+  const mainPhone = "573224822840";
 
-  // Mensaje automático
-  const whatsappMsg = `Hola, estoy interesado en: ${propertyTitle} (Cód: ${propertyCode}).`;
+  // Etiquetas [WEB] para segmentación en el Bot
+  const whatsappMsg = `[WEB] Hola, estoy interesado en: ${propertyTitle} (Cód: ${propertyCode}). Vengo de la página web.`;
   const whatsappLink = `https://wa.me/${mainPhone}?text=${encodeURIComponent(whatsappMsg)}`;
 
-  // Link para Agendar (Mismo número, diferente intención)
-  const scheduleLink = `https://wa.me/${mainPhone}?text=${encodeURIComponent("Hola, quisiera agendar una visita para ver: " + propertyTitle)}`;
+  const scheduleLink = `https://wa.me/${mainPhone}?text=${encodeURIComponent("[WEB] Hola, quisiera agendar una visita para ver: " + propertyTitle + " (Cód: " + propertyCode + ")")}`;
 
   return (
     <div className="sticky top-24 font-sans animate-in fade-in slide-in-from-right-4 duration-700">
         
-        {/* TARJETA DE CONTACTO EJECUTIVA */}
         <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/40 border border-slate-100 relative overflow-hidden group hover:shadow-2xl transition-shadow duration-300">
             
-            {/* Header Sutil */}
-            <div className="text-center mb-8 border-b border-slate-100 pb-6">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">
-                    {t('agent_title')}
+            {/* CABECERA CORPORATIVA (Cero datos privados) */}
+            <div className="text-center mb-6 border-b border-slate-100 pb-6">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">
+                    Contacta a un agente de
                 </p>
-                <h3 className="text-2xl font-black text-slate-800 tracking-tight">
-                    {agentName}
+                <h3 className="text-2xl font-black text-[#0A192F] tracking-tight">
+                    AyC FINCA RAÍZ
                 </h3>
-                {prop?.ayc_id && (
-                    <div className="mt-3 inline-flex items-center justify-center px-3 py-1 bg-slate-50 text-slate-500 text-[10px] font-bold rounded-full border border-slate-200">
-                        {t('code')}: {prop.ayc_id}
-                    </div>
-                )}
             </div>
 
-            {/* Acciones */}
+            {/* CÓDIGO AYC CON MÁXIMA JERARQUÍA */}
+            <div className="mb-6 bg-slate-50 border-2 border-slate-100 rounded-xl p-4 text-center shadow-inner relative overflow-hidden">
+                <Hash size={64} className="absolute -right-4 -top-4 text-slate-200/50 rotate-12" />
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 relative z-10">Código del Inmueble</p>
+                <p className="text-3xl font-black text-green-600 tracking-tighter relative z-10">{propertyCode}</p>
+            </div>
+
+            {/* BOTONES DE ACCIÓN */}
             <div className="space-y-4">
-                
-                {/* 1. WHATSAPP (Principal) */}
                 <a 
                     href={whatsappLink}
                     target="_blank" 
@@ -56,7 +52,6 @@ export default function ContactSidebar({ prop }: any) {
                     <span className="tracking-wide">{t('btn_whatsapp')}</span>
                 </a>
                 
-                {/* 2. AGENDAR VISITA (Secundario) */}
                 <a 
                     href={scheduleLink}
                     target="_blank"
@@ -66,10 +61,9 @@ export default function ContactSidebar({ prop }: any) {
                     <Calendar size={18} className="text-slate-400 group-hover:text-white transition-colors"/> 
                     <span className="tracking-wide">{t('appraisal_final_btn')}</span>
                 </a>
-
             </div>
 
-            {/* Decoración Inferior */}
+            {/* FOOTER SUTIL */}
             <div className="mt-8 pt-6 border-t border-slate-50 text-center">
                 <p className="text-[10px] text-slate-400 font-medium">
                     Respuesta inmediata en horario de oficina.

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Map, ScrollText, Zap, Maximize, Ruler, Briefcase, MapPin, Layers } from 'lucide-react';
 
 // Lista de Servicios (Checkboxes para specs.features)
@@ -15,12 +15,18 @@ const LOTE_SERVICES = [
    { label: "Predio Desenglobado" }
 ];
 
-// Helpers UI
-const InputIcon = ({ icon: Icon, label, register, name, s, type="text", placeholder }: any) => (
+// --- AÑADIDO: step="any" para permitir decimales ---
+const InputIcon = ({ icon: Icon, label, register, name, s, type="text", placeholder, step }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icon size={14}/></div>
-    <input {...register(name)} type={type} placeholder={placeholder} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
+    <input 
+        {...register(name)} 
+        type={type} 
+        placeholder={placeholder} 
+        step={step} 
+        className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} 
+    />
   </div>
 );
 
@@ -35,8 +41,24 @@ const SelectIcon = ({ icon: Icon, label, register, name, options, s }: any) => (
   </div>
 );
 
-export default function LoteForm({ register, s }: any) {
+export default function LoteForm({ register, s, watch, setValue }: any) {
   const labelColor = "text-gray-600"; // Color neutro para Lotes
+
+  // Observamos el frente y el fondo
+  const watchedFront = watch("specs.front");
+  const watchedDepth = watch("specs.depth");
+
+  // --- LÓGICA DE AUTO-CÁLCULO (FRENTE x FONDO = ÁREA LOTE) ---
+  useEffect(() => {
+     const front = parseFloat(watchedFront) || 0;
+     const depth = parseFloat(watchedDepth) || 0;
+
+     // Si ambos tienen valor mayor a 0, calculamos el área
+     if (front > 0 && depth > 0) {
+        const calculatedArea = Number((front * depth).toFixed(2));
+        setValue("specs.area", calculatedArea, { shouldValidate: true, shouldDirty: true });
+     }
+  }, [watchedFront, watchedDepth, setValue]);
 
   return (
     <div className="animate-in fade-in space-y-6">
@@ -47,11 +69,20 @@ export default function LoteForm({ register, s }: any) {
            <Map className="text-gray-600" size={18}/>
            <h3 className="font-black text-gray-700 uppercase text-xs tracking-widest">Dimensiones & Terreno</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-           <InputIcon register={register} name="specs.area" label="Área Total (m²)" icon={Maximize} s={s} type="number" placeholder="Ej: 500"/>
-           <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number"/>
-           <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} type="number"/>
+        
+        {/* Contenedor relativo para el tooltip de autocalculado */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative">
+           <InputIcon register={register} name="specs.area" label="Área Total (m²)" icon={Maximize} s={s} type="number" step="any" placeholder="Ej: 500"/>
+           <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" step="any"/>
+           <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} type="number" step="any"/>
            <SelectIcon register={register} name="specs.topography" label="Topografía" icon={Layers} s={s} options={["Plano", "Inclinado", "Mixto", "Ondulado"]} />
+           
+           {/* Pequeño tooltip visual si el usuario diligenció frente y fondo */}
+           {parseFloat(watchedFront) > 0 && parseFloat(watchedDepth) > 0 && (
+              <div className="absolute -top-6 right-0 bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-[10px] font-bold border border-gray-300 shadow-sm animate-pulse">
+                  Área Autocalculada (Frente x Fondo)
+              </div>
+           )}
         </div>
       </div>
 

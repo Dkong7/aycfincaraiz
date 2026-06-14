@@ -24,12 +24,17 @@ const CORPORATE_AMENITIES = [
   { id: "terrace_lounge", label: "Terraza / Lounge" }
 ];
 
-// Helpers UI
-const InputIcon = ({ icon: Icon, label, register, name, s, type="text" }: any) => (
+// --- AÑADIDO: step="any" para permitir decimales en type="number" ---
+const InputIcon = ({ icon: Icon, label, register, name, s, type="text", step }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icon size={14}/></div>
-    <input {...register(name)} type={type} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
+    <input 
+        {...register(name)} 
+        type={type} 
+        step={step} 
+        className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} 
+    />
   </div>
 );
 
@@ -57,18 +62,20 @@ export default function OficinaForm({ register, s }: any) {
            <h3 className="font-black text-emerald-800 uppercase text-xs tracking-widest">Espacio & Dotación</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-           <InputIcon register={register} name="specs.area" label="Área Privada (m²)" icon={Maximize} s={s} type="number"/>
+           {/* Permite decimales */}
+           <InputIcon register={register} name="specs.area" label="Área Privada (m²)" icon={Maximize} s={s} type="number" step="any"/>
            <InputIcon register={register} name="specs.floor_level" label="Piso / Nivel" icon={ArrowUpFromLine} s={s} type="number"/>
            <InputIcon register={register} name="specs.garages" label="Garajes Privados" icon={Car} s={s} type="number"/>
            <SelectIcon register={register} name="specs.condition" label="Estado Entrega" icon={Briefcase} s={s} options={["Obra Gris", "Adecuada", "Amoblada", "Remodelada"]} />
         </div>
         
-        {/* NUEVO: DETALLE DE BAÑOS Y ANTIGÜEDAD */}
+        {/* DETALLE DE BAÑOS Y ANTIGÜEDAD */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
             <SelectIcon register={register} name="specs.bathrooms_type" label="Tipo de Baños" icon={Bath} s={s} options={["Privados", "Batería Comunal", "Mixto"]} />
-            <InputIcon register={register} name="specs.bathrooms" label="# Baños Internos" icon={Bath} s={s} type="number"/>
+            {/* Permite decimales por si es 1.5, etc. */}
+            <InputIcon register={register} name="specs.bathrooms" label="# Baños Internos" icon={Bath} s={s} type="number" step="any"/>
             
-            {/* NUEVO CAMPO: ANTIGÜEDAD */}
+            {/* CAMPO: ANTIGÜEDAD */}
             <div className="col-span-2 md:col-span-2">
                 <SelectIcon 
                   register={register} 

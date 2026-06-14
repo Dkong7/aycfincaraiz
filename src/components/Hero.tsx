@@ -1,6 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Bed, Bath, Car, Ruler, MapPin, Play } from "lucide-react";
+import { Bed, Bath, Car, Ruler, MapPin, Play, Youtube } from "lucide-react";
 import { useApp } from "../context/AppContext"; 
 
 // Interfaces
@@ -19,6 +19,7 @@ interface PropertyDB {
   images: string[];
   video_url?: string;
   specs?: any;
+  updated?: string;
 }
 
 interface HeroProps {
@@ -31,13 +32,13 @@ interface MediaItem {
   type: 'video' | 'image';
   src: string;
   thumb?: string;
+  embedUrl?: string;
 }
 
 const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
   const { t } = useApp(); 
 
-  // CAMBIO CRÍTICO: URL Segura
-  const PB_URL = "https://www.aycfincaraiz.com";  
+  const PB_URL = window.location.origin;  
   
   const [propIndex, setPropIndex] = useState(0); 
   const [mediaIndex, setMediaIndex] = useState(0); 
@@ -49,7 +50,6 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
     price_cop: 0, images: [], property_type: "", listing_type: "", video_url: ""
   };
 
-  // Resetear índice de media al cambiar de propiedad
   useEffect(() => { setMediaIndex(0); }, [propIndex]);
 
   const nextProperty = () => setPropIndex((prev) => (prev === list.length - 1 ? 0 : prev + 1));
@@ -65,35 +65,49 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
   let specs: any = {};
   try { specs = typeof activeProp.specs === "string" ? JSON.parse(activeProp.specs) : activeProp.specs || {}; } catch(e) { specs = {}; }
 
-  // --- DATOS VISUALES ---
   const title = activeProp.title || "";
   const categoryType = t(activeProp.property_type) || activeProp.property_type; 
   const categoryListing = activeProp.listing_type || "Venta"; 
   const price = activeProp.price_cop;
-  
-  const rawLocation = activeProp.neighborhood || activeProp.municipality || "Ubicación";
-  const location = rawLocation; 
+  const location = activeProp.neighborhood || activeProp.municipality || "Ubicación"; 
 
   const usdPrice = activeProp.price_usd || 0;
   const displayPrice = currency === "USD" ? (usdPrice > 0 ? usdPrice : price / exchangeRate) : price;
 
-  const getYoutubeId = (url: string) => {
+  // --- PARSEADOR INTELIGENTE DE YOUTUBE ---
+  const getYoutubeData = (url: string) => {
     if (!url) return null;
-    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
-    return (match && match[2].length === 11) ? match[2] : null;
+    const listMatch = url.match(/[?&]list=([^#\&\?]+)/);
+    const videoMatch = url.match(/(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#\&\?]*)/);
+
+    if (listMatch && listMatch[1]) {
+        return { type: 'playlist', id: listMatch[1], embedUrl: `https://www.youtube.com/embed/videoseries?list=${listMatch[1]}` };
+    } else if (videoMatch && videoMatch[1] && videoMatch[1].length === 11) {
+        return { type: 'video', id: videoMatch[1], embedUrl: `https://www.youtube.com/embed/${videoMatch[1]}` };
+    }
+    return null;
   };
-  const videoId = getYoutubeId(activeProp.video_url || "");
+  const ytData = getYoutubeData(activeProp.video_url || "");
 
   // --- LISTA UNIFICADA MEDIA ---
   const mediaList: MediaItem[] = [
-      ...(videoId ? [{ type: 'video' as const, src: videoId, thumb: `https://img.youtube.com/vi/${videoId}/default.jpg` }] : []),
+      ...(ytData && ytData.type === 'video' ? [{ type: 'video' as const, src: ytData.id, embedUrl: ytData.embedUrl, thumb: `https://img.youtube.com/vi/${ytData.id}/maxresdefault.jpg` }] : []),
+      ...(ytData && ytData.type === 'playlist' ? [{ type: 'video' as const, src: 'playlist', embedUrl: ytData.embedUrl, thumb: activeProp.images?.length > 0 ? `${PB_URL}/api/files/${activeProp.collectionId}/${activeProp.id}/${activeProp.images[0]}` : "https://via.placeholder.com/600x400?text=PLAYLIST" }] : []),
       ...(activeProp.images?.map(img => ({ 
           type: 'image' as const, 
-          src: `${PB_URL}/api/files/${activeProp.collectionId}/${activeProp.id}/${img}` 
+          src: `${PB_URL}/api/files/${activeProp.collectionId}/${activeProp.id}/${img}?t=${activeProp.updated || ''}` 
       })) || [])
   ];
 
   const currentMedia = mediaList[mediaIndex];
+
+  // URL generadora para el fondo (AutoPlay + Silencio + Bucle)
+  const getBgIframeSrc = (media: MediaItem) => {
+      if (media.src === 'playlist') {
+          return `${media.embedUrl}&autoplay=1&mute=1&controls=0&loop=1&showinfo=0&rel=0`;
+      }
+      return `${media.embedUrl}?autoplay=1&mute=1&controls=0&loop=1&playlist=${media.src}&showinfo=0&rel=0&iv_load_policy=3&disablekb=1`;
+  };
 
   const getColors = (type: string) => {
     const t = type?.toLowerCase() || "";
@@ -109,25 +123,31 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
   return (
     <div className="relative w-full h-[95vh] bg-gray-900 overflow-hidden font-sans group select-none">
       
+      {/* ESTILO PARA MATAR LA BARRA GRIS DEL SCROLL */}
+      <style>{`
+        .hide-scrollbars::-webkit-scrollbar { display: none; }
+        .hide-scrollbars { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
       {/* 1. FONDO */}
       <div key={`${activeProp.id}-${mediaIndex}`} className="absolute inset-0 z-0 animate-fadeIn">
         {currentMedia?.type === 'video' ? (
-            <div className="w-full h-full pointer-events-none scale-150 relative">
+            <div className="w-full h-full pointer-events-none scale-[1.35] md:scale-150 relative">
                 <iframe 
                     className="w-full h-full opacity-80" 
-                    src={`https://www.youtube.com/embed/${currentMedia.src}?autoplay=1&mute=1&controls=0&loop=1&playlist=${currentMedia.src}&showinfo=0&rel=0&iv_load_policy=3&disablekb=1`}
+                    src={getBgIframeSrc(currentMedia)}
                     title="Hero Video"
                     allow="autoplay; encrypted-media"
                     style={{ pointerEvents: 'none' }}
                 ></iframe>
-                <div className="absolute inset-0 z-10"></div>
+                <div className="absolute inset-0 z-10 bg-black/10"></div>
             </div>
         ) : currentMedia?.type === 'image' ? (
            <img src={currentMedia.src} alt={title} className="w-full h-full object-cover opacity-80 transition-transform duration-[7000ms] ease-linear hover:scale-105"/> 
         ) : (
            <div className="w-full h-full bg-gray-800 flex items-center justify-center"><span className="text-gray-500 font-mono tracking-widest">SIN IMAGEN</span></div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-black/40 z-20"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-black/40 z-20"></div>
       </div>
 
       {/* 2. FLECHAS */}
@@ -171,39 +191,45 @@ const Hero: React.FC<HeroProps> = ({ properties, currency, exchangeRate }) => {
         </div>
 
         <div className="flex flex-wrap gap-3 mb-8 text-white/90 text-sm animate-slideUp" style={{animationDelay: '300ms'}}>
-             {(specs.habs || specs.rooms) && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Bed size={16} className="text-green-400"/> <span className="font-bold">{specs.habs || specs.rooms}</span></div>}
-             {(specs.baths || specs.bathrooms) && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Bath size={16} className="text-green-400"/> <span className="font-bold">{specs.baths || specs.bathrooms}</span></div>}
-             {specs.garages && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Car size={16} className="text-green-400"/> <span className="font-bold">{specs.garages}</span></div>}
-             {(specs.area_built || specs.area_total) && <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10"><Ruler size={16} className="text-green-400"/> <span className="font-bold">{specs.area_built || specs.area_total} m²</span></div>}
+             {(specs.habs || specs.rooms) && <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-sm"><Bed size={16} className="text-green-400"/> <span className="font-bold">{specs.habs || specs.rooms}</span></div>}
+             {(specs.baths || specs.bathrooms) && <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-sm"><Bath size={16} className="text-green-400"/> <span className="font-bold">{specs.baths || specs.bathrooms}</span></div>}
+             {specs.garages && <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-sm"><Car size={16} className="text-green-400"/> <span className="font-bold">{specs.garages}</span></div>}
+             {(specs.area_built || specs.area_total) && <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-sm"><Ruler size={16} className="text-green-400"/> <span className="font-bold">{specs.area_built || specs.area_total} m²</span></div>}
         </div>
 
         <div className="flex flex-col items-start gap-6 w-full max-w-4xl animate-slideUp" style={{animationDelay: '400ms'}}>
-          <Link to={`/inmuebles/${activeProp.id}`} className="bg-white text-green-900 font-black py-3 px-8 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all flex items-center z-30 uppercase text-xs md:text-sm">
+          <Link to={`/inmuebles/${activeProp.ayc_id || activeProp.id}`} className="bg-white text-green-900 font-black py-3 px-8 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all flex items-center z-30 uppercase text-xs md:text-sm">
              {t('hero_btn')} <span className="ml-2 text-lg">→</span>
           </Link>
           
-          {/* MINIATURAS (VIDEO PRIMERO) */}
-          <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
-              <div className="flex gap-3">
-                   {mediaList.map((media, index) => (
-                       <button 
-                           key={index} 
-                           onClick={() => setMediaIndex(index)} 
-                           className={`relative w-28 h-20 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${mediaIndex === index ? "border-green-400 scale-105 shadow-xl ring-2 ring-green-400/50" : "border-white/20 opacity-70 hover:opacity-100"}`}
-                       >
-                           {media.type === 'video' ? (
-                               <>
-                                 <img src={media.thumb} className="w-full h-full object-cover" alt="Video"/>
-                                 <div className="absolute inset-0 flex items-center justify-center bg-black/40"><Play size={24} className="text-white fill-white"/></div>
-                                 <div className="absolute bottom-0 w-full bg-red-600 text-white text-[8px] font-bold text-center py-0.5">VIDEO</div>
-                               </>
-                           ) : (
-                               <img src={media.src} className="w-full h-full object-cover" alt={`Thumb ${index}`}/>
-                           )}
-                       </button>
-                   ))}
+          {/* MÁSCARA PARA MINIATURAS CON SCROLL INVISIBLE Y EFECTO IMÁN */}
+          <div className="w-full relative">
+              {/* Sombra difuminada a la derecha para indicar que hay más scroll */}
+              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none z-10"></div>
+              
+              <div className="w-full overflow-x-auto pb-4 pt-1 flex gap-3 snap-x snap-mandatory hide-scrollbars">
+                    {mediaList.map((media, index) => (
+                        <button 
+                            key={index} 
+                            onClick={() => setMediaIndex(index)} 
+                            className={`snap-start relative w-28 h-20 md:w-32 md:h-24 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${mediaIndex === index ? "border-green-400 scale-105 shadow-[0_0_15px_rgba(74,222,128,0.5)] z-10" : "border-white/20 opacity-60 hover:opacity-100 hover:scale-95"}`}
+                        >
+                            {media.type === 'video' ? (
+                                <>
+                                  <img src={media.thumb || "https://via.placeholder.com/400x300?text=VIDEO"} className="w-full h-full object-cover" alt="Video"/>
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 group-hover:bg-black/30 transition-colors">
+                                      <Youtube size={28} className="text-red-500 fill-white drop-shadow-lg"/>
+                                  </div>
+                                  <div className="absolute bottom-0 w-full bg-red-600/90 backdrop-blur-sm text-white text-[9px] tracking-widest font-black text-center py-1">RECORRIDO</div>
+                                </>
+                            ) : (
+                                <img src={media.src} className="w-full h-full object-cover" alt={`Thumb ${index}`}/>
+                            )}
+                        </button>
+                    ))}
               </div>
           </div>
+
         </div>
       </div>
     </div>

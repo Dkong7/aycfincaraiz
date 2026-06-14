@@ -6,6 +6,8 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Properties from "./pages/Properties";
 import PropertyDetail from "./pages/PropertyDetail";
+import DashboardMap from "./pages/DashboardMap";
+import DashboardCRM from "./pages/DashboardCRM"; // <-- NUEVO IMPORT DEL CRM
 import DashboardInventario from "./pages/DashboardInventario";
 import DashboardBlog from "./pages/DashboardBlog"; 
 import DashboardTeam from "./pages/DashboardTeam";
@@ -55,6 +57,8 @@ function App() {
           </Route>
 
           {/* RUTAS DASHBOARD (Sin Navbar Pública) */}
+          <Route path="/dashboard/mapa" element={<DashboardMap />} />
+          <Route path="/dashboard/crm" element={<DashboardCRM />} /> {/* <-- NUEVA RUTA */}
           <Route path="/dashboard/inventario" element={<DashboardInventario />} />
           <Route path="/dashboard/blog" element={<DashboardBlog />} />
           <Route path="/dashboard/equipo" element={<DashboardTeam />} />

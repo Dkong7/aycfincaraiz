@@ -12,6 +12,10 @@ export default function LotePreview({ data }: any) {
   // --- CORRECCIÓN CRÍTICA: Aseguramos que sea un Array ---
   const featuresList = Array.isArray(s.features) ? s.features : [];
 
+  // --- LÓGICA DE ADMIN FEE ROBUSTA ---
+  const rawAdmin = data.admin_fee || s.admin_fee || 0;
+  const adminVal = Number(String(rawAdmin).replace(/\D/g, ""));
+
   // Helper para Secciones
   const Section = ({ title, icon: Icon, children }: any) => (
     <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -43,20 +47,25 @@ export default function LotePreview({ data }: any) {
       <Section title="Resumen del Terreno" icon={Map}>
          <Row 
             label="Precio Venta" 
-            val={data.price_cop ? formatCurrency(data.price_cop) : "$0"} 
+            val={data.price_cop ? `$${formatCurrency(data.price_cop)}` : "$0"} 
             icon={DollarSign} 
             valClass="text-green-700 font-black text-sm" 
          />
          {data.price_usd && Number(data.price_usd) > 0 && (
             <Row 
                label="Precio USD" 
-               val={`$${data.price_usd}`} 
+               val={`$${formatCurrency(data.price_usd)}`} 
                icon={DollarSign} 
                valClass="text-green-600 font-bold" 
             />
          )}
          
-         <Row label="Administración" val={data.admin_fee ? formatCurrency(data.admin_fee) : "N/A"} icon={Building} />
+         {/* CORRECCIÓN ADMIN */}
+         <Row 
+            label="Administración" 
+            val={adminVal > 0 ? `$${formatCurrency(adminVal)}` : "No aplica"} 
+            icon={Building} 
+         />
          
          <Row label="Área Total" val={`${s.area || 0} m²`} icon={Maximize} valClass="text-green-700 font-bold" />
          <Row label="Uso Principal" val={translate(s.soil_use)} icon={Briefcase} />

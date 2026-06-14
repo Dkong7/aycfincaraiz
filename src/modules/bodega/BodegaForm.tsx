@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { 
   Maximize, Ruler, Zap, ArrowUpFromLine, Layers, Warehouse, MapPin, 
   Truck, Briefcase, ShoppingBag, DollarSign, ShieldAlert, Droplets, Flame, 
@@ -33,12 +33,17 @@ const INDUSTRIAL_EXTRAS = [
    {label: "Muelle con Nivelador", icon: Truck}
 ];
 
-// --- HELPERS UI ---
-const InputIcon = ({ icon: Icon, label, register, name, s, type="text" }: any) => (
+// --- HELPERS UI (Con soporte para decimales en type="number") ---
+const InputIcon = ({ icon: Icon, label, register, name, s, type="text", step }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icon size={14}/></div>
-    <input {...register(name)} type={type} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
+    <input 
+        {...register(name)} 
+        type={type} 
+        step={step} 
+        className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} 
+    />
   </div>
 );
 
@@ -66,12 +71,27 @@ const CheckGroup = ({ options, register, name, s, colorClass }: any) => (
 
 function EyeIcon({size}:any){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>}
 
-export default function BodegaForm({ register, s, watch }: any) { 
+export default function BodegaForm({ register, s, watch, setValue }: any) { 
   const labelColor = "text-amber-700"; 
   
-  // SELECTOR PARA DESPLEGAR OFICINAS
+  // SELECTORES DE DESPLIEGUE
   const hasOffices = watch("specs.has_offices");
   const hasMezzanine = watch("specs.has_mezzanine");
+
+  // OBSERVADORES DE FRENTE Y FONDO
+  const watchedFront = watch("specs.front");
+  const watchedDepth = watch("specs.depth");
+
+  // --- LÓGICA DE AUTO-CÁLCULO (FRENTE x FONDO = ÁREA LOTE TOTAL) ---
+  useEffect(() => {
+     const front = parseFloat(watchedFront) || 0;
+     const depth = parseFloat(watchedDepth) || 0;
+
+     if (front > 0 && depth > 0) {
+        const calculatedArea = Number((front * depth).toFixed(2));
+        setValue("specs.area_total", calculatedArea, { shouldValidate: true, shouldDirty: true });
+     }
+  }, [watchedFront, watchedDepth, setValue]);
   
   return (
     <div className="animate-in fade-in space-y-6">
@@ -82,19 +102,26 @@ export default function BodegaForm({ register, s, watch }: any) {
        </div>
 
        {/* 1. DIMENSIONES */}
-       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <InputIcon register={register} name="specs.area_total" label="Área Lote Total m²" icon={Maximize} s={s} type="number" />
-          <InputIcon register={register} name="specs.area_built" label="Área Total Construida m²" icon={Maximize} s={s} type="number" />
+       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 relative">
+          <InputIcon register={register} name="specs.area_total" label="Área Lote Total m²" icon={Maximize} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.area_built" label="Área Construida m²" icon={Maximize} s={s} type="number" step="any" />
           <InputIcon register={register} name="specs.levels_qty" label="Niveles / Pisos" icon={Layers} s={s} type="number" />
-          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" />
-          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} type="number" />
+          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={Ruler} s={s} type="number" step="any" />
+
+          {/* Pequeño tooltip visual si el usuario diligenció frente y fondo */}
+          {parseFloat(watchedFront) > 0 && parseFloat(watchedDepth) > 0 && (
+             <div className="absolute -top-6 right-0 bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-[10px] font-bold border border-amber-200 shadow-sm animate-pulse">
+                 Área Total Autocalculada (Frente x Fondo)
+             </div>
+          )}
        </div>
 
        {/* 2. CAPACIDAD */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <InputIcon register={register} name="specs.height" label="Altura Libre (m)" icon={ArrowUpFromLine} s={s} type="number"/>
-          <InputIcon register={register} name="specs.energy_kva" label="Capacidad KVA" icon={Zap} s={s} type="number" />
-          <InputIcon register={register} name="specs.floor_resistance" label="Resistencia Piso (Ton/m²)" icon={Layers} s={s} />
+          <InputIcon register={register} name="specs.height" label="Altura Libre (m)" icon={ArrowUpFromLine} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.energy_kva" label="Capacidad KVA" icon={Zap} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.floor_resistance" label="Resistencia Piso (Ton/m²)" icon={Layers} s={s} type="number" step="any" />
           
           <SelectIcon register={register} name="specs.floor_type" label="Tipo de Piso" icon={Layers} s={s} options={["Concreto Alta Resistencia", "Epóxico", "Baldosa", "Afianzado"]} />
           
@@ -109,7 +136,6 @@ export default function BodegaForm({ register, s, watch }: any) {
           <SelectIcon register={register} name="specs.gate_type" label="Tipo Portón" icon={Warehouse} s={s} options={["Doble Altura", "Corredizo", "Levadizo", "Persiana", "Muelle Nivelador"]} />
           <InputIcon register={register} name="specs.entry_count" label="# Entradas Camión" icon={Truck} s={s} type="number"/>
           
-          {/* Opción Sector Industrial incluida */}
           <SelectIcon register={register} name="specs.location_type" label="Ubicación" icon={MapPin} s={s} options={["Sector Industrial", "Parque Industrial", "Zona Franca", "Vía Principal", "Interior", "Esquinera", "Medianera"]} />
           
           <div className="col-span-1 md:col-span-3 pt-2">
@@ -123,14 +149,12 @@ export default function BodegaForm({ register, s, watch }: any) {
        {/* 4. OFICINAS (CON SELECTOR DE DESPLIEGUE) */}
        <div className="border-t border-amber-100 pt-4">
           <label className={`flex items-center gap-2 cursor-pointer font-black text-sm mb-3 ${labelColor}`}>
-              {/* CAMBIO SOLICITADO: Texto del Toggle */}
               <input type="checkbox" {...register("specs.has_offices")} className="toggle toggle-sm toggle-warning" /> ¿TIENE OFICINAS?
           </label>
           
           {hasOffices && (
              <div className="p-4 bg-white border border-amber-200 rounded-xl shadow-sm animate-in slide-in-from-top-2 grid grid-cols-2 md:grid-cols-4 gap-3">
-                {/* Etiqueta actualizada */}
-                <InputIcon register={register} name="specs.office_area" label="# Oficinas / Espacios" icon={Briefcase} s={s} type="number"/>
+                <InputIcon register={register} name="specs.office_area" label="# Oficinas / Espacios" icon={Briefcase} s={s} type="number" step="any" />
                 <InputIcon register={register} name="specs.office_bathrooms" label="Baños Administrativos" icon={Bath} s={s} type="number"/>
                 <SelectIcon register={register} name="specs.office_condition" label="Estado Oficinas" icon={Briefcase} s={s} options={["Obra Gris", "Adecuadas", "Amobladas", "Modernas"]} />
                 <div className="flex flex-col justify-center">
@@ -153,8 +177,8 @@ export default function BodegaForm({ register, s, watch }: any) {
           
           {hasMezzanine && (
              <div className="p-4 bg-white border border-amber-200 rounded-xl shadow-sm animate-in slide-in-from-top-2 grid grid-cols-2 md:grid-cols-3 gap-3">
-                <InputIcon register={register} name="specs.mezzanine_area" label="Área Mezzanine m²" icon={Maximize} s={s} type="number"/>
-                <InputIcon register={register} name="specs.mezzanine_load" label="Capacidad Carga (kg/m²)" icon={Layers} s={s} type="number"/>
+                <InputIcon register={register} name="specs.mezzanine_area" label="Área Mezzanine m²" icon={Maximize} s={s} type="number" step="any" />
+                <InputIcon register={register} name="specs.mezzanine_load" label="Capacidad Carga (kg/m²)" icon={Layers} s={s} type="number" step="any" />
                 <SelectIcon register={register} name="specs.mezzanine_material" label="Material" icon={Factory} s={s} options={["Concreto", "Metálico", "Madera", "Mixto"]} />
              </div>
           )}

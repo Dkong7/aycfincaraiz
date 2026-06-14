@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFieldArray } from "react-hook-form";
 import { 
   Maximize, Grid, Ruler, Bed, Bath, Car, Flame, Utensils, Layers, 
@@ -21,8 +21,8 @@ const LevelsSection = ({ control, register, s, labelColor }: any) => {
           <div key={field.id} className="p-3 bg-white rounded-xl border border-gray-200 shadow-sm animate-in fade-in">
              <div className="flex gap-2 mb-2 items-center">
                 <input {...register(`specs.levels_list.${index}.name`)} placeholder="Nivel X" className={`w-1/4 p-1.5 text-xs font-bold rounded border ${s.input}`} />
-                <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded border border-gray-100"><Bath size={10} className="text-gray-400"/><input {...register(`specs.levels_list.${index}.baths`)} type="number" placeholder="0" className="w-8 bg-transparent text-xs text-center outline-none"/></div>
-                <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded border border-gray-100"><Bed size={10} className="text-gray-400"/><input {...register(`specs.levels_list.${index}.rooms`)} type="number" placeholder="0" className="w-8 bg-transparent text-xs text-center outline-none"/></div>
+                <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded border border-gray-100"><Bath size={10} className="text-gray-400"/><input {...register(`specs.levels_list.${index}.baths`)} type="number" step="any" placeholder="0" className="w-8 bg-transparent text-xs text-center outline-none"/></div>
+                <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded border border-gray-100"><Bed size={10} className="text-gray-400"/><input {...register(`specs.levels_list.${index}.rooms`)} type="number" step="any" placeholder="0" className="w-8 bg-transparent text-xs text-center outline-none"/></div>
                 <button type="button" onClick={() => remove(index)} className="ml-auto text-red-400 hover:text-red-600 text-xs font-bold px-2">Eliminar</button>
              </div>
              <textarea {...register(`specs.levels_list.${index}.desc`)} placeholder="Descripción del espacio..." className={`w-full p-2 text-xs rounded border ${s.input} h-14 resize-none`} />
@@ -47,11 +47,11 @@ const HOUSE_AMENITIES = [
    { label: "CBS (Cuarto Servicio)", icon: Shirt }, { label: "Depósito", icon: Box }
 ];
 
-const InputIcon = ({ icon: Icon, label, register, name, s, type="text" }: any) => (
+const InputIcon = ({ icon: Icon, label, register, name, s, type="text", step }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icon size={14}/></div>
-    <input {...register(name)} type={type} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
+    <input {...register(name)} type={type} step={step} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
   </div>
 );
 
@@ -66,24 +66,50 @@ const SelectIcon = ({ icon: Icon, label, register, name, options, s }: any) => (
   </div>
 );
 
-export default function HouseForm({ register, control, watch, s }: any) {
+export default function HouseForm({ register, control, watch, setValue, s }: any) {
   const hasRent = watch("specs.has_rent");
   const hasSocial = watch("specs.has_social");
+  
+  // Observamos el frente y el fondo
+  const watchedFront = watch("specs.front");
+  const watchedDepth = watch("specs.depth");
   const labelColor = "text-yellow-600";
+
+  // --- LÓGICA DE AUTO-CÁLCULO (FRENTE x FONDO = ÁREA LOTE) ---
+  useEffect(() => {
+     // Convertir a número (0 si están vacíos)
+     const front = parseFloat(watchedFront) || 0;
+     const depth = parseFloat(watchedDepth) || 0;
+
+     // Solo calculamos si AMBOS campos tienen valores válidos mayores a 0
+     if (front > 0 && depth > 0) {
+        // Multiplicar y limitar a 2 decimales (ej: 7.5 * 21 = 157.5)
+        const calculatedArea = Number((front * depth).toFixed(2));
+        // Se actualiza el área del lote automáticamente, disparando validación y ensuciando el form
+        setValue("specs.area_lot", calculatedArea, { shouldValidate: true, shouldDirty: true });
+     }
+  }, [watchedFront, watchedDepth, setValue]);
 
   return (
     <div className="animate-in fade-in space-y-6">
        
        {/* 1. DIMENSIONES Y EDAD */}
-       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <InputIcon register={register} name="specs.area_lot" label="Lote m²" icon={Maximize} s={s} type="number" />
-          <InputIcon register={register} name="specs.area_built" label="Construida m²" icon={Grid} s={s} type="number" />
-          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" />
-          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={ArrowUpDown} s={s} type="number" />
+       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 relative">
+          <InputIcon register={register} name="specs.area_lot" label="Lote m²" icon={Maximize} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.area_built" label="Construida m²" icon={Grid} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.front" label="Frente (m)" icon={Ruler} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.depth" label="Fondo (m)" icon={ArrowUpDown} s={s} type="number" step="any" />
+          
+          {/* Pequeño tooltip visual si el usuario diligenció frente y fondo */}
+          {parseFloat(watchedFront) > 0 && parseFloat(watchedDepth) > 0 && (
+             <div className="absolute -top-6 right-0 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-[10px] font-bold border border-yellow-200 shadow-sm animate-pulse">
+                 Área Lote Autocalculada (Frente x Fondo)
+             </div>
+          )}
        </div>
        
        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <InputIcon register={register} name="specs.levels_qty" label="Nº Pisos/Niveles" icon={Layers} s={s} type="number" />
+          <InputIcon register={register} name="specs.levels_qty" label="Nº Pisos/Niveles" icon={Layers} s={s} type="number" step="any" />
           
           <div className="col-span-2">
              <SelectIcon register={register} name="specs.antiquity" label="Edad / Antigüedad" icon={Calendar} s={s} options={["Estrenar", "Menos de 1 año", "1 a 9 años", "10 a 20 años", "Más de 20 años", "Remodelado"]} />
@@ -92,9 +118,9 @@ export default function HouseForm({ register, control, watch, s }: any) {
 
        {/* 2. DISTRIBUCIÓN */}
        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <InputIcon register={register} name="specs.habs" label="Habs" icon={Bed} s={s} type="number" />
-          <InputIcon register={register} name="specs.baths" label="Baños" icon={Bath} s={s} type="number" />
-          <InputIcon register={register} name="specs.garages" label="# Garajes" icon={Car} s={s} type="number" />
+          <InputIcon register={register} name="specs.habs" label="Habs" icon={Bed} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.baths" label="Baños" icon={Bath} s={s} type="number" step="any" />
+          <InputIcon register={register} name="specs.garages" label="# Garajes" icon={Car} s={s} type="number" step="any" />
           <SelectIcon register={register} name="specs.garage_type" label="Tipo Garaje" icon={Car} s={s} options={["Cubierto", "Descubierto", "Doble Lineal", "Doble Paralelo", "Sencillo", "Servidumbre"]} />
           <SelectIcon register={register} name="specs.gas_type" label="Gas" icon={Flame} s={s} options={["Natural", "Propano", "Pipeta", "Red", "Ninguno"]} />
        </div>
@@ -149,7 +175,7 @@ export default function HouseForm({ register, control, watch, s }: any) {
              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl animate-in slide-in-from-top-2">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                    <SelectIcon register={register} name="specs.rent_type" label="Tipo de Renta" icon={ShoppingBag} s={s} options={["Apartamento Independiente", "Local Comercial", "Oficina", "Paisa"]} />
-                   <InputIcon register={register} name="specs.rent_value" label="Canon Estimado Mensual ($)" icon={DollarSign} s={s} type="number" />
+                   <InputIcon register={register} name="specs.rent_value" label="Canon Estimado Mensual ($)" icon={DollarSign} s={s} type="number" step="any" />
                 </div>
                 <div className="mb-4">
                    <span className="text-[9px] font-bold uppercase text-blue-400 block mb-2">Comodidades Renta</span>

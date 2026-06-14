@@ -19,12 +19,18 @@ const RURAL_AMENITIES = [
   { label: "Planta Eléctrica", icon: Zap }
 ];
 
-// Helpers UI
-const InputIcon = ({ icon: Icon, label, register, name, s, type="text", placeholder }: any) => (
+// --- AÑADIDO: step="any" para permitir decimales en type="number" ---
+const InputIcon = ({ icon: Icon, label, register, name, s, type="text", placeholder, step }: any) => (
   <div className="w-full relative group">
     {label && <label className={`text-[10px] font-bold uppercase mb-1 block opacity-70 ${s.label}`}>{label}</label>}
     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icon size={14}/></div>
-    <input {...register(name)} type={type} placeholder={placeholder} className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} />
+    <input 
+        {...register(name)} 
+        type={type} 
+        step={step} 
+        placeholder={placeholder} 
+        className={`w-full pl-9 pr-3 py-2.5 rounded-lg text-sm outline-none border transition-all ${s.input}`} 
+    />
   </div>
 );
 
@@ -54,7 +60,8 @@ export default function RuralForm({ register, s }: any) {
             <h3 className="font-black text-purple-800 uppercase text-xs tracking-widest">Terreno & Topografía</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <InputIcon register={register} name="specs.land_area" label="Área Lote (Ha/m²)" icon={Maximize} s={s} placeholder="Ej: 3.5 Hectáreas" />
+            {/* Agregado type="number" y step="any" */}
+            <InputIcon register={register} name="specs.land_area" label="Área Lote (Ha/m²)" icon={Maximize} s={s} type="number" step="any" placeholder="Ej: 3.5" />
             <SelectIcon register={register} name="specs.topography" label="Topografía" icon={Map} s={s} options={["Plano", "Ondulado", "Quebrado", "Mixto"]} />
             <SelectIcon register={register} name="specs.access_type" label="Vía de Acceso" icon={Route} s={s} options={["Pavimentado", "Destapado", "Huella", "Solo 4x4"]} />
             <SelectIcon register={register} name="specs.water_source" label="Fuente Agua" icon={Droplets} s={s} options={[
@@ -72,13 +79,13 @@ export default function RuralForm({ register, s }: any) {
             <h3 className={`text-[10px] font-bold uppercase opacity-70 ${labelColor}`}>Vivienda Principal (Casa)</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <InputIcon register={register} name="specs.built_area" label="Área Casa (m²)" icon={Maximize} s={s} type="number" />
-            <InputIcon register={register} name="specs.levels" label="Niveles" icon={ArrowUpFromLine} s={s} type="number" />
-            <InputIcon register={register} name="specs.bedrooms" label="Habitaciones" icon={Bed} s={s} type="number" />
-            <InputIcon register={register} name="specs.bathrooms" label="Baños" icon={Bath} s={s} type="number" />
+            <InputIcon register={register} name="specs.built_area" label="Área Casa (m²)" icon={Maximize} s={s} type="number" step="any" />
+            <InputIcon register={register} name="specs.levels" label="Niveles" icon={ArrowUpFromLine} s={s} type="number" step="any" />
+            <InputIcon register={register} name="specs.bedrooms" label="Habitaciones" icon={Bed} s={s} type="number" step="any" />
+            <InputIcon register={register} name="specs.bathrooms" label="Baños" icon={Bath} s={s} type="number" step="any" />
             <SelectIcon register={register} name="specs.gas_type" label="Gas" icon={Flame} s={s} options={[{val: "Red Natural", label: "Red Natural"}, {val: "Pipeta", label: "Pipeta / Propano"}, {val: "No tiene", label: "No tiene"}]} />
             
-            {/* NUEVO CAMPO: ANTIGÜEDAD */}
+            {/* CAMPO: ANTIGÜEDAD */}
             <SelectIcon 
                 register={register} 
                 name="specs.antiquity" 
@@ -96,7 +103,6 @@ export default function RuralForm({ register, s }: any) {
          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-2">
             {RURAL_AMENITIES.map((item) => (
                <label key={item.label} className={`flex items-center gap-2 text-[10px] font-bold cursor-pointer hover:opacity-80 transition-opacity text-gray-600`}>
-                  {/* Usamos 'features' para mantener consistencia con los otros módulos */}
                   <input type="checkbox" value={item.label} {...register("specs.features")} className="rounded focus:ring-0 w-3.5 h-3.5 border-gray-300 text-purple-600"/> 
                   <span className="flex items-center gap-1.5">
                      <item.icon size={12} className="shrink-0 text-purple-400"/> {item.label}

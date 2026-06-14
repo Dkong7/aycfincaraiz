@@ -12,7 +12,7 @@ const Blog = () => {
   const [loading, setLoading] = useState(true);
   
   // CAMBIO CRÍTICO: URL SEGURA FIJA
-  const PB_URL = "https://www.aycfincaraiz.com";
+  const PB_URL = window.location.origin;
 
   useEffect(() => {
     const fetchPosts = async () => {
