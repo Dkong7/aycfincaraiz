@@ -52,4 +52,11 @@ AyC_Backend/pb_data/
 *.mkv
 *.zip
 *.rar
-*.tar.gz
+*.tar.gzbot/
+pb_public/
+
+
+bot/
+pb_public/
+frontend-src
+
